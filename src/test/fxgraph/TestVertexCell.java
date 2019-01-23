@@ -3,7 +3,6 @@ import com.fxgraph.edges.CorneredEdge;
 import com.fxgraph.edges.DoubleCorneredEdge;
 import com.fxgraph.edges.Edge;
 import com.fxgraph.graph.Graph;
-import com.fxgraph.graph.ICell;
 import com.fxgraph.graph.Model;
 import com.fxgraph.layout.AbegoTreeLayout;
 import com.fxgraph.layout.RandomLayout;
@@ -45,13 +44,13 @@ public class TestVertexCell extends Application {
 
         graph.beginUpdate();
 
-        final ICell cellA = new SimpleVertexCell();
-        final ICell cellB = new SimpleVertexCell();
-        final ICell cellC = new SimpleVertexCell();
-        final ICell cellD = new SimpleVertexCell();
-        final ICell cellE = new SimpleVertexCell();
-        final ICell cellF = new SimpleVertexCell();
-        final ICell cellG = new SimpleVertexCell();
+        final SimpleVertexCell cellA = new SimpleVertexCell();
+        final SimpleVertexCell cellB = new SimpleVertexCell();
+        final SimpleVertexCell cellC = new SimpleVertexCell();
+        final SimpleVertexCell cellD = new SimpleVertexCell();
+        final SimpleVertexCell cellE = new SimpleVertexCell();
+        final SimpleVertexCell cellF = new SimpleVertexCell();
+        final SimpleVertexCell cellG = new SimpleVertexCell();
 
         model.addCell(cellA);
         model.addCell(cellB);
@@ -67,6 +66,14 @@ public class TestVertexCell extends Application {
         model.addEdge(cellC, cellD);
         model.addEdge(cellB, cellE);
         model.addEdge(cellD, cellF);
+
+        cellA.textProperty().set("cellA");
+        cellB.textProperty().set("cellB");
+        cellC.textProperty().set("cellC");
+        cellD.textProperty().set("cellD");
+        cellE.textProperty().set("cellE");
+        cellF.textProperty().set("cellF");
+        cellG.textProperty().set("cellG");
 
         final Edge edge = new Edge(cellD, cellG);
         edge.textProperty().set("Edges can have text too!");
@@ -84,13 +91,13 @@ public class TestVertexCell extends Application {
 
         graph.beginUpdate();
 
-        final ICell cellA = new SimpleVertexCell();
-        final ICell cellB = new SimpleVertexCell();
-        final ICell cellC = new SimpleVertexCell();
-        final ICell cellD = new SimpleVertexCell();
-        final ICell cellE = new SimpleVertexCell();
-        final ICell cellF = new SimpleVertexCell();
-        final ICell cellG = new SimpleVertexCell();
+        final SimpleVertexCell cellA = new SimpleVertexCell();
+        final SimpleVertexCell cellB = new SimpleVertexCell();
+        final SimpleVertexCell cellC = new SimpleVertexCell();
+        final SimpleVertexCell cellD = new SimpleVertexCell();
+        final SimpleVertexCell cellE = new SimpleVertexCell();
+        final SimpleVertexCell cellF = new SimpleVertexCell();
+        final SimpleVertexCell cellG = new SimpleVertexCell();
 
         model.addCell(cellA);
         model.addCell(cellB);
@@ -99,6 +106,14 @@ public class TestVertexCell extends Application {
         model.addCell(cellE);
         model.addCell(cellF);
         model.addCell(cellG);
+
+        cellA.textProperty().set("cellA");
+        cellB.textProperty().set("cellB");
+        cellC.textProperty().set("cellC");
+        cellD.textProperty().set("cellD");
+        cellE.textProperty().set("cellE");
+        cellF.textProperty().set("cellF");
+        cellG.textProperty().set("cellG");
 
         final Edge edgeAB = new Edge(cellA, cellB);
         edgeAB.textProperty().set("Edges can have text too!");

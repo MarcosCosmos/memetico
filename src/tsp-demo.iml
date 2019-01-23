@@ -9,7 +9,7 @@
     <orderEntry type="jdk" jdkName="oraclejdk-1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="com.sirolf2009:fxgraph:0.0.3" level="project" />
-    <orderEntry type="library" name="jorlib" level="project" />
-    <orderEntry type="library" name="src" level="project" />
+    <orderEntry type="library" name="ma4tsp" level="project" />
+    <orderEntry type="library" name="jorlib-core-1.1.1" level="project" />
   </component>
 </module>

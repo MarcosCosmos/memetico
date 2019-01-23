@@ -1,15 +1,20 @@
 package org.marcos.uon.tspaidemo.fxgraph;
 
 import com.fxgraph.cells.AbstractCell;
+import com.fxgraph.cells.CellGestures;
 import com.fxgraph.edges.Edge;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.IEdge;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
@@ -23,12 +28,11 @@ import javafx.scene.transform.Scale;
  * Todo: see if radius can be bound to css, etc?
  */
 public class SimpleVertexCell extends AbstractCell {
-    public static final double PREFERRED_RADIUS = 20.5;
-    public static class VertexGraphic extends Pane {
+    public static final double PREFERRED_RADIUS = 3;
+    public static class VertexGraphic extends BorderPane {
         private final Group group;
         private final Circle dot;
         private final Text text;
-
         public VertexGraphic(Graph graph, StringProperty textProperty) {
             group = new Group();
             dot = new Circle();
@@ -37,18 +41,6 @@ public class SimpleVertexCell extends AbstractCell {
             group.getStyleClass().add("vertex");
             text.getStyleClass().add("label");
             dot.getStyleClass().add("dot");
-
-//            final DoubleBinding sourceX = edge.getSource().getXAnchor(graph, edge);
-//            final DoubleBinding sourceY = edge.getSource().getYAnchor(graph, edge);
-//            final DoubleBinding targetX = edge.getTarget().getXAnchor(graph, edge);
-//            final DoubleBinding targetY = edge.getTarget().getYAnchor(graph, edge);
-//
-//            line.startXProperty().bind(sourceX);
-//            line.startYProperty().bind(sourceY);
-//
-//            line.endXProperty().bind(targetX);
-//            line.endYProperty().bind(targetY);
-//            group.getChildren().add(line);
 
             final DoubleProperty textWidth = new SimpleDoubleProperty();
             final DoubleProperty textHeight = new SimpleDoubleProperty();
@@ -61,8 +53,8 @@ public class SimpleVertexCell extends AbstractCell {
             );
             text.yProperty().bind(
                     dot.centerYProperty()
-                        .add(dot.radiusProperty())
-                        .add(textHeight.divide(2))
+                        .subtract(dot.radiusProperty())
+                        .subtract(textHeight.divide(2))
             );
 
             final Runnable recalculateWidth = () -> {
@@ -74,16 +66,15 @@ public class SimpleVertexCell extends AbstractCell {
 
 
             group.getChildren().addAll(dot, text);
-            getChildren().addAll(dot, text); //wrapper group for autosizing
 
             dot.setRadius(PREFERRED_RADIUS);
 
-//            setPrefSize(PREFERRED_RADIUS*2, PREFERRED_RADIUS*2);
+            setCenter(group);
 
-            final Scale scale = new Scale(1, 1);
-            dot.getTransforms().add(scale);
-            scale.xProperty().bind(widthProperty().divide(PREFERRED_RADIUS));
-            scale.yProperty().bind(heightProperty().divide(PREFERRED_RADIUS));
+
+
+//
+//            group.translateXProperty().bind();
         }
 
         public Group getGroup() {
@@ -114,5 +105,19 @@ public class SimpleVertexCell extends AbstractCell {
     @Override
     public Region getGraphic(Graph graph) {
         return new VertexGraphic(graph, textProperty);
+    }
+
+    public DoubleBinding getXAnchor(Graph graph, IEdge edge) {
+        VertexGraphic graphic = (VertexGraphic) graph.getGraphic(this);
+        DoubleProperty boundsMinX = new SimpleDoubleProperty();
+        boundsMinX.bind(Bindings.selectDouble(graphic.getGroup().getBoundsInParent(), "minX"));
+        return graphic.layoutXProperty().subtract(boundsMinX);
+    }
+
+    public DoubleBinding getYAnchor(Graph graph, IEdge edge) {
+        VertexGraphic graphic = (VertexGraphic) graph.getGraphic(this);
+        DoubleProperty boundsMinY = new SimpleDoubleProperty();
+        boundsMinY.bind(Bindings.selectDouble(graphic.getGroup().getBoundsInParent(), "minY"));
+        return graphic.layoutYProperty().subtract(boundsMinY);
     }
 }
