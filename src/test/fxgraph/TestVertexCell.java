@@ -4,15 +4,13 @@ import com.fxgraph.edges.DoubleCorneredEdge;
 import com.fxgraph.edges.Edge;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.Model;
-import com.fxgraph.layout.AbegoTreeLayout;
 import com.fxgraph.layout.RandomLayout;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.abego.treelayout.Configuration;
-import org.marcos.uon.tspaidemo.fxgraph.SimpleVertexCell;
+import org.marcos.uon.tspaidemo.fxgraph.SimpleVertex;
 
 public class TestVertexCell extends Application {
 
@@ -34,7 +32,7 @@ public class TestVertexCell extends Application {
         primaryStage.show();
 
         addTreeComponents();
-        graph.layout(new AbegoTreeLayout(200, 200, Configuration.Location.Top));
+//        graph.layout(new AbegoTreeLayout(200, 200, Configuration.Location.Top));
     }
 
     @SuppressWarnings("unused")
@@ -44,13 +42,13 @@ public class TestVertexCell extends Application {
 
         graph.beginUpdate();
 
-        final SimpleVertexCell cellA = new SimpleVertexCell();
-        final SimpleVertexCell cellB = new SimpleVertexCell();
-        final SimpleVertexCell cellC = new SimpleVertexCell();
-        final SimpleVertexCell cellD = new SimpleVertexCell();
-        final SimpleVertexCell cellE = new SimpleVertexCell();
-        final SimpleVertexCell cellF = new SimpleVertexCell();
-        final SimpleVertexCell cellG = new SimpleVertexCell();
+        final SimpleVertex cellA = new SimpleVertex(0,0);
+        final SimpleVertex cellB = new SimpleVertex(10,10);
+        final SimpleVertex cellC = new SimpleVertex(20,20);
+        final SimpleVertex cellD = new SimpleVertex(30,30);
+        final SimpleVertex cellE = new SimpleVertex(40,40);
+        final SimpleVertex cellF = new SimpleVertex(50,50);
+        final SimpleVertex cellG = new SimpleVertex(60,60);
 
         model.addCell(cellA);
         model.addCell(cellB);
@@ -91,13 +89,13 @@ public class TestVertexCell extends Application {
 
         graph.beginUpdate();
 
-        final SimpleVertexCell cellA = new SimpleVertexCell();
-        final SimpleVertexCell cellB = new SimpleVertexCell();
-        final SimpleVertexCell cellC = new SimpleVertexCell();
-        final SimpleVertexCell cellD = new SimpleVertexCell();
-        final SimpleVertexCell cellE = new SimpleVertexCell();
-        final SimpleVertexCell cellF = new SimpleVertexCell();
-        final SimpleVertexCell cellG = new SimpleVertexCell();
+        final SimpleVertex cellA = new SimpleVertex(0,0);
+        final SimpleVertex cellB = new SimpleVertex(10,10);
+        final SimpleVertex cellC = new SimpleVertex(20,20);
+        final SimpleVertex cellD = new SimpleVertex(30,30);
+        final SimpleVertex cellE = new SimpleVertex(40,40);
+        final SimpleVertex cellF = new SimpleVertex(50,50);
+        final SimpleVertex cellG = new SimpleVertex(60,60);
 
         model.addCell(cellA);
         model.addCell(cellB);
