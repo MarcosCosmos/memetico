@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< Updated upstream
-      <module fileurl="file://$PROJECT_DIR$/src/tsp-demo.iml" filepath="$PROJECT_DIR$/src/tsp-demo.iml" />
-=======
       <module fileurl="file://$PROJECT_DIR$/gui.iml" filepath="$PROJECT_DIR$/gui.iml" />
       <module fileurl="file://$PROJECT_DIR$/utils.iml" filepath="$PROJECT_DIR$/utils.iml" />
->>>>>>> Stashed changes
     </modules>
   </component>
 </project>
