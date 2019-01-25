@@ -11,7 +11,7 @@ public interface ILogger<T> {
      * Note that the view itself is not synchronised for it's own methods, and only blocks on update calls, synchronising with the logger.
      * Views should be considered externally unmodifiable
      */
-    interface View<State> extends List<State> {
+    interface View<T> extends List<T> {
         void update() throws InterruptedException;
     }
 
