@@ -1,0 +1,23 @@
+.dot {
+    -fx-fill:white;
+}
+
+.line {
+    -fx-stroke: blue;
+}
+
+.suboptimal .line {
+    -fx-stroke: #777777;
+}
+
+.optimal .line {
+    -fx-stroke: #00ff00;
+}
+
+.graph {
+    -fx-background-color: #000000;
+}
+
+.label {
+    -fx-fill: #cecece;
+}

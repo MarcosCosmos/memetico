@@ -1,9 +1,9 @@
 package org.marcos.uon.tspaidemo.fxgraph;
 
 import com.fxgraph.cells.AbstractCell;
-import com.fxgraph.edges.Edge;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.IEdge;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -13,23 +13,20 @@ import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Scale;
 
 /**
  * An fxgraph cell for a simple vertex in a tsp instance
  * It supports an optional label. (Todo: possibly support changing the text position?)
  * Todo: see if radius can be bound to css, etc?
  */
-public class SimpleVertexCell extends AbstractCell {
-    public static final double PREFERRED_RADIUS = 20.5;
+public class SimpleVertex extends AbstractCell implements ISelfLocatingCell {
+    public static final double DEFAULT_RADIUS = 3;
     public static class VertexGraphic extends Pane {
         private final Group group;
         private final Circle dot;
         private final Text text;
-
-        public VertexGraphic(Graph graph, StringProperty textProperty) {
+        public VertexGraphic(Graph graph, DoubleProperty radius, StringProperty textProperty) {
             group = new Group();
             dot = new Circle();
             text = new Text();
@@ -38,31 +35,17 @@ public class SimpleVertexCell extends AbstractCell {
             text.getStyleClass().add("label");
             dot.getStyleClass().add("dot");
 
-//            final DoubleBinding sourceX = edge.getSource().getXAnchor(graph, edge);
-//            final DoubleBinding sourceY = edge.getSource().getYAnchor(graph, edge);
-//            final DoubleBinding targetX = edge.getTarget().getXAnchor(graph, edge);
-//            final DoubleBinding targetY = edge.getTarget().getYAnchor(graph, edge);
-//
-//            line.startXProperty().bind(sourceX);
-//            line.startYProperty().bind(sourceY);
-//
-//            line.endXProperty().bind(targetX);
-//            line.endYProperty().bind(targetY);
-//            group.getChildren().add(line);
-
             final DoubleProperty textWidth = new SimpleDoubleProperty();
             final DoubleProperty textHeight = new SimpleDoubleProperty();
             text.textProperty().bind(textProperty);
             text.getStyleClass().add("label");
 
             text.xProperty().bind(
-                    dot.centerXProperty()
-                            .subtract(textWidth.divide(2))
+                    dot.centerYProperty().subtract(textWidth.divide(2))
             );
             text.yProperty().bind(
-                    dot.centerYProperty()
-                        .add(dot.radiusProperty())
-                        .add(textHeight.divide(2))
+                    dot.centerYProperty().subtract(dot.radiusProperty())
+                        .subtract(textHeight.divide(2))
             );
 
             final Runnable recalculateWidth = () -> {
@@ -74,16 +57,11 @@ public class SimpleVertexCell extends AbstractCell {
 
 
             group.getChildren().addAll(dot, text);
-            getChildren().addAll(dot, text); //wrapper group for autosizing
 
-            dot.setRadius(PREFERRED_RADIUS);
+            dot.radiusProperty().bind(radius);
 
-//            setPrefSize(PREFERRED_RADIUS*2, PREFERRED_RADIUS*2);
+            getChildren().add(group);
 
-            final Scale scale = new Scale(1, 1);
-            dot.getTransforms().add(scale);
-            scale.xProperty().bind(widthProperty().divide(PREFERRED_RADIUS));
-            scale.yProperty().bind(heightProperty().divide(PREFERRED_RADIUS));
         }
 
         public Group getGroup() {
@@ -101,18 +79,42 @@ public class SimpleVertexCell extends AbstractCell {
     }
 
     private transient final StringProperty textProperty;
-
-    public SimpleVertexCell() {
+    private final DoubleProperty radius;
+    private final DoubleProperty locationX;
+    private final DoubleProperty locationY;
+    public SimpleVertex(double x, double y, double radius) {
         textProperty = new SimpleStringProperty();
-
+        this.radius = new SimpleDoubleProperty(radius);
+        locationX = new SimpleDoubleProperty(x);
+        locationY = new SimpleDoubleProperty(y);
+    }
+    public SimpleVertex(double x, double y) {
+        this(x,y,DEFAULT_RADIUS);
     }
 
     public StringProperty textProperty() {
         return textProperty;
     }
+    public DoubleProperty radius() {
+        return radius;
+    }
+    public DoubleProperty locationX() {return locationX;}
+    public DoubleProperty locationY() {return locationY;}
 
     @Override
     public Region getGraphic(Graph graph) {
-        return new VertexGraphic(graph, textProperty);
+        return new VertexGraphic(graph, radius, textProperty);
+    }
+
+    public DoubleBinding getXAnchor(Graph graph, IEdge edge) {
+        return Bindings.createDoubleBinding(locationX::get, locationX);
+    }
+
+    public DoubleBinding getYAnchor(Graph graph, IEdge edge) {
+        return Bindings.createDoubleBinding(locationY::get, locationY);
+    }
+
+    public void applyLocation(Graph g) {
+        g.getGraphic(this).relocate(locationX.get(), locationY.get());
     }
 }
