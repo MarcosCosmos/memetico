@@ -9,7 +9,7 @@
 .suboptimal .line {
     -fx-stroke: #777777;
 }
-
+/* note that tour edges created using the TourEdge class, the css class .tour is used instead */
 .optimal .line {
     -fx-stroke: #00ff00;
 }

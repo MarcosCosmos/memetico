@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Label?>
+<BorderPane fx:id="frameContext" fx:controller="algos._memetico.TestPCFrameController"
+            xmlns:fx="http://javafx.com/fxml">
+    <center>
+        <GridPane>
+            <Label fx:id="generationLabel">Generation:</Label>
+            <Text fx:id="simpleText">Test</Text>
+        </GridPane>
+    </center>
+</BorderPane>
+
+<!--<Text id="welcome-text" text="Welcome"-->
+      <!--GridPane.columnIndex="0" GridPane.rowIndex="0"-->
+      <!--GridPane.columnSpan="2"/>-->
+
+<!--<Label text="User Name:"-->
+       <!--GridPane.columnIndex="0" GridPane.rowIndex="1"/>-->
+
+<!--<TextField-->
+<!--GridPane.columnIndex="1" GridPane.rowIndex="1"/>-->
+
+<!--<Label text="Password:"-->
+       <!--GridPane.columnIndex="0" GridPane.rowIndex="2"/>-->
+
+<!--<PasswordField fx:id="passwordField"-->
+               <!--GridPane.columnIndex="1" GridPane.rowIndex="2"/>-->
+
+<!--<HBox spacing="10" alignment="bottom_right"-->
+      <!--GridPane.columnIndex="1" GridPane.rowIndex="4">-->
+<!--<Button text="Sign In"-->
+        <!--onAction="#handleSubmitButtonAction"/>-->
+<!--</HBox>-->
+
+<!--<Text fx:id="actiontarget"-->
+      <!--GridPane.columnIndex="1" GridPane.rowIndex="6"/>-->
+
+<!--<stylesheets>-->
+<!--<URL value="@Login.css" />-->
+<!--</stylesheets>-->
