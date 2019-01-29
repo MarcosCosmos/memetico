@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.control.Label?>
-<BorderPane fx:id="frameContext" fx:controller="algos._memetico.TestPCFrameController"
+<?import javafx.scene.layout.HBox?>
+<BorderPane fx:id="contentRoot" fx:controller="algos._memetico.TestPCFrameController"
             xmlns:fx="http://javafx.com/fxml">
     <center>
-        <GridPane>
+        <HBox>
             <Label fx:id="generationLabel">Generation:</Label>
-            <Text fx:id="simpleText">Test</Text>
-        </GridPane>
+            <Text fx:id="generationText">Test</Text>
+        </HBox>
     </center>
 </BorderPane>
 

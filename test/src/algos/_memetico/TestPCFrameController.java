@@ -3,11 +3,15 @@ package algos._memetico;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -20,27 +24,25 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class TestPCFrameController {
-    private @FXML VBox frameContent;
-    private @FXML Text simpleText;
+    @FXML private BorderPane contentRoot;
+
+    private IntegerProperty generationValue = new SimpleIntegerProperty();
+    @FXML private Text generationText;
 
     private BasicLogger<PCAlgorithmState>.View logView;
-
-    private Timeline frameUpdater;
-    public void setView(BasicLogger<PCAlgorithmState>.View logView) {
+    private IntegerProperty frameIndex;
+    public void setup(BasicLogger<PCAlgorithmState>.View logView, IntegerProperty frameIndex) {
         this.logView = logView;
-        frameUpdater = new Timeline(new KeyFrame(Duration.millis(16), new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                try {
+        this.frameIndex = frameIndex;
+        Bindings.createIntegerBinding(
+                () -> {
                     logView.update();
-                    simpleText.setText(logView.isEmpty() ? "Nada" : String.valueOf(logView.get(logView.size()-1).generation));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }));
-        frameUpdater.setCycleCount(Animation.INDEFINITE);
-        frameUpdater.play();
+                    return logView.isEmpty() ? 0 : logView.get(frameIndex.get()).generation;
+                },
+                frameIndex
+        );
+        generationText.textProperty()
+                .bind(generationValue.asString());
 
     }
 }

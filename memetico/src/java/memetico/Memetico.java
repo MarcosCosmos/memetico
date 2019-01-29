@@ -42,7 +42,7 @@ public class Memetico {
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
     public Memetico(IPCLogger logger, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, String name, long OptimalSol, DataOutputStream fileOut, DataOutputStream compact_fileOut) throws Exception {
-        logger = logger;
+        this.logger = logger;
         int GenNum = 0, i;
         double TotalTime = 0, bestTime = 0, auxTime, recombineTime;
         double Aver_time = 0, Aver_Gen = 0,
