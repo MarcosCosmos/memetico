@@ -34,12 +34,14 @@ public class TestPCFrameController {
     public void setup(BasicLogger<PCAlgorithmState>.View logView, IntegerProperty frameIndex) {
         this.logView = logView;
         this.frameIndex = frameIndex;
-        Bindings.createIntegerBinding(
-                () -> {
-                    logView.update();
-                    return logView.isEmpty() ? 0 : logView.get(frameIndex.get()).generation;
-                },
-                frameIndex
+        generationValue.bind(
+                Bindings.createIntegerBinding(
+                    () -> {
+                        logView.update();
+                        return logView.isEmpty() ? 0 : logView.get(frameIndex.get()).generation;
+                    },
+                    frameIndex
+                )
         );
         generationText.textProperty()
                 .bind(generationValue.asString());

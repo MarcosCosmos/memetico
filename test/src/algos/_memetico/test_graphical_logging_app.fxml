@@ -7,9 +7,9 @@
 <BorderPane fx:id="root" fx:controller="algos._memetico.TestVisualisationController"
             xmlns:fx="http://javafx.com/fxml">
     <top>
-        <Text>MyText</Text>
+        <Text>ContentPlaceholder</Text>
     </top>
     <bottom>
-        <Pane fx:id="playbackControls"/>
+        <Text>PlaybackControlsPlaceholder</Text>
     </bottom>
 </BorderPane>

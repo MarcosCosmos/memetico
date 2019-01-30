@@ -22,7 +22,12 @@
             <HBox>
                 <Text>Speed:</Text>
                 <ChoiceBox fx:id="speedChoice">
-                    <Double fx:value="1" />-
+                    <Double fx:value="1" />
+                    <Double fx:value="2" />
+                    <Double fx:value="5" />
+                    <Double fx:value="10" />
+                    <Double fx:value="30" />
+                    <Double fx:value="60" />
                 </ChoiceBox>
             </HBox>
         </HBox>

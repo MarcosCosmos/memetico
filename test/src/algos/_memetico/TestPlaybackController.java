@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class TestPlaybackController {
-    private static final String PAUSE_TEXT = "\u23F8";
+    private static final String PAUSE_TEXT = "❚❚";
     private static final String PLAY_TEXT = "▶";
 
     @FXML private Slider sldrFrameIndex;
@@ -45,11 +45,13 @@ public class TestPlaybackController {
         @Override
         public void handle(ActionEvent event) {
             try {
-                logView.update();
-                sldrFrameIndex.setMax(logView.size());
-                int curIndex = frameIndex.get();
-                if(curIndex < logView.size()-1) {
-                    frameIndex.set(curIndex+1);
+                if(isPlaying.get()) {
+                    logView.update();
+                    sldrFrameIndex.setMax(logView.size());
+                    int curIndex = frameIndex.get();
+                    if (curIndex < logView.size() - 1) {
+                        frameIndex.set(curIndex + 1);
+                    }
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -69,10 +71,12 @@ public class TestPlaybackController {
                                 isPlaying
                         )
                 );
-        speedChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
-            ObservableList<KeyFrame> frames = playbackTimeline.getKeyFrames();
-            frames.add(new KeyFrame(Duration.millis(100/ newValue), frameUpdater));
-        });
+        speedChoice.valueProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    ObservableList<KeyFrame> frames = playbackTimeline.getKeyFrames();
+                    frames.add(new KeyFrame(Duration.millis(100/ newValue), frameUpdater));
+                }
+        );
         speedChoice.setValue(1.0);
 //        playbackTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(100/speedChoice.getValue().doubleValue()), frameUpdater));
         playbackTimeline.setCycleCount(Animation.INDEFINITE);
