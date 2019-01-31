@@ -257,7 +257,7 @@ public class Memetico {
         Vector matRT[];
         Reduction reduction = null;
         // counter to check the number of instances, 27 in the assymetric case
-        int countNames = 27;
+        int countNames = 1;
 
         // names of the instances of the TSP which are going to be used for the
         // experiments. We are assuming they are located in the same directory.
@@ -270,43 +270,51 @@ public class Memetico {
                 OPMutacao = "base.MutationInsertion";
         String structSol = "base.DiCycle";
         String structPop = "Ternary Tree";
+//        String Names[] = {
+//                "br17.atsp", "ftv33.atsp", "ftv35.atsp", "ftv38.atsp", "p43.atsp", "ftv44.atsp",
+//                "ftv47.atsp", "ry48p.atsp", "ft53.atsp", "ftv55.atsp", "ftv64.atsp", "ft70.atsp",
+//                "ftv70.atsp", "ftv90.atsp", "kro124p.atsp", "ftv100.atsp", "ftv110.atsp", "ftv120.atsp",
+//                "ftv130.atsp", "ftv140.atsp", "ftv150.atsp", "ftv160.atsp", "ftv170.atsp",
+//                "rbg323.atsp", "rbg358.atsp", "rbg403.atsp", "rbg443.atsp",
+//                "tsp_tree64.txt", "tsp_tree128.txt", "tsp_tree8.txt", "tsp_tree16.txt", "tsp_tree20.txt", "tsp_tree30.txt", "ulysses16.atsp",
+//                "alb1000.hcp", "alb2000.hcp", "alb3000.hcp", "alb3000a.hcp", "alb3000b.hcp",
+//                "alb3000c.hcp", "alb3000d.hcp", "alb3000e.hcp", "alb4000.hcp", "alb5000.hcp",
+//
+//                "ulysses16.tsp", "ulysses22.tsp", "gr24.tsp", "fri26.tsp", "bayg29.tsp",
+//                "bays29.tsp", "att48.tsp", "gr48.tsp", "eil51.tsp", "berlin52.tsp",
+//                "st70.tsp", "eil76.tsp", "pr76.tsp", "gr96.tsp", "kroa100.tsp",
+//                "kroc100.tsp", "krod100.tsp", "rd100.tsp", "eil101.tsp", "lin105.tsp",
+//                "gr120.tsp", "ch130.tsp", "ch150.tsp", "brg180.tsp", "gr202.tsp",
+//                "tsp225.tsp", "a280.tsp", "pcb442.tsp", "pa561.tsp", "gr666.tsp",
+//                "pr1002.tsp", "pr2392.tsp"
+//        };
         String Names[] = {
-                "br17.atsp", "ftv33.atsp", "ftv35.atsp", "ftv38.atsp", "p43.atsp", "ftv44.atsp",
-                "ftv47.atsp", "ry48p.atsp", "ft53.atsp", "ftv55.atsp", "ftv64.atsp", "ft70.atsp",
-                "ftv70.atsp", "ftv90.atsp", "kro124p.atsp", "ftv100.atsp", "ftv110.atsp", "ftv120.atsp",
-                "ftv130.atsp", "ftv140.atsp", "ftv150.atsp", "ftv160.atsp", "ftv170.atsp",
-                "rbg323.atsp", "rbg358.atsp", "rbg403.atsp", "rbg443.atsp",
-                "tsp_tree64.txt", "tsp_tree128.txt", "tsp_tree8.txt", "tsp_tree16.txt", "tsp_tree20.txt", "tsp_tree30.txt", "ulysses16.atsp",
-                "alb1000.hcp", "alb2000.hcp", "alb3000.hcp", "alb3000a.hcp", "alb3000b.hcp",
-                "alb3000c.hcp", "alb3000d.hcp", "alb3000e.hcp", "alb4000.hcp", "alb5000.hcp",
-
-                "ulysses16.tsp", "ulysses22.tsp", "gr24.tsp", "fri26.tsp", "bayg29.tsp",
-                "bays29.tsp", "att48.tsp", "gr48.tsp", "eil51.tsp", "berlin52.tsp",
-                "st70.tsp", "eil76.tsp", "pr76.tsp", "gr96.tsp", "kroa100.tsp",
-                "kroc100.tsp", "krod100.tsp", "rd100.tsp", "eil101.tsp", "lin105.tsp",
-                "gr120.tsp", "ch130.tsp", "ch150.tsp", "brg180.tsp", "gr202.tsp",
-                "tsp225.tsp", "a280.tsp", "pcb442.tsp", "pa561.tsp", "gr666.tsp",
-                "pr1002.tsp", "pr2392.tsp"
+                "br17.atsp"
         };
+
 
         // the cost of the optimal solution for each of the preceeding instances.
         // Same order.
+//        long OptimalSol[] = {
+//                39, 1286, 1473, 1530, 5620, 1613, 1776, 14422, 6905, 1608,
+//                1839, 38673, 1950, 1579, 36230, 1788, 1958, 2166, 2307,
+//                2420, 2611, 2683, 2755, 1326, 1163, 2465, 2720,
+//                2563, 4979, 178, 270, 336, 408, 6859,
+//                1000, 2000, 3000, 3000, 3000,
+//                3000, 3000, 3000, 4000, 5000,
+//
+//                6859, 7013, 1272, 937, 1610,
+//                2020, 10628, 5046, 426, 7542,
+//                675, 538, 108159, 55209, 21282,
+//                20749, 21294, 7910, 629, 14379,
+//                6942, 6110, 6528, 1950, 40160,
+//                3916, 2579, 50778, 2763, 294358,
+//                259045, 378032
+//        };
         long OptimalSol[] = {
-                39, 1286, 1473, 1530, 5620, 1613, 1776, 14422, 6905, 1608,
-                1839, 38673, 1950, 1579, 36230, 1788, 1958, 2166, 2307,
-                2420, 2611, 2683, 2755, 1326, 1163, 2465, 2720,
-                2563, 4979, 178, 270, 336, 408, 6859,
-                1000, 2000, 3000, 3000, 3000,
-                3000, 3000, 3000, 4000, 5000,
-
-                6859, 7013, 1272, 937, 1610,
-                2020, 10628, 5046, 426, 7542,
-                675, 538, 108159, 55209, 21282,
-                20749, 21294, 7910, 629, 14379,
-                6942, 6110, 6528, 1950, 40160,
-                3916, 2579, 50778, 2763, 294358,
-                259045, 378032
+                39
         };
+
 
 
         try {

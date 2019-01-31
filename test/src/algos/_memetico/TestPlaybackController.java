@@ -15,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Slider;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import memetico.logging.PCAlgorithmState;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
@@ -23,46 +24,48 @@ import javax.swing.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Note importantly that the logview is currently only updated by main visualisation controller; this works well but only under the assumption that all accesses to the log view share a thread (which they under standard javafx which uses a single thread at time of writing)
+ */
 public class TestPlaybackController {
     private static final String PAUSE_TEXT = "❚❚";
     private static final String PLAY_TEXT = "▶";
 
-    @FXML private Slider sldrFrameIndex;
-    @FXML private Button btnStop;
-    @FXML private Button btnPlayPause;
+    @FXML
+    private Slider sldrFrameIndex;
+    @FXML
+    private Button btnStop;
+    @FXML
+    private Button btnPlayPause;
 
     /**
      * Values are measured as FPS
      */
-    @FXML private ChoiceBox<Double> speedChoice;
+    @FXML
+    private ChoiceBox<Double> speedChoice;
 
-    private BasicLogger<PCAlgorithmState>.View logView;
-
-
+    private transient IntegerProperty numberOfFrames;
     private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(false);
     private final transient IntegerProperty frameIndex = new SimpleIntegerProperty(0);
     private final transient EventHandler<ActionEvent> frameUpdater = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            try {
-                if(isPlaying.get()) {
-                    logView.update();
-                    sldrFrameIndex.setMax(logView.size());
-                    int curIndex = frameIndex.get();
-                    if (curIndex < logView.size() - 1) {
-                        frameIndex.set(curIndex + 1);
-                    }
+            if(isPlaying.get()) {
+                int curIndex = frameIndex.get();
+                if (curIndex < numberOfFrames.get() - 1) {
+                    frameIndex.set(curIndex + 1);
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     };
     private transient Timeline playbackTimeline = new Timeline();
 
-    public void setup(BasicLogger<PCAlgorithmState>.View logView) {
-        this.logView = logView;
+    public void setup(IntegerProperty numberOfFramesProp) {
+        this.numberOfFrames = numberOfFramesProp;
+        sldrFrameIndex.majorTickUnitProperty().bind(Bindings.max(numberOfFrames, 1));
+        sldrFrameIndex.setShowTickLabels(true);
         sldrFrameIndex.setMin(0);
+        sldrFrameIndex.maxProperty().bind(numberOfFrames);
         sldrFrameIndex.valueProperty().bindBidirectional(frameIndex);
         btnPlayPause.textProperty()
                 .bind(

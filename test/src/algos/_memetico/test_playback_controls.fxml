@@ -13,7 +13,7 @@
 <BorderPane fx:id="playbackControls" fx:controller="algos._memetico.TestPlaybackController"
             xmlns:fx="http://javafx.com/fxml">
     <center>
-        <Slider fx:id="sldrFrameIndex"></Slider>
+        <Slider fx:id="sldrFrameIndex"/>
     </center>
     <right>
         <HBox>
@@ -22,6 +22,11 @@
             <HBox>
                 <Text>Speed:</Text>
                 <ChoiceBox fx:id="speedChoice">
+                    <Double fx:value="0.015" />
+                    <Double fx:value="0.033" />
+                    <Double fx:value="0.1" />
+                    <Double fx:value="0.2" />
+                    <Double fx:value="0.5" />
                     <Double fx:value="1" />
                     <Double fx:value="2" />
                     <Double fx:value="5" />

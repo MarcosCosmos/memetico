@@ -4,41 +4,16 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <BorderPane fx:id="contentRoot" fx:controller="algos._memetico.TestPCFrameController"
             xmlns:fx="http://javafx.com/fxml">
     <center>
-        <HBox>
-            <Label fx:id="generationLabel">Generation:</Label>
-            <Text fx:id="generationText">Test</Text>
-        </HBox>
+        <VBox>
+            <HBox>
+                <Label fx:id="generationLabel">Generation:</Label>
+                <Text fx:id="generationText">Test</Text>
+            </HBox>
+            <GridPane fx:id="agentsGrid"/>
+        </VBox>
     </center>
 </BorderPane>
-
-<!--<Text id="welcome-text" text="Welcome"-->
-      <!--GridPane.columnIndex="0" GridPane.rowIndex="0"-->
-      <!--GridPane.columnSpan="2"/>-->
-
-<!--<Label text="User Name:"-->
-       <!--GridPane.columnIndex="0" GridPane.rowIndex="1"/>-->
-
-<!--<TextField-->
-<!--GridPane.columnIndex="1" GridPane.rowIndex="1"/>-->
-
-<!--<Label text="Password:"-->
-       <!--GridPane.columnIndex="0" GridPane.rowIndex="2"/>-->
-
-<!--<PasswordField fx:id="passwordField"-->
-               <!--GridPane.columnIndex="1" GridPane.rowIndex="2"/>-->
-
-<!--<HBox spacing="10" alignment="bottom_right"-->
-      <!--GridPane.columnIndex="1" GridPane.rowIndex="4">-->
-<!--<Button text="Sign In"-->
-        <!--onAction="#handleSubmitButtonAction"/>-->
-<!--</HBox>-->
-
-<!--<Text fx:id="actiontarget"-->
-      <!--GridPane.columnIndex="1" GridPane.rowIndex="6"/>-->
-
-<!--<stylesheets>-->
-<!--<URL value="@Login.css" />-->
-<!--</stylesheets>-->
