@@ -10,7 +10,7 @@ import java.io.PrintStream;
 
 public class TestMemeticLogging {
     public static void main(String[] args) throws InterruptedException {
-        PCLogger logger = new PCLogger();
+        PCLogger logger = new PCLogger(100);
         Thread theThread = new Thread(() -> Memetico.main(logger, args));
         theThread.start();
         ILogger.View<PCAlgorithmState> view = logger.newView();

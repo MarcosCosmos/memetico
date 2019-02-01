@@ -2,11 +2,15 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <GridPane fx:id="agentRoot" fx:controller="algos._memetico.AgentDisplayController" xmlns:fx="http://javafx.com/fxml">
     <Text GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="1">Agent ID:</Text>
     <Text GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="1" fx:id="agentIdText"/>
     <Text GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="1">Pocket Cost:</Text>
     <Text GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="1" fx:id="pocketCostText"/>
+    <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="2" fx:id="bxTogglePocket"/>
     <Text GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="1">Current Cost:</Text>
     <Text GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="1" fx:id="currentCostText"/>
+    <CheckBox GridPane.rowIndex="2" GridPane.columnIndex="2" fx:id="bxToggleCurrent"/>
 </GridPane>

@@ -46,11 +46,12 @@ public class TestFXGraphTSPLIB extends Application {
 
         loadInstance();
 
+        //may be to consider spacing for specific cells etc in a more complex way instead
         //scale the instance so it's big enough for the text
-        for(SimpleVertex each : cells) {
-            each.locationX().set(each.locationX().get()*10);
-            each.locationY().set(each.locationY().get()*10);
-        }
+//        for(SimpleVertex each : cells) {
+//            each.locationX().set(each.locationX().get()*10);
+//            each.locationY().set(each.locationY().get()*10);
+//        }
 
         for(SimpleEdge eachCell : normalEdges) {
             graph.getGraphic(eachCell).getStyleClass().add("suboptimal");
@@ -70,8 +71,8 @@ public class TestFXGraphTSPLIB extends Application {
 
     public void loadInstance() throws IOException {
         theInstance = new TSPInstance();
-        theInstance.load(new File("/home/marcos/Downloads/all_tsplib/a280.tsp"));
-        theInstance.addTour(new File("/home/marcos/Downloads/all_tsplib/a280.opt.tour"));
+        theInstance.load(new File("/home/marcos/Downloads/all_tsplib/berlin52.tsp"));
+        theInstance.addTour(new File("/home/marcos/Downloads/all_tsplib/berlin52.opt.tour"));
         NodeCoordinates nodeData;
         switch (this.theInstance.getDisplayDataType()) {
             case TWOD_DISPLAY:
@@ -89,7 +90,7 @@ public class TestFXGraphTSPLIB extends Application {
 
         final Model model = graph.getModel();
 
-        graph.beginUpdate();
+//        graph.beginUpdate(); //only one of beginUpdate/endUpdate actually need to be called; begin update should probably never be called since it just wipes the canvas without changing other lists?
 
         cells = Stream.generate(() -> (SimpleVertex)null)
                 .limit(nodeData.size())

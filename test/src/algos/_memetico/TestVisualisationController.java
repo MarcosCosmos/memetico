@@ -12,6 +12,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import memetico.Memetico;
 import memetico.logging.PCAlgorithmState;
@@ -36,7 +38,7 @@ public class TestVisualisationController implements Initializable {
     public static double LOG_POLL_RATE = 60;
 
     @FXML
-    private BorderPane root;
+    private VBox root;
     @FXML
     private Pane frameContent;
     @FXML
@@ -54,14 +56,14 @@ public class TestVisualisationController implements Initializable {
         //todo: perhaps make the type of the logger and frame content to use generic/parameters given to this controller.?
         //set the frame content controller to a new
         try {
-            logger = new PCLogger();
+            logger = new PCLogger(10);
 
-            PrintStream originalStdout = System.out;
-            System.setOut(new PrintStream(new OutputStream() {
-                public void write(int b) {
-                    //DO NOTHING
-                }
-            }));
+//            PrintStream originalStdout = System.out;
+//            System.setOut(new PrintStream(new OutputStream() {
+//                public void write(int b) {
+//                    //DO NOTHING
+//                }
+//            }));
 
             Thread theThread = new Thread(() -> Memetico.main(logger, new String[0]));
             theThread.start();
@@ -72,7 +74,7 @@ public class TestVisualisationController implements Initializable {
             //setup the playback controls, giving them an observable reference to the total frame count.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("test_playback_controls.fxml"));
             Pane playbackControls = loader.load();
-            root.setBottom(playbackControls);
+            root.getChildren().add(playbackControls);
             TestPlaybackController playbackController = loader.<TestPlaybackController>getController();
             playbackController.setup(numberOfFrames);
 
@@ -85,6 +87,7 @@ public class TestVisualisationController implements Initializable {
                     )
             );
 
+
             //set up the content display with an observable reference to the current state to display.
             loader = new FXMLLoader(
                     getClass().getResource(
@@ -92,7 +95,8 @@ public class TestVisualisationController implements Initializable {
                     )
             );
             Pane content = loader.load();
-            root.setTop(content);
+            root.getChildren().add(0, content);
+            VBox.setVgrow(content, Priority.ALWAYS);
             loader.<TestPCFrameController>getController().setup(currentState);
 
             //setup a timeline to poll for log updates, and update the number of frames accordingly

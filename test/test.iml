@@ -13,5 +13,6 @@
     <orderEntry type="module" module-name="memetico" />
     <orderEntry type="library" name="jorlib-core-1.1.1" level="project" />
     <orderEntry type="library" name="com.sirolf2009:fxgraph:0.0.31" level="project" />
+    <orderEntry type="library" name="com.sirolf2009:fxgraph:0.0.3" level="project" />
   </component>
 </module>

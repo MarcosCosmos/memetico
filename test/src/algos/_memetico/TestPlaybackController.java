@@ -42,7 +42,7 @@ public class TestPlaybackController {
      * Values are measured as FPS
      */
     @FXML
-    private ChoiceBox<Double> speedChoice;
+    private ChoiceBox<Double> cbSpeed;
 
     private transient IntegerProperty numberOfFrames;
     private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(false);
@@ -65,8 +65,9 @@ public class TestPlaybackController {
         sldrFrameIndex.majorTickUnitProperty().bind(Bindings.max(numberOfFrames, 1));
         sldrFrameIndex.setShowTickLabels(true);
         sldrFrameIndex.setMin(0);
-        sldrFrameIndex.maxProperty().bind(numberOfFrames);
+        sldrFrameIndex.maxProperty().bind(Bindings.max(0, numberOfFrames.subtract(1)));
         sldrFrameIndex.valueProperty().bindBidirectional(frameIndex);
+
         btnPlayPause.textProperty()
                 .bind(
                         Bindings.createStringBinding(
@@ -74,13 +75,13 @@ public class TestPlaybackController {
                                 isPlaying
                         )
                 );
-        speedChoice.valueProperty().addListener(
+        cbSpeed.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     ObservableList<KeyFrame> frames = playbackTimeline.getKeyFrames();
                     frames.add(new KeyFrame(Duration.millis(100/ newValue), frameUpdater));
                 }
         );
-        speedChoice.setValue(1.0);
+        cbSpeed.setValue(1.0);
 //        playbackTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(100/speedChoice.getValue().doubleValue()), frameUpdater));
         playbackTimeline.setCycleCount(Animation.INDEFINITE);
         playbackTimeline.play();

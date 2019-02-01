@@ -257,7 +257,6 @@ public class Memetico {
         Vector matRT[];
         Reduction reduction = null;
         // counter to check the number of instances, 27 in the assymetric case
-        int countNames = 1;
 
         // names of the instances of the TSP which are going to be used for the
         // experiments. We are assuming they are located in the same directory.
@@ -288,10 +287,6 @@ public class Memetico {
 //                "tsp225.tsp", "a280.tsp", "pcb442.tsp", "pa561.tsp", "gr666.tsp",
 //                "pr1002.tsp", "pr2392.tsp"
 //        };
-        String Names[] = {
-                "br17.atsp"
-        };
-
 
         // the cost of the optimal solution for each of the preceeding instances.
         // Same order.
@@ -311,9 +306,16 @@ public class Memetico {
 //                3916, 2579, 50778, 2763, 294358,
 //                259045, 378032
 //        };
-        long OptimalSol[] = {
-                39
+
+        String Names[] = {
+                "berlin52.tsp"
         };
+        long OptimalSol[] = {
+                7542
+        };
+
+
+        int          countNames=Names.length;
 
 
 

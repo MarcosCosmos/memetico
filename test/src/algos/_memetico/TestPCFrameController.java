@@ -1,47 +1,74 @@
 package algos._memetico;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import com.fxgraph.graph.PannableCanvas;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.*;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
+import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
 import memetico.logging.PCAlgorithmState;
-import memetico.logging.PCLogger;
-import org.marcos.uon.tspaidemo.util.log.BasicLogger;
+import org.jorlib.io.tspLibReader.TSPInstance;
+import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class TestPCFrameController {
     @FXML
-    private BorderPane contentRoot;
+    private VBox contentRoot;
     @FXML
     private Text generationText;
     @FXML
     private GridPane agentsGrid;
+    @FXML
+    private SplitPane splitPane;
 
     private IntegerProperty generationValue = new SimpleIntegerProperty();
     private ObjectProperty<PCAlgorithmState> state;
+    private Map<String, TSPInstance> baseInstances;
+
+    private List<BooleanProperty[]> tourDisplayToggles = new ArrayList<>();
+
+    private Euc2DTSPFXGraph fxGraph;
+
+    private void updateTours() {
+        if(!fxGraph.isEmpty()) {
+            //clear and re-draw tours
+            fxGraph.clearTours();
+
+            for (int i = 0; i < tourDisplayToggles.size(); ++i) {
+                BooleanProperty[] eachToggles = tourDisplayToggles.get(i);
+                for (int k = 0; k < eachToggles.length; ++k) {
+                    if (eachToggles[k].get()) {
+                        fxGraph.addTour(
+                                Arrays.stream(
+                                        (
+                                                (k == 0 ? state.get().agents[i].pocket : state.get().agents[i].current)
+                                        ).arcArray
+                                )
+                                        .map(
+                                                each -> new int[]{each.from, each.tip}
+                                        )
+                                        .collect(Collectors.toList())
+                        );
+                    }
+                }
+            }
+        }
+    }
+
     public void setup(ObjectProperty<PCAlgorithmState> state) {
+        splitPane.prefHeightProperty().bind(contentRoot.heightProperty());
+
+        baseInstances = new HashMap<>();
         this.state = state;
         generationValue.bind(
                 Bindings.createIntegerBinding(
@@ -57,19 +84,56 @@ public class TestPCFrameController {
 
         //use a listener to dynamically create/destroy agent displays
         state.addListener(((observable, oldValue, newValue) -> {
+            TSPInstance baseInstance = baseInstances.computeIfAbsent(newValue.instanceName, (file) -> {
+                TSPInstance result = new TSPInstance();
+                try {
+                    result.load(new File(file));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return result;
+            });
             ObservableList<Node> displayNodes = agentsGrid.getChildren();
-            if(newValue.agents.length < displayNodes.size()) {
-                //delete unneeded agent displays and states; todo: possibly just hide them for performance?
-                displayNodes.subList(newValue.agents.length, displayNodes.size()).clear();
-            } else if(newValue.agents.length > displayNodes.size()) {
-                //add needed agent displays
-                for(int i=displayNodes.size(); i<newValue.agents.length; ++i) {
-                    FXMLLoader loader = new FXMLLoader(
-                            getClass().getResource(
-                                    "test_agent_display.fxml"
-                            )
-                    );
-                    try {
+
+            try {
+                //for all the graphs we are going to keep, if the instance changed, switch to the new one.
+                if (oldValue == null || !newValue.instanceName.equals(oldValue.instanceName)) {
+                    fxGraph = new Euc2DTSPFXGraph(baseInstance);
+                    if(!fxGraph.isEmpty()) {
+                        PannableCanvas graphCanvas = fxGraph.getCanvas();
+
+                        splitPane.getItems().set(1, graphCanvas);
+
+                        BoundingBox canvasBounds = fxGraph.getLogicalBounds();
+
+                        double availableHeight = splitPane.getHeight();
+                        double scaleHeight = availableHeight / (canvasBounds.getHeight() + canvasBounds.getMinY());
+                        //technically this is effected by divider style, not sure how to compute that yet
+                        double availableWidth = (splitPane.getWidth()) * (1.0 - splitPane.getDividerPositions()[0]);
+                        double scaleWidth = availableWidth / (canvasBounds.getWidth() + canvasBounds.getMinX()*3);
+                        double chosenScale = Math.min(scaleWidth, scaleHeight);
+//                    SplitPane.setResizableWithParent(graphCanvas, false);
+
+                        graphCanvas.setPivot((availableWidth)*(chosenScale) + canvasBounds.getMinX()*(1/chosenScale)/2, 0);
+                        graphCanvas.setScale(chosenScale);
+                    } else {
+                        splitPane.getItems().set(1, new Pane());
+                    }
+
+
+                }
+
+                if (newValue.agents.length < displayNodes.size()) {
+                    //delete unneeded agent displays and states; todo: possibly just hide them for performance?
+                    displayNodes.subList(newValue.agents.length, displayNodes.size()).clear();
+                } else if (newValue.agents.length > displayNodes.size()) {
+                    //add needed agent displays
+                    for (int i = displayNodes.size(); i < newValue.agents.length; ++i) {
+                        FXMLLoader loader = new FXMLLoader(
+                                getClass().getResource(
+                                        "test_agent_display.fxml"
+                                )
+                        );
                         //load the node
                         Pane newNode = loader.load();
                         //retrieve the controller
@@ -86,50 +150,35 @@ public class TestPCFrameController {
                                         state, newId
                                 )
                         );
+//
+//                        if(!fxGraph.isEmpty()) {
+//                        } else {
+//                            newController.setup(newId, newState);
+//                        }
 
+
+                        BooleanProperty[] newToggles = {new SimpleBooleanProperty(false), new SimpleBooleanProperty(false)};
+                        for (BooleanProperty eachProp : newToggles) {
+                            eachProp.addListener((observable1, oldValue1, newValue1) -> updateTours());
+                        }
                         //give the state to the controller
-                        newController.setup(newId, newState);
+                        newController.setup(newId, newState, newToggles[0], newToggles[1]);
+
+                        //position the node cheaply for now
+                        GridPane.setRowIndex(newNode, i);
+
                         //add the data to the lists
                         displayNodes.add(newNode);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        tourDisplayToggles.add(newToggles);
                     }
+
+//                    updateTours();
+
+                    System.gc();
                 }
+            } catch (IOException | InvalidArgumentException e) {
+                e.printStackTrace();
             }
-
-            int numParents = (int) Math.floor(newValue.agents.length / newValue.nAry);
-            int row = newValue.agents.length-1;
-            for (int parent = numParents-1; parent >= 0; parent++) {
-                int firstCh = newValue.nAry * parent + 1;
-                int lastCh = newValue.nAry * parent + newValue.nAry;
-                for (int i = lastCh-1; i>=firstCh; i--) {
-                    if(i < newValue.agents.length) {
-                        GridPane.setRowIndex(displayNodes.get(i), row--);
-                    }
-                }
-            }
-            GridPane.setRowIndex(displayNodes.get(0), row);
-
-            int i, j, firstCh, lastCh, parent;
-
-//            for (parent = nrParents - 1; parent >= 0; parent--) {
-//                firstCh = n_ary * parent + 1;
-//                lastCh = n_ary * parent + n_ary;
-//                for (i = firstCh; i < lastCh; i++) {
-//                    for (j = (i + 1); j <= lastCh; j++) {
-//                        if (pop[i].cost > pop[j].cost) {
-//                            pop[i].exchangeSolutionStructures(pop[j]);
-//                        }
-//                    }
-//                }
-//            }
-
-//            //for all agents, ensure they position in the grid is correct for their position in the population
-//            for(int i=0; i<displayNodes.size();++i) {
-//                //set the row and column indices based on tree position
-////                //(for initial test, just row index)
-//            }
 //0
 //        1
 //                4

@@ -18,7 +18,7 @@ package memetico;/*
 
 public class Arc {
 
-    int from, tip;       // in a previous version `Tip' was called `Next',
+    public int from, tip;       // in a previous version `Tip' was called `Next',
     // and `From' was called `Prev'.
     // `Tip' would have also been called `To'...
     // we keep the name `Tip' since it is the same in the

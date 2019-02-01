@@ -5,15 +5,18 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<BorderPane fx:id="contentRoot" fx:controller="algos._memetico.TestPCFrameController"
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.Pane?>
+<VBox fx:id="contentRoot" fx:controller="algos._memetico.TestPCFrameController"
             xmlns:fx="http://javafx.com/fxml">
-    <center>
+    <SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
         <VBox>
             <HBox>
                 <Label fx:id="generationLabel">Generation:</Label>
                 <Text fx:id="generationText">Test</Text>
             </HBox>
-            <GridPane fx:id="agentsGrid"/>
+            <GridPane fx:id="agentsGrid" VBox.vgrow="ALWAYS"/>
         </VBox>
-    </center>
-</BorderPane>
+        <Pane/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
+    </SplitPane>
+</VBox>

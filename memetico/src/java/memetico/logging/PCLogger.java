@@ -6,12 +6,16 @@ import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 
 public class PCLogger extends BasicLogger<PCAlgorithmState> implements IPCLogger {
     double startTime;
-    public PCLogger() {
+    int logFrequency;
+    public PCLogger(int logFrequency) {
+        this.logFrequency = logFrequency;
         //give the clock a sane-ish default start
         startClock();
     }
     public void log(String instanceName, Population population, int generation) throws InterruptedException {
-        log(new PCAlgorithmState(instanceName, population, generation, System.currentTimeMillis()));
+        if (generation % logFrequency == 0) {
+            log(new PCAlgorithmState(instanceName, population, generation, System.currentTimeMillis()));
+        }
     }
 
     @Override

@@ -3,12 +3,12 @@ package memetico;
 import java.io.*;
 
 
-class DiCycle extends SolutionStructure {
+public class DiCycle extends SolutionStructure {
     /* base.DiCycle = a Double-Linked Cyclic Permutation of {1..N} integers */
 /* it also has a boolean array of ``don't look bits'' which is
    generally useful for some local search implementations         */
 
-    Arc arcArray[];
+    public Arc arcArray[];
     boolean dontlook[];
     double startTime[];
     int startingCity = 0;

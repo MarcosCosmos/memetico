@@ -3,21 +3,17 @@
 }
 
 .line {
-    -fx-stroke: blue;
-}
-
-.suboptimal .line {
-    -fx-stroke: #777777;
+    -fx-stroke: black;
 }
 /* note that tour edges created using the TourEdge class, the css class .tour is used instead */
-.optimal .line {
+.tour .line {
     -fx-stroke: #00ff00;
 }
 
 .graph {
-    -fx-background-color: #000000;
 }
 
-.label {
-    -fx-fill: #cecece;
+.graph .label {
+    visibility:hidden;
 }
+
