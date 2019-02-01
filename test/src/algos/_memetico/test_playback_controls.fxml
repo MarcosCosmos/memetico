@@ -13,7 +13,24 @@
 <BorderPane fx:id="playbackControls" fx:controller="algos._memetico.TestPlaybackController"
             xmlns:fx="http://javafx.com/fxml">
     <center>
-        <Slider fx:id="sldrFrameIndex"/>
+        <BorderPane fx:id="sliderWrapper">
+            <left>
+                <Text fx:id="txtMinFrame"/>
+            </left>
+            <center>
+                <BorderPane>
+                    <center>
+                        <Text fx:id="txtCurFrame"/>
+                    </center>
+                    <top>
+                        <Slider fx:id="sldrFrameIndex"/>
+                    </top>
+                </BorderPane>
+            </center>
+            <right>
+                <Text fx:id="txtMaxFrame"/>
+            </right>
+        </BorderPane>
     </center>
     <right>
         <HBox>

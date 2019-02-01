@@ -29,7 +29,7 @@ public class Euc2DTSPFXGraph {
     private List<List<TourEdge>> tours;
     private List<SimpleEdge> normalEdges;
 
-//    private final BorderPane root = new BorderPane();
+    private final BorderPane root = new BorderPane();
 
 
     /**
@@ -109,17 +109,11 @@ public class Euc2DTSPFXGraph {
         fxGraph.layout(new SelfLocatingLayout());
 
         //crop the layout
-        BoundingBox bounds = getLogicalBounds();
-        for (SimpleVertex cell : cells) {
-            cell.locationX().subtract(bounds.getMinX());
-            cell.locationY().subtract(bounds.getMinY());
-        }
         fxGraph.layout(new SelfLocatingLayout());
 
-        BoundingBox boundsB = getLogicalBounds();
-//        root.setCenter();
+        root.setCenter(fxGraph.getCanvas());
         Region canvas = fxGraph.getCanvas();
-        canvas.getStyleClass().add("graph");
+        root.getStyleClass().add("graph");
     }
 
     /**
@@ -196,5 +190,9 @@ public class Euc2DTSPFXGraph {
 
         return new BoundingBox(minX, minY, maxX-minX, maxY-minY);
 
+    }
+
+    public Region getGraphic() {
+        return root;
     }
 }

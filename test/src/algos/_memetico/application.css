@@ -3,7 +3,7 @@
 }
 
 .line {
-    -fx-stroke: black;
+    -fx-stroke: white;
 }
 /* note that tour edges created using the TourEdge class, the css class .tour is used instead */
 .tour .line {
@@ -11,9 +11,29 @@
 }
 
 .graph {
+    -fx-background-color:black;
 }
 
 .graph .label {
-    visibility:hidden;
+    -fx-color: #cecece;
+}
+
+#contentRoot, #playbackControls, #sliderWrapper {
+    -fx-padding: 5px;
+}
+
+.agentInfo {
+    -fx-padding: 5px 0 0 0;
+}
+.lblAgentId, .txtAgentId {
+    -fx-font-weight:bold;
+}
+
+Text, Label {
+    -fx-padding: 0 5px 0 10px;
+}
+
+.agentInfo CheckBox {
+    -fx-label-padding: 0 5px 0 10px;
 }
 

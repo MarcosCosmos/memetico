@@ -4,6 +4,8 @@ import com.fxgraph.graph.PannableCanvas;
 import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
 import memetico.logging.PCAlgorithmState;
 import org.jorlib.io.tspLibReader.TSPInstance;
 import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
@@ -23,13 +26,13 @@ import java.util.stream.Collectors;
 
 public class TestPCFrameController {
     @FXML
-    private VBox contentRoot;
+    private HBox contentRoot;
     @FXML
     private Text generationText;
     @FXML
     private GridPane agentsGrid;
     @FXML
-    private SplitPane splitPane;
+    private BorderPane graphWrapper;
 
     private IntegerProperty generationValue = new SimpleIntegerProperty();
     private ObjectProperty<PCAlgorithmState> state;
@@ -39,7 +42,32 @@ public class TestPCFrameController {
 
     private Euc2DTSPFXGraph fxGraph;
 
+    private double lastScale = 0;
+    private final ChangeListener<Number> autoSizeListener = (observable12, oldValue12, newValue12) -> {
+        //reset to the old position
+        PannableCanvas graphCanvas = fxGraph.getCanvas();
+        BoundingBox canvasBounds = fxGraph.getLogicalBounds();
+
+        double availableHeight = graphWrapper.getHeight();
+        double padding = Math.max(canvasBounds.getMinX()*2, canvasBounds.getMinY()*2);
+        double scaleHeight = availableHeight / (canvasBounds.getHeight() + padding);
+        //technically this is effected by divider style, not sure how to compute that yet
+        double availableWidth = newValue12.doubleValue();
+        double scaleWidth = availableWidth / (canvasBounds.getWidth() + padding);
+        double chosenScale = Math.min(scaleWidth, scaleHeight);
+//        double newTranslate = ((availableWidth)*(chosenScale)/2 + canvasBounds.getMinX()*2);
+
+        Scale scale = new Scale();
+        scale.setPivotX(0);
+        scale.setPivotY(100);
+        scale.setX(chosenScale/lastScale);
+        scale.setY(chosenScale/lastScale);
+        graphCanvas.getTransforms().add(scale);
+        lastScale = chosenScale;
+    };
+
     private void updateTours() {
+        //disable auto scaling
         if(!fxGraph.isEmpty()) {
             //clear and re-draw tours
             fxGraph.clearTours();
@@ -66,10 +94,11 @@ public class TestPCFrameController {
     }
 
     public void setup(ObjectProperty<PCAlgorithmState> state) {
-        splitPane.prefHeightProperty().bind(contentRoot.heightProperty());
-
         baseInstances = new HashMap<>();
         this.state = state;
+
+
+
         generationValue.bind(
                 Bindings.createIntegerBinding(
                     () -> {
@@ -99,25 +128,13 @@ public class TestPCFrameController {
                 //for all the graphs we are going to keep, if the instance changed, switch to the new one.
                 if (oldValue == null || !newValue.instanceName.equals(oldValue.instanceName)) {
                     fxGraph = new Euc2DTSPFXGraph(baseInstance);
+                    graphWrapper.getChildren().clear();
                     if(!fxGraph.isEmpty()) {
-                        PannableCanvas graphCanvas = fxGraph.getCanvas();
-
-                        splitPane.getItems().set(1, graphCanvas);
-
-                        BoundingBox canvasBounds = fxGraph.getLogicalBounds();
-
-                        double availableHeight = splitPane.getHeight();
-                        double scaleHeight = availableHeight / (canvasBounds.getHeight() + canvasBounds.getMinY());
-                        //technically this is effected by divider style, not sure how to compute that yet
-                        double availableWidth = (splitPane.getWidth()) * (1.0 - splitPane.getDividerPositions()[0]);
-                        double scaleWidth = availableWidth / (canvasBounds.getWidth() + canvasBounds.getMinX()*3);
-                        double chosenScale = Math.min(scaleWidth, scaleHeight);
-//                    SplitPane.setResizableWithParent(graphCanvas, false);
-
-                        graphCanvas.setPivot((availableWidth)*(chosenScale) + canvasBounds.getMinX()*(1/chosenScale)/2, 0);
-                        graphCanvas.setScale(chosenScale);
-                    } else {
-                        splitPane.getItems().set(1, new Pane());
+                        graphWrapper.setCenter(fxGraph.getGraphic());
+                        lastScale=1;
+                        //enable auto sizing
+                        graphWrapper.widthProperty().addListener(autoSizeListener);
+//                        autoSizeListener.changed(null, graphWrapper.getWidth(), graphWrapper.getWidth());
                     }
 
 
@@ -129,15 +146,6 @@ public class TestPCFrameController {
                 } else if (newValue.agents.length > displayNodes.size()) {
                     //add needed agent displays
                     for (int i = displayNodes.size(); i < newValue.agents.length; ++i) {
-                        FXMLLoader loader = new FXMLLoader(
-                                getClass().getResource(
-                                        "test_agent_display.fxml"
-                                )
-                        );
-                        //load the node
-                        Pane newNode = loader.load();
-                        //retrieve the controller
-                        AgentDisplayController newController = loader.<AgentDisplayController>getController();
                         //create an observable reference to an agent state
                         ObjectProperty<PCAlgorithmState.AgentState> newState = new SimpleObjectProperty<>();
                         //create an observable property for the id
@@ -162,7 +170,7 @@ public class TestPCFrameController {
                             eachProp.addListener((observable1, oldValue1, newValue1) -> updateTours());
                         }
                         //give the state to the controller
-                        newController.setup(newId, newState, newToggles[0], newToggles[1]);
+                        AgentDisplay newNode = new AgentDisplay(newId, newState, newToggles[0], newToggles[1]);
 
                         //position the node cheaply for now
                         GridPane.setRowIndex(newNode, i);
@@ -172,13 +180,11 @@ public class TestPCFrameController {
                         tourDisplayToggles.add(newToggles);
                     }
 
-//                    updateTours();
-
-                    System.gc();
                 }
-            } catch (IOException | InvalidArgumentException e) {
+            } catch ( InvalidArgumentException e) {
                 e.printStackTrace();
             }
+            updateTours();
 //0
 //        1
 //                4

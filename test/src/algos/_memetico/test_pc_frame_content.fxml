@@ -7,16 +7,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.Pane?>
-<VBox fx:id="contentRoot" fx:controller="algos._memetico.TestPCFrameController"
+<HBox fx:id="contentRoot" fx:controller="algos._memetico.TestPCFrameController"
             xmlns:fx="http://javafx.com/fxml">
-    <SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
-        <VBox>
-            <HBox>
-                <Label fx:id="generationLabel">Generation:</Label>
-                <Text fx:id="generationText">Test</Text>
-            </HBox>
-            <GridPane fx:id="agentsGrid" VBox.vgrow="ALWAYS"/>
-        </VBox>
-        <Pane/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
-    </SplitPane>
-</VBox>
+    <VBox fx:id="dataWrapper" minWidth="200">
+        <HBox>
+            <Label fx:id="generationLabel" styleClass="test">Generation:</Label>
+            <Text fx:id="generationText">Test</Text>
+        </HBox>
+        <GridPane fx:id="agentsGrid" VBox.vgrow="ALWAYS"/>
+    </VBox>
+    <BorderPane fx:id="graphWrapper"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
+</HBox>

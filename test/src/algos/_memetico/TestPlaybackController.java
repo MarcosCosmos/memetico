@@ -4,6 +4,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -14,7 +15,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import memetico.logging.PCAlgorithmState;
@@ -37,6 +40,10 @@ public class TestPlaybackController {
     private Button btnStop;
     @FXML
     private Button btnPlayPause;
+    @FXML
+    private Text txtCurFrame, txtMinFrame, txtMaxFrame;
+
+    private boolean wasPlaying = false;
 
     /**
      * Values are measured as FPS
@@ -62,11 +69,26 @@ public class TestPlaybackController {
 
     public void setup(IntegerProperty numberOfFramesProp) {
         this.numberOfFrames = numberOfFramesProp;
-        sldrFrameIndex.majorTickUnitProperty().bind(Bindings.max(numberOfFrames, 1));
-        sldrFrameIndex.setShowTickLabels(true);
         sldrFrameIndex.setMin(0);
         sldrFrameIndex.maxProperty().bind(Bindings.max(0, numberOfFrames.subtract(1)));
+
+
+        txtCurFrame.textProperty().bind(Bindings.createIntegerBinding(() -> (int)sldrFrameIndex.valueProperty().get(), sldrFrameIndex.valueProperty()).asString());
+        txtMinFrame.textProperty().bind(Bindings.createIntegerBinding(() -> (int)sldrFrameIndex.minProperty().get(), sldrFrameIndex.minProperty()).asString());
+        txtMaxFrame.textProperty().bind(Bindings.createIntegerBinding(() -> (int)sldrFrameIndex.maxProperty().get(), sldrFrameIndex.maxProperty()).asString());
+
         sldrFrameIndex.valueProperty().bindBidirectional(frameIndex);
+
+        sldrFrameIndex.setOnMousePressed((event) -> {
+            wasPlaying = isPlaying.get();
+            isPlaying.set(false);
+        });
+
+        sldrFrameIndex.setOnMouseReleased((event) -> {
+            if(wasPlaying) {
+                isPlaying.set(true);
+            }
+        });
 
         btnPlayPause.textProperty()
                 .bind(
