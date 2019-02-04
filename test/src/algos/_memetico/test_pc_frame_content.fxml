@@ -9,12 +9,12 @@
 <?import javafx.scene.layout.Pane?>
 <HBox fx:id="contentRoot" fx:controller="algos._memetico.TestPCFrameController"
             xmlns:fx="http://javafx.com/fxml">
-    <VBox fx:id="dataWrapper" minWidth="200">
+    <VBox fx:id="dataWrapper" minWidth="1000" HBox.hgrow="ALWAYS">
         <HBox>
             <Label fx:id="generationLabel" styleClass="test">Generation:</Label>
             <Text fx:id="generationText">Test</Text>
         </HBox>
         <GridPane fx:id="agentsGrid" VBox.vgrow="ALWAYS"/>
     </VBox>
-    <BorderPane fx:id="graphWrapper" HBox.hgrow="ALWAYS"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
+    <BorderPane fx:id="graphWrapper"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
 </HBox>

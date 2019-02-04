@@ -18,6 +18,8 @@ import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class TestPCFrameController {
     @FXML
@@ -135,9 +137,12 @@ public class TestPCFrameController {
 
                 }
 
+                boolean listUpdated = false;
+
                 if (newValue.agents.length < displayNodes.size()) {
                     //delete unneeded agent displays and states; todo: possibly just hide them for performance?
                     displayNodes.subList(newValue.agents.length, displayNodes.size()).clear();
+                    listUpdated = true;
                 } else if (newValue.agents.length > displayNodes.size()) {
                     //add needed agent displays
                     for (int i = displayNodes.size(); i < newValue.agents.length; ++i) {
@@ -167,18 +172,39 @@ public class TestPCFrameController {
                         //give the state to the controller
                         AgentDisplay newNode = new AgentDisplay(newId, newState, newToggles[0], newToggles[1]);
 
-                        //position the node cheaply for now
-                        GridPane.setRowIndex(newNode, i);
+//                        //position the node cheaply for now
+//                        GridPane.setRowIndex(newNode, i);
 
                         //add the data to the lists
                         displayNodes.add(newNode);
                         tourDisplayToggles.add(newToggles);
                     }
-
+                    listUpdated = true;
                 }
+//                //if the list was updated, the re-arrange the cells in the grid
+//                if(listUpdated) {
+//                    int height = (int)Math.ceil(Math.log(newValue.agents.length)/Math.log(newValue.nAry));
+//                    int[] indices = IntStream.generate(() -> newValue.nAry-1).limit(height).toArray();
+//                    int curCol = height-1;
+//                    int nodesSeen = newValue.agents.length-1;
+////                    {
+////                        Node eachNode = displayNodes.get(0);
+////                        GridPane.setRowIndex(eachNode, 0);
+////                        GridPane.setRowIndex(eachNode, curCol);
+////                        ++nodesSeen;
+////                    }
+//                    while(nodesSeen >= 0) {
+//                        GridPane.setRowIndex(displayNodes.get(nodesSeen), nodesSeen--);
+//                        if(curCol == height-1) {
+//                        }
+//
+//                    }
+//                }
             } catch ( InvalidArgumentException e) {
                 e.printStackTrace();
             }
+
+
             updateTours();
 //0
 //        1
@@ -193,6 +219,14 @@ public class TestPCFrameController {
 //                10
 //                11
 //                12
+
+//todo: try storing them like this. (that is, [0,1,4-6], [0,2,7-9])
+
+
+            1=0*3+1+0
+            4=(((0*3+1)+0)*3+1)+0
+            7=((((0*3+1)+1)*3)+1)+1
+            10=((((0*3+1)+2)*3)+1)+1
         }));
 
     }
