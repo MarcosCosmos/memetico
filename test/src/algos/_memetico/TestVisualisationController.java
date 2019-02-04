@@ -15,15 +15,18 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import memetico.Memetico;
+import memetico.*;
 import memetico.logging.PCAlgorithmState;
 import memetico.logging.PCLogger;
+import org.jorlib.io.tspLibReader.TSPLibInstance;
+import org.jorlib.io.tspLibReader.TSPLibTour;
+import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -51,6 +54,8 @@ public class TestVisualisationController implements Initializable {
     private transient ObjectProperty<PCAlgorithmState> currentState;
     private final transient Timeline updateCheckingTimeline = new Timeline();
 
+    private Map<String, TSPLibInstance> baseInstances = new HashMap<>();
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //todo: perhaps make the type of the logger and frame content to use generic/parameters given to this controller.?
@@ -65,7 +70,82 @@ public class TestVisualisationController implements Initializable {
 //                }
 //            }));
 
-            Thread theThread = new Thread(() -> Memetico.main(logger, new String[0]));
+            Thread theThread = new Thread(() -> {
+                String MetodoConstrutivo = "Nearest Neighbour";
+                String BuscaLocal = "Recursive base.Arc Insertion";//Recursive base.Arc Insertion";
+                String SingleorDouble = "Double";
+                String OPCrossover = "Strategic base.Arc Crossover - SAX",
+                        OPReStart = "base.RestartInsertion",
+                        OPMutacao = "base.MutationInsertion";
+                String structSol = "base.DiCycle";
+                String structPop = "Ternary Tree";
+                long MaxTime = 100, MaxGenNum;
+                int PopSize = 13, mutationRate = 5;
+
+
+                try {
+                    File probFile = new File(getClass().getClassLoader().getResource("att532.tsp").getFile());
+
+                    TSPLibInstance tspLibInstance = new TSPLibInstance(probFile);
+
+                    baseInstances.put(tspLibInstance.getName(), tspLibInstance);
+
+                    Instance memeticoInstance;
+
+                    switch (tspLibInstance.getDataType()) {
+//                        case TSP:
+//                            memeticoInstance = new TSPInstance();
+//                            break;
+                        case ATSP:
+                        default:
+                            //atsp should be safe (ish) even if it is in fact tsp
+                            memeticoInstance = new ATSPInstance();
+                    }
+
+                    //give the memeticoInstance the required data
+                    memeticoInstance.setDimension(tspLibInstance.getDimension());
+                    {
+                        DistanceTable distanceTable = tspLibInstance.getDistanceTable();
+                        double[][] memeticoMat = ((GraphInstance) memeticoInstance).getMatDist();
+                        for(int i=0; i<memeticoInstance.getDimension(); ++i) {
+                            for(int k=0; k<memeticoInstance.getDimension(); ++k) {
+                                memeticoMat[i][k] = distanceTable.getDistanceBetween(i,k);
+                            }
+                        }
+                    }
+
+                    MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(((GraphInstance) memeticoInstance).getDimension()));
+
+                    FileOutputStream dataOut = null;
+                    dataOut = new FileOutputStream("result.txt");
+                    DataOutputStream fileOut = new DataOutputStream(dataOut);
+
+                    FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
+                    DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
+
+                    long targetCost; //for letting the solver know when it's found the optimal (if known)
+                    //a280: this one has a tour
+//                    {
+//                        File tourFile = new File(getClass().getClassLoader().getResource("a280.opt.tour").getFile());
+//                        tspLibInstance.addTour(tourFile);
+//                        targetCost = (long) tspLibInstance.getTours().get(0).distance(tspLibInstance);
+////                        tspLibInstance.getTours().clear();
+//                    }
+                    //att532: this one just has known cost
+                    targetCost = 27686;
+
+                    Memetico meme = new Memetico(logger, memeticoInstance, structSol, structPop, MetodoConstrutivo,
+                            PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao,
+                            MaxTime, MaxGenNum, tspLibInstance.getName(), targetCost, fileOut,
+                            compact_fileOut);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
             theThread.start();
 
             view = logger.newView();
@@ -97,7 +177,7 @@ public class TestVisualisationController implements Initializable {
             Pane content = loader.load();
             root.getChildren().add(0, content);
             VBox.setVgrow(content, Priority.ALWAYS);
-            loader.<TestPCFrameController>getController().setup(currentState);
+            loader.<TestPCFrameController>getController().setup(baseInstances, currentState);
 
             //setup a timeline to poll for log updates, and update the number of frames accordingly
             updateCheckingTimeline.getKeyFrames().add(

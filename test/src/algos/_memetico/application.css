@@ -6,16 +6,21 @@
     -fx-stroke: white;
 }
 /* note that tour edges created using the TourEdge class, the css class .tour is used instead */
-.tour .line {
-    -fx-stroke: #00ff00;
+.prediction .line {
+    -fx-stroke: yellow;
 }
 
-.graph {
+.target .line {
+    -fx-stroke: lime;
+}
+
+.graph, #graphWrapper {
     -fx-background-color:black;
 }
 
 .graph .label {
     -fx-color: #cecece;
+    visibility:hidden;
 }
 
 #contentRoot, #playbackControls, #sliderWrapper {

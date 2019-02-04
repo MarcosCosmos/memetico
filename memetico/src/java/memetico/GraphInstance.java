@@ -22,9 +22,16 @@ public abstract class GraphInstance extends Instance {
         super.problemType = super.GRAPH_TYPE;
     }
 
-    void setDimension(int dim) {
+    public void setDimension(int dim) {
         dimension = dim;
         matDist = new double[dimension][dimension];
     }
 
+    public double[][] getMatDist() {
+        return matDist;
+    }
+
+    public void setMatDist(double[][] matDist) {
+        this.matDist = matDist;
+    }
 }/*end of Graph base.Instance class*/

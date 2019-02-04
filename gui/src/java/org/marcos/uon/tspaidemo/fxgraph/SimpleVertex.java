@@ -14,6 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import sun.security.provider.certpath.Vertex;
 
 /**
  * An fxgraph cell for a simple vertex in a tsp instance
@@ -22,11 +23,11 @@ import javafx.scene.text.Text;
  */
 public class SimpleVertex extends AbstractCell implements ISelfLocatingCell {
     public static final double DEFAULT_RADIUS = 3;
-    public static class VertexGraphic extends Pane {
+    public class VertexGraphic extends Pane {
         private final Group group;
         private final Circle dot;
         private final Text text;
-        public VertexGraphic(Graph graph, DoubleProperty radius, StringProperty textProperty) {
+        public VertexGraphic() {
             group = new Group();
             dot = new Circle();
             text = new Text();
@@ -82,11 +83,13 @@ public class SimpleVertex extends AbstractCell implements ISelfLocatingCell {
     private final DoubleProperty radius;
     private final DoubleProperty locationX;
     private final DoubleProperty locationY;
+    private final VertexGraphic theGraphic;
     public SimpleVertex(double x, double y, double radius) {
         textProperty = new SimpleStringProperty();
         this.radius = new SimpleDoubleProperty(radius);
         locationX = new SimpleDoubleProperty(x);
         locationY = new SimpleDoubleProperty(y);
+        theGraphic = new VertexGraphic();
     }
     public SimpleVertex(double x, double y) {
         this(x,y,DEFAULT_RADIUS);
@@ -103,14 +106,24 @@ public class SimpleVertex extends AbstractCell implements ISelfLocatingCell {
 
     @Override
     public Region getGraphic(Graph graph) {
-        return new VertexGraphic(graph, radius, textProperty);
+        return theGraphic;
     }
 
+    @Override
     public DoubleBinding getXAnchor(Graph graph, IEdge edge) {
+        return getXAnchor();
+    }
+
+    @Override
+    public DoubleBinding getYAnchor(Graph graph, IEdge edge) {
+        return getYAnchor();
+    }
+
+    public DoubleBinding getXAnchor() {
         return Bindings.createDoubleBinding(locationX::get, locationX);
     }
 
-    public DoubleBinding getYAnchor(Graph graph, IEdge edge) {
+    public DoubleBinding getYAnchor() {
         return Bindings.createDoubleBinding(locationY::get, locationY);
     }
 

@@ -58,7 +58,7 @@ public class Memetico {
 
 //   base.Agent refAgent = null;
 
-        System.out.println('\n' + "Opening file " + name);
+        //System.out.println('\n' + "Opening file " + name);
         for (count = 0; count < nrReplications; count++) {
             recombineTime = time_vmp = time_init = 0;
             GenNum = 0;
@@ -88,9 +88,9 @@ public class Memetico {
             logger.log(name, memePop, GenNum);
 
             initialSolution += memePop.bestAgent.bestCost;
-//      System.out.println("Otima: " +OptimalSol);
-            System.out.println("melhor: " + memePop.bestAgent.bestCost);
-            System.out.println("InitPop Time " + (System.currentTimeMillis() - TotalTime) / 1000);
+//      //System.out.println("Otima: " +OptimalSol);
+            //System.out.println("melhor: " + memePop.bestAgent.bestCost);
+            //System.out.println("InitPop Time " + (System.currentTimeMillis() - TotalTime) / 1000);
 
             refMut.mutationRate = TxMut;
 
@@ -98,10 +98,10 @@ public class Memetico {
             /* Here we start the Generations loop */
 /*          String str = new String();
         for(i=0; i < memePop.popSize; i++) {str += pocCurPop[i].current.cost; str += " ";}
-        System.out.println("Currents: "+str);
+        //System.out.println("Currents: "+str);
         str = "";
           for(i=0; i < memePop.popSize; i++) {str += pocCurPop[i].pocket.cost; str += " ";}
-          System.out.println("Pockets: "+str);*/
+          //System.out.println("Pockets: "+str);*/
             while (GenNum < MaxGenNum)
             // the stoping criteria used are two in this case.
             // This should be improved in a future version.
@@ -111,9 +111,9 @@ public class Memetico {
                 memePop.agentPropagation();
                 if (memePop.bestAgent.bestCost < best_aux) {
                     bestTime = (System.currentTimeMillis() - TotalTime) / 1000;
-                    System.out.println("Solution: " + memePop.pop[0].cost +
-                            " GenNum: " + GenNum + " Tempo: " +
-                            bestTime);
+//                    System.out.println("Solution: " + memePop.pop[0].cost +
+//                            " GenNum: " + GenNum + " Tempo: " +
+//                            bestTime);
 
 //           ((base.DiCycle)((base.PocCurAgent)memePop.bestAgent).pocket).printDiCycle();
                 } else memePop.newBestSol++;
@@ -135,7 +135,7 @@ public class Memetico {
                 // RestartPablo
                 if (pocCurPop[0].noChangeCounter % 30 == 0) {
                     int aux_rand = (int) (Math.random() * 3 + 1);
-                    System.out.println("aux_rand: " + aux_rand);
+                    //System.out.println("aux_rand: " + aux_rand);
                     NNInicializePop(refConstr, aux_rand, (int) (Math.random() * ((GraphInstance) inst).dimension),
                             (int) (Math.random() * ((GraphInstance) inst).dimension), inst);
 
@@ -144,9 +144,9 @@ public class Memetico {
                     memePop.updateAgents(inst);
                     memePop.agentPropagation();
 
-                    System.out.println("now at Restart... incumbent cost is:" + pocCurPop[0].pocket.cost +
-                            " GenNum: " + GenNum + " Tempo: " +
-                            bestTime);
+//                    System.out.println("now at Restart... incumbent cost is:" + pocCurPop[0].pocket.cost +
+//                            " GenNum: " + GenNum + " Tempo: " +
+//                            bestTime);
 
                     int mutationRateAux = TxMut;
                     TxMut = 100; // increase to high mutation rate
@@ -176,7 +176,7 @@ public class Memetico {
                         str += pocCurPop[i].pocket.cost;
                         str += " ";
                     }
-                    System.out.println("Pockets: " + str);
+                    //System.out.println("Pockets: " + str);
 
 	   /* System.out.println("getting out of Restart... incumbent cost is:" + pocCurPop[0].pocket.cost +
                               " GenNum: " +GenNum + " Tempo: " +
@@ -218,9 +218,9 @@ public class Memetico {
             } catch (IOException e) {
                 throw new Exception("File not properly opened" + e.toString());
             }
-            System.out.println("Tempo total de execucao: " + (TotalTime / 1000) + '\t');        /*Tempo total de execucao*/
-            System.out.println("Melhor solucao encontrada: " + memePop.bestAgent.bestCost + '\t');    /*Melhor solucao encontrada*/
-            System.out.println("Numero total de Geracoes: " + GenNum + '\n');            /*Numero total de Geracoes*/
+            //System.out.println("Tempo total de execucao: " + (TotalTime / 1000) + '\t');        /*Tempo total de execucao*/
+            //System.out.println("Melhor solucao encontrada: " + memePop.bestAgent.bestCost + '\t');    /*Melhor solucao encontrada*/
+            //System.out.println("Numero total de Geracoes: " + GenNum + '\n');            /*Numero total de Geracoes*/
         }//for
 
 //   afileOut.close();

@@ -5,22 +5,17 @@ import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
-import javafx.scene.control.SplitPane;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
 import memetico.logging.PCAlgorithmState;
-import org.jorlib.io.tspLibReader.TSPInstance;
+import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,7 +31,7 @@ public class TestPCFrameController {
 
     private IntegerProperty generationValue = new SimpleIntegerProperty();
     private ObjectProperty<PCAlgorithmState> state;
-    private Map<String, TSPInstance> baseInstances;
+    private Map<String, TSPLibInstance> baseInstances;
 
     private List<BooleanProperty[]> tourDisplayToggles = new ArrayList<>();
 
@@ -59,7 +54,7 @@ public class TestPCFrameController {
 
         Scale scale = new Scale();
         scale.setPivotX(0);
-        scale.setPivotY(100);
+        scale.setPivotY(0);
         scale.setX(chosenScale/lastScale);
         scale.setY(chosenScale/lastScale);
         graphCanvas.getTransforms().add(scale);
@@ -70,16 +65,23 @@ public class TestPCFrameController {
         //disable auto scaling
         if(!fxGraph.isEmpty()) {
             //clear and re-draw tours
-            fxGraph.clearTours();
+            fxGraph.clearPredictions();
 
             for (int i = 0; i < tourDisplayToggles.size(); ++i) {
                 BooleanProperty[] eachToggles = tourDisplayToggles.get(i);
                 for (int k = 0; k < eachToggles.length; ++k) {
                     if (eachToggles[k].get()) {
-                        fxGraph.addTour(
+                        fxGraph.addPredictionEdges(
                                 Arrays.stream(
                                         (
-                                                (k == 0 ? state.get().agents[i].pocket : state.get().agents[i].current)
+                                                k == 0 ?
+                                                    state.get()
+                                                            .agents[i]
+                                                            .pocket
+                                                :
+                                                    state.get()
+                                                            .agents[i]
+                                                            .current
                                         ).arcArray
                                 )
                                         .map(
@@ -90,11 +92,12 @@ public class TestPCFrameController {
                     }
                 }
             }
+            fxGraph.endUpdate();
         }
     }
 
-    public void setup(ObjectProperty<PCAlgorithmState> state) {
-        baseInstances = new HashMap<>();
+    public void setup(Map<String, TSPLibInstance> baseInstances, ObjectProperty<PCAlgorithmState> state) {
+        this.baseInstances = baseInstances;
         this.state = state;
 
 
@@ -113,15 +116,7 @@ public class TestPCFrameController {
 
         //use a listener to dynamically create/destroy agent displays
         state.addListener(((observable, oldValue, newValue) -> {
-            TSPInstance baseInstance = baseInstances.computeIfAbsent(newValue.instanceName, (file) -> {
-                TSPInstance result = new TSPInstance();
-                try {
-                    result.load(new File(file));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return result;
-            });
+            TSPLibInstance baseInstance = baseInstances.get(newValue.instanceName);
             ObservableList<Node> displayNodes = agentsGrid.getChildren();
 
             try {
@@ -134,7 +129,7 @@ public class TestPCFrameController {
                         lastScale=1;
                         //enable auto sizing
                         graphWrapper.widthProperty().addListener(autoSizeListener);
-//                        autoSizeListener.changed(null, graphWrapper.getWidth(), graphWrapper.getWidth());
+                        autoSizeListener.changed(null, graphWrapper.getWidth(), graphWrapper.getWidth());
                     }
 
 

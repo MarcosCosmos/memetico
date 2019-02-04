@@ -16,5 +16,5 @@
         </HBox>
         <GridPane fx:id="agentsGrid" VBox.vgrow="ALWAYS"/>
     </VBox>
-    <BorderPane fx:id="graphWrapper"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
+    <BorderPane fx:id="graphWrapper" HBox.hgrow="ALWAYS"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
 </HBox>

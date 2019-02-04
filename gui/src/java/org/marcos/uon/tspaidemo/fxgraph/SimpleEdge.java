@@ -1,43 +1,86 @@
 package org.marcos.uon.tspaidemo.fxgraph;
 
-import com.fxgraph.edges.AbstractEdge;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
+import com.fxgraph.graph.IEdge;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 
-public class SimpleEdge extends AbstractEdge {
+public class SimpleEdge implements IEdge {
     private final transient StringProperty textProperty = new SimpleStringProperty();
+    private final transient ListProperty<String> additionalStyleClasses = new SimpleListProperty<>();
+    private transient final EdgeGraphic theGraphic;
 
-    public SimpleEdge(ICell source, ICell target) {
-        super(source, target);
+    private ObjectProperty<SimpleVertex> source = new SimpleObjectProperty<SimpleVertex>();
+    private ObjectProperty<SimpleVertex> target = new SimpleObjectProperty<SimpleVertex>();
+
+    public SimpleEdge(SimpleVertex source, SimpleVertex target, ListProperty<String> additionalStyleClasses) {
+        this.source.setValue(source);
+        this.target.setValue(target);
+        this.additionalStyleClasses.bind(additionalStyleClasses);
+        theGraphic = new EdgeGraphic();
+    }
+
+    public SimpleEdge(SimpleVertex source, SimpleVertex target) {
+        this(source, target, new SimpleListProperty<>());
     }
 
     public EdgeGraphic getGraphic(Graph graph) {
-        return new EdgeGraphic(graph, this, this.textProperty);
+        theGraphic.getStyleClass().setAll(additionalStyleClasses);
+        return theGraphic;
     }
 
     public StringProperty textProperty() {
         return this.textProperty;
     }
 
-    public static class EdgeGraphic extends Pane {
+    @Override
+    public ICell getSource() {
+        return source.get();
+    }
+
+    @Override
+    public ICell getTarget() {
+        return target.get();
+    }
+
+    public ObjectProperty<SimpleVertex> sourceProperty() {
+        return source;
+    }
+
+    public ObjectProperty<SimpleVertex> targetProperty() {
+        return target;
+    }
+
+    public class EdgeGraphic extends Pane {
         private final Group group = new Group();
         private final Line line = new Line();
         private final Text text;
 
-        public EdgeGraphic(Graph graph, SimpleEdge edge, StringProperty textProperty) {
-            DoubleBinding sourceX = edge.getSource().getXAnchor(graph, edge);
-            DoubleBinding sourceY = edge.getSource().getYAnchor(graph, edge);
-            DoubleBinding targetX = edge.getTarget().getXAnchor(graph, edge);
-            DoubleBinding targetY = edge.getTarget().getYAnchor(graph, edge);
+
+        public EdgeGraphic() {
+            DoubleBinding sourceX = Bindings.createDoubleBinding(
+                    () -> source.get().getXAnchor().get(),
+                    source
+            );
+            DoubleBinding sourceY = Bindings.createDoubleBinding(
+                    () -> source.get().getYAnchor().get(),
+                    source
+            );
+            DoubleBinding targetX = Bindings.createDoubleBinding(
+                    () -> target.get().getXAnchor().get(),
+                    target
+            );
+            DoubleBinding targetY = Bindings.createDoubleBinding(
+                    () -> target.get().getYAnchor().get(),
+                    target
+            );
             this.line.startXProperty().bind(sourceX);
             this.line.startYProperty().bind(sourceY);
             this.line.endXProperty().bind(targetX);
@@ -78,5 +121,13 @@ public class SimpleEdge extends AbstractEdge {
         public Text getText() {
             return this.text;
         }
+    }
+
+    public ObservableList<String> getAdditionalStyleClasses() {
+        return additionalStyleClasses.get();
+    }
+
+    public ListProperty<String> additionalStyleClassesProperty() {
+        return additionalStyleClasses;
     }
 }

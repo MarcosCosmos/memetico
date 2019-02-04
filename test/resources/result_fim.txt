@@ -1,3 +1,0 @@
-file	ini	qual_ini	qual	time	lsTime	gen	opt
-berlin52.tsp	12063.47	59.95	59.94	0.23	1202	0 (30)
-	12063.47		59.94	0.23	1202	0/30

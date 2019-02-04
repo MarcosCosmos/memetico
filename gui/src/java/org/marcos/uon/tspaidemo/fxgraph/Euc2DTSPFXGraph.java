@@ -2,20 +2,23 @@ package org.marcos.uon.tspaidemo.fxgraph;
 
 import com.fxgraph.graph.*;
 import com.sun.javaws.exceptions.InvalidArgumentException;
-import javafx.collections.ListChangeListener;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
-import javafx.geometry.Point3D;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import org.jorlib.io.tspLibReader.TSPInstance;
-import org.jorlib.io.tspLibReader.Tour;
+import org.jorlib.io.tspLibReader.TSPLibInstance;
+import org.jorlib.io.tspLibReader.TSPLibTour;
 import org.jorlib.io.tspLibReader.graph.Edge;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,10 +27,60 @@ import java.util.stream.Stream;
  * Todo: possibly make this modifiable; Possibly using observable lists, possibly using views and explicit add/remove helpers.
  */
 public class Euc2DTSPFXGraph {
-    private Graph fxGraph;
-    private List<SimpleVertex> cells;
-    private List<List<TourEdge>> tours;
-    private List<SimpleEdge> normalEdges;
+    public static final ListProperty<String>
+            TARGET_STYLE_CLASSES = new SimpleListProperty<String>(FXCollections.unmodifiableObservableList(FXCollections.observableArrayList("target"))),
+            PREDICTION_STYLE_CLASSES = new SimpleListProperty<>(FXCollections.unmodifiableObservableList(FXCollections.observableArrayList("prediction"))),
+            EMPTY_STYLE_CLASSES = new SimpleListProperty<>(FXCollections.unmodifiableObservableList(FXCollections.emptyObservableList()));
+
+    /**
+     * Helper that reduces memory overhead/gc costs by recycling edges
+     */
+    protected static final class SimpleEdgePool {
+        private final List<SimpleEdge> available = new ArrayList<>();
+
+        public SimpleEdgePool() {
+
+        }
+
+        public void discard(SimpleEdge edge) {
+            available.add(edge);
+        }
+
+        public void discardAll(Collection<SimpleEdge> edges) {
+            available.addAll(edges);
+        }
+
+        public void discardAll(SimpleEdge... edges) {
+            available.addAll(Arrays.asList(edges));
+        }
+
+        /**
+         * Provides a surrogate constructor; draws from the pool and assigns properties etc as needed,
+         * @return
+         */
+        public SimpleEdge retrieve(SimpleVertex source, SimpleVertex target, ListProperty<String> additionalStyleClasses) {
+            if(!available.isEmpty()) {
+                SimpleEdge result = available.remove(available.size()-1);
+                result.sourceProperty().set(source);
+                result.targetProperty().set(target);
+                result.additionalStyleClassesProperty().bind(additionalStyleClasses);
+                return result;
+            } else {
+                return new SimpleEdge(source, target, additionalStyleClasses);
+            }
+        }
+        public SimpleEdge retrieve(SimpleVertex source, SimpleVertex target) {
+            return retrieve(source, target, EMPTY_STYLE_CLASSES);
+        }
+    }
+
+    protected Graph fxGraph;
+    protected List<SimpleVertex> cells;
+    protected List<List<SimpleEdge>> targets;
+    protected List<List<SimpleEdge>> predictions;
+    protected List<SimpleEdge> normalEdges;
+
+    protected final transient SimpleEdgePool edgePool = new SimpleEdgePool();
 
     private final BorderPane root = new BorderPane();
 
@@ -37,9 +90,10 @@ public class Euc2DTSPFXGraph {
      * @param instance A tsp instance,with main data already loaded from file;
      * @throws InvalidArgumentException if the instance is not Euclidean 2D
      */
-    public Euc2DTSPFXGraph(TSPInstance instance) throws InvalidArgumentException {
+    public Euc2DTSPFXGraph(TSPLibInstance instance) throws InvalidArgumentException {
         fxGraph = new Graph();
-        tours = new ArrayList<>();
+        targets = new ArrayList<>();
+        predictions = new ArrayList<>();
         normalEdges = new ArrayList<>();
 
         fxGraph.getUseNodeGestures().setValue(false);
@@ -77,23 +131,26 @@ public class Euc2DTSPFXGraph {
             cells.set(eachIndex, eachCell);
             model.addCell(eachCell);
         }
-        for(Tour eachTour : instance.getTours()) {
-            List<TourEdge> eachEdgeList = new ArrayList<>();
+
+        //todo: possibly add option to display base edgeset (as "normal" edges)
+
+        for(TSPLibTour eachTour : instance.getTours()) {
+            List<SimpleEdge> eachEdgeList = new ArrayList<>();
             for(Edge eachEdge : eachTour.toEdges()) {
-                int _a = eachEdge.getId1()-1;
-                int _b = eachEdge.getId2()-1;
+                int _a = eachEdge.getId1();
+                int _b = eachEdge.getId2();
                 SimpleVertex a = cells.get(_a),
                         b = cells.get(_b)
                                 ;
-                TourEdge eachResult = new TourEdge(a,b);
+                SimpleEdge eachResult = edgePool.retrieve(a,b);
                 eachResult.textProperty().set(String.valueOf(new Point2D(a.locationX().get(), b.locationY().get()).distance(b.locationX().get(), b.locationY().get())));
                 eachEdgeList.add(eachResult);
             }
-            tours.add(Collections.unmodifiableList(eachEdgeList));
+            targets.add(Collections.unmodifiableList(eachEdgeList));
         }
         Stream.of(
                 normalEdges.stream(),
-                tours.stream()
+                targets.stream()
                         .flatMap(Collection::stream)
         ).flatMap(each -> each)
                 .forEach(model::addEdge);
@@ -126,37 +183,55 @@ public class Euc2DTSPFXGraph {
 
     //todo: make these modifications affect the inter
 
-    public List<List<TourEdge>> getTours() {
-        return Collections.unmodifiableList(tours);
+    public List<List<SimpleEdge>> getTargets() {
+        return Collections.unmodifiableList(targets);
     }
 
-    public void clearTours() {
-        ObservableList<IEdge> toRemove = fxGraph.getModel().getRemovedEdges();
-        for(List<TourEdge> eachTour : tours) {
-            toRemove.addAll(eachTour);
-        }
-        fxGraph.endUpdate();
+    public List<List<SimpleEdge>> getPredictions() {
+        return Collections.unmodifiableList(predictions);
     }
 
+    private void clearEdges(List<List<SimpleEdge>> edgeCategory) {
+//        ObservableList<IEdge> toRemove = fxGraph.getModel().getRemovedEdges();
+//        for(List<SimpleEdge> eachTour : edgeCategory) {
+//            toRemove.addAll(eachTour);
+//        }
+        edgeCategory.forEach(edgePool::discardAll);
+        edgeCategory.clear();
+    }
 
+    public void clearTargets() {
+        clearEdges(targets);
+    }
 
-    public void addTour(List<int[]> edges) {
+    public void clearPredictions() {
+        clearEdges(predictions);
+    }
+
+    private void addEdges(List<List<SimpleEdge>> edgeCategory, List<int[]> newEdges, BiFunction<SimpleVertex, SimpleVertex, SimpleEdge> constructor) {
         //        graph.beginUpdate(); //only one of beginUpdate/endUpdate actually need to be called; begin update should probably never be called since it just wipes the canvas without changing other lists?
-        Model model = fxGraph.getModel();
-        List<TourEdge> edgeList = new ArrayList<>();
-        for(int[] eachEdge : edges) {
+//        Model model = fxGraph.getModel();
+        List<SimpleEdge> edgeList = new ArrayList<>();
+        for(int[] eachEdge : newEdges) {
             SimpleVertex a = cells.get(eachEdge[0]),
                     b = cells.get(eachEdge[1])
-            ;
-            TourEdge eachResult = new TourEdge(a,b);
+                            ;
+            SimpleEdge eachResult = constructor.apply(a,b);
             eachResult.textProperty().set(String.valueOf(new Point2D(a.locationX().get(), b.locationY().get()).distance(b.locationX().get(), b.locationY().get())));
             edgeList.add(eachResult);
-            model.addEdge(eachResult);
+//            model.addEdge(eachResult);
         }
         //add the return-to-start
 
-        tours.add(Collections.unmodifiableList(edgeList));
-        fxGraph.endUpdate();
+        edgeCategory.add(Collections.unmodifiableList(edgeList));
+    }
+
+    public void addTargetEdges(List<int[]> edges) {
+        addEdges(targets, edges, (a, b) -> edgePool.retrieve(a, b, TARGET_STYLE_CLASSES));
+    }
+
+    public void addPredictionEdges(List<int[]> edges) {
+        addEdges(predictions, edges, (a,b) -> edgePool.retrieve(a,b, PREDICTION_STYLE_CLASSES));
     }
 
     public PannableCanvas getCanvas() {
@@ -194,5 +269,43 @@ public class Euc2DTSPFXGraph {
 
     public Region getGraphic() {
         return root;
+    }
+
+    public void beginUpdate() {
+//        fxGraph.getModel().getRemovedCells().addAll(cells);
+//        Stream.concat(
+//                Stream.of(normalEdges),
+//                Stream.of(
+//                        targets.stream(),
+//                        predictions.stream()
+//                ).flatMap(Function.identity())
+//        )
+//                .forEach(
+//                        fxGraph.getModel()
+//                                .getRemovedEdges()
+//                                ::addAll
+//                );
+//        predictions.forEach(
+//                fxGraph.getModel().getRemovedEdges()::addAll
+//        );
+    }
+
+    public void endUpdate() {
+
+        fxGraph.beginUpdate();
+//        fxGraph.getModel().getRemovedCells().addAll(fxGraph.getModel().getAllCells()); //remove cells
+        fxGraph.getModel().getAllCells().clear();
+        fxGraph.getModel().getAllEdges().clear();
+        fxGraph.getModel().getAddedEdges().addAll(
+                Stream.of(
+                        normalEdges.stream(),
+                        Stream.concat(targets.stream(), predictions.stream())
+                                .flatMap(Collection::stream)
+                )
+                        .flatMap(Function.identity())
+                        .collect(Collectors.toList())
+        );
+        fxGraph.getModel().getAddedCells().addAll(cells);
+        fxGraph.endUpdate();
     }
 }
