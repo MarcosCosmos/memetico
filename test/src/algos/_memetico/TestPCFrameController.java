@@ -172,8 +172,8 @@ public class TestPCFrameController {
                         //give the state to the controller
                         AgentDisplay newNode = new AgentDisplay(newId, newState, newToggles[0], newToggles[1]);
 
-//                        //position the node cheaply for now
-//                        GridPane.setRowIndex(newNode, i);
+                        //position the node cheaply for now
+                        GridPane.setRowIndex(newNode, i);
 
                         //add the data to the lists
                         displayNodes.add(newNode);
@@ -222,11 +222,11 @@ public class TestPCFrameController {
 
 //todo: try storing them like this. (that is, [0,1,4-6], [0,2,7-9])
 
-
-            1=0*3+1+0
-            4=(((0*3+1)+0)*3+1)+0
-            7=((((0*3+1)+1)*3)+1)+0
-            10=((((0*3+1)+2)*3)+1)+0
+//
+//            1=0*3+1+0
+//            4=(((0*3+1)+0)*3+1)+0
+//            7=((((0*3+1)+1)*3)+1)+0
+//            10=((((0*3+1)+2)*3)+1)+0
         }));
 
     }
