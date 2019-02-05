@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.collections.FXCollections?>
-<?import java.lang.Double?>
-<BorderPane fx:id="playbackControls" fx:controller="algos._memetico.TestPlaybackController"
+<?import java.lang.*?>
+<BorderPane fx:id="playbackControls" fx:controller="org.marcos.uon.tspaidemo.gui.main.PlaybackController"
             xmlns:fx="http://javafx.com/fxml">
     <center>
         <BorderPane fx:id="sliderWrapper">

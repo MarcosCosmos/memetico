@@ -1,4 +1,4 @@
-package algos._memetico;
+package fxgraph;
 
 import memetico.Memetico;
 import memetico.logging.PCAlgorithmState;

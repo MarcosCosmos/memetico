@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<fx:root type="GridPane" styleClass="agentRoot" xmlns:fx="http://javafx.com/fxml">
+    <Text GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="1">Agent ID:</Text>
+    <Text GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtAgentId"/>
+    <Text GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="1">Pocket Cost:</Text>
+    <Text GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtPocketCost"/>
+    <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="cbTogglePocket"/>
+    <Text GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="1">Current Cost:</Text>
+    <Text GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtCurrentCost"/>
+    <CheckBox GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="cbToggleCurrent"/>
+</fx:root>

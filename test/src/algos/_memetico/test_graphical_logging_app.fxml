@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.text.Text?>
-<VBox fx:id="root" fx:controller="algos._memetico.TestVisualisationController"
-            xmlns:fx="http://javafx.com/fxml">
-</VBox>

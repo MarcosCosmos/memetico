@@ -23,19 +23,12 @@
     visibility:hidden;
 }
 
-#contentRoot, #playbackControls, #sliderWrapper {
-    -fx-padding: 5px;
-}
-
 .agentInfo {
     -fx-padding: 5px 0 0 0;
 }
+
 .lblAgentId, .txtAgentId {
     -fx-font-weight:bold;
-}
-
-Text, Label {
-    -fx-padding: 0 5px 0 10px;
 }
 
 .agentInfo CheckBox {

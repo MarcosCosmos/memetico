@@ -1,4 +1,4 @@
-package algos._memetico;
+package org.marcos.uon.tspaidemo.gui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,17 +10,15 @@ import java.io.IOException;
 
 public class TestGraphicalLoggingApp extends Application {
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("test_graphical_logging_app.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("main/visualisation.fxml"));
 
-        Scene scene = new Scene(root, 300, 275);
+        Scene scene = new Scene(root, 1280, 720);
 
-        scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-
-        stage.setTitle("FXML Welcome");
+        stage.setTitle("INSERT TITLE HERE");
         stage.setScene(scene);
         stage.show();
     }
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         launch(args);
     }
 }
