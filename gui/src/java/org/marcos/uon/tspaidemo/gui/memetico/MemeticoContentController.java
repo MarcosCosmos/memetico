@@ -13,9 +13,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
 import javafx.util.Duration;
@@ -52,7 +50,7 @@ public class MemeticoContentController implements ContentController {
     public static double LOG_POLL_RATE = 60;
 
     @FXML
-    private HBox contentRoot;
+    private VBox contentRoot;
     @FXML
     private Text generationText;
     @FXML
@@ -63,7 +61,7 @@ public class MemeticoContentController implements ContentController {
     private transient ObjectProperty<PCAlgorithmState> state = new SimpleObjectProperty<>();
     private transient PCLogger logger;
     private transient BasicLogger<PCAlgorithmState>.View theView;
-    private final transient Timeline updateCheckingTimeline = new Timeline();
+    private final transient Timeline redrawTimeline = new Timeline();
     private transient ReadOnlyIntegerWrapper numberOfFrames = new ReadOnlyIntegerWrapper(0);
     private transient IntegerProperty selectedFrameIndex = new SimpleIntegerProperty(0);
 
@@ -72,6 +70,8 @@ public class MemeticoContentController implements ContentController {
 
     private List<BooleanProperty[]> tourDisplayToggles = new ArrayList<>();
 
+    private String lastDrawnGraphName = null;
+    private int lastDrawnFrameIndex = -1;
     private Euc2DTSPFXGraph fxGraph;
 
     private double lastScale = 0;
@@ -102,7 +102,7 @@ public class MemeticoContentController implements ContentController {
     public void initialize(URL location, ResourceBundle resources) {
         contentRoot.getStylesheets().add(getClass().getResource("content.css").toExternalForm());
         //create the logger and get a view
-        logger = new PCLogger(10);
+        logger = new PCLogger(1);
         try {
             theView = logger.newView();
         } catch (InterruptedException e) {
@@ -132,23 +132,20 @@ public class MemeticoContentController implements ContentController {
         generationText.textProperty()
                 .bind(generationValue.asString());
 
-        //use a listener to dynamically create/destroy agent displays
-        state.addListener(this::handleStateChange);
-
-
         //setup a timeline to poll for log updates, and update the number of frames accordingly
-        updateCheckingTimeline.getKeyFrames().add(
+        redrawTimeline.getKeyFrames().add(
                 new KeyFrame(Duration.millis(100 / LOG_POLL_RATE), (event) -> {
                     try {
                         theView.update();
                         numberOfFrames.set(theView.size());
+                        updateDisplay();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 })
         );
-        updateCheckingTimeline.setCycleCount(Animation.INDEFINITE);
-        updateCheckingTimeline.play();
+        redrawTimeline.setCycleCount(Animation.INDEFINITE);
+        redrawTimeline.play();
 
         launchMemetico();
     }
@@ -209,13 +206,19 @@ public class MemeticoContentController implements ContentController {
         }
     }
 
-    private void handleStateChange(ObservableValue<? extends PCAlgorithmState> observable, PCAlgorithmState oldValue, PCAlgorithmState newValue) {
-        TSPLibInstance baseInstance = baseInstances.get(newValue.instanceName);
+    private void updateDisplay() {
+        PCAlgorithmState currentValue = state.get();
+        if(selectedFrameIndex.get() == lastDrawnFrameIndex || state.get() == null) {
+            return; //cancel the update
+        }
+
+        lastDrawnFrameIndex = selectedFrameIndex.get();
+        TSPLibInstance baseInstance = baseInstances.get(currentValue.instanceName);
         ObservableList<Node> agentNodes = agentsGrid.getChildren();
 
         try {
             //for all the graphs we are going to keep, if the instance changed, switch to the new one.
-            if (oldValue == null || !newValue.instanceName.equals(oldValue.instanceName)) {
+            if (!currentValue.instanceName.equals(lastDrawnGraphName)) {
                 fxGraph = new Euc2DTSPFXGraph(baseInstance);
                 graphWrapper.getChildren().clear();
                 if (!fxGraph.isEmpty()) {
@@ -225,19 +228,18 @@ public class MemeticoContentController implements ContentController {
                     graphWrapper.widthProperty().addListener(autoSizeListener);
                     autoSizeListener.changed(null, graphWrapper.getWidth(), graphWrapper.getWidth());
                 }
-
-
+                lastDrawnGraphName = currentValue.instanceName;
             }
 
             boolean listUpdated = false;
 
-            if (newValue.agents.length < agentNodes.size()) {
+            if (currentValue.agents.length < agentNodes.size()) {
                 //delete unneeded agent displays and states; todo: possibly just hide them for performance?
-                agentNodes.subList(newValue.agents.length, agentNodes.size()).clear();
+                agentNodes.subList(currentValue.agents.length, agentNodes.size()).clear();
                 listUpdated = true;
-            } else if (newValue.agents.length > agentNodes.size()) {
+            } else if (currentValue.agents.length > agentNodes.size()) {
                 //add needed agent displays
-                for (int i = agentNodes.size(); i < newValue.agents.length; ++i) {
+                for (int i = agentNodes.size(); i < currentValue.agents.length; ++i) {
                     //create an observable reference to an agent state
                     ObjectProperty<PCAlgorithmState.AgentState> newState = new SimpleObjectProperty<>();
                     //create an observable property for the id
@@ -257,7 +259,7 @@ public class MemeticoContentController implements ContentController {
 //                        }
 
 
-                    BooleanProperty[] newToggles = {new SimpleBooleanProperty(false), new SimpleBooleanProperty(false)};
+                    BooleanProperty[] newToggles = {new SimpleBooleanProperty(i == 0), new SimpleBooleanProperty(false)};
                     for (BooleanProperty eachProp : newToggles) {
                         eachProp.addListener((observable1, oldValue1, newValue1) -> updateTours());
                     }
@@ -278,7 +280,7 @@ public class MemeticoContentController implements ContentController {
                     //use a tree structure for ease of understanding and debugging; populate using known structure from memetico
                     int columnsAllocated = 0;
 
-                    List<GridPositionData> arrangementInstructions = new ArrayList<>(newValue.agents.length); //unordered list of instructions which can be used to assign grid positions
+                    List<GridPositionData> arrangementInstructions = new ArrayList<>(currentValue.agents.length); //unordered list of instructions which can be used to assign grid positions
 
                     //the following implements vertical-then-horizontal arrangement (root is at the center-top)
                     {
@@ -295,8 +297,8 @@ public class MemeticoContentController implements ContentController {
                         while (!creationQueue.isEmpty()) {
                             TreeNode<GridPositionData> eachNode = creationQueue.remove();
                             GridPositionData eachData = eachNode.getData();
-                            int firstChildId = newValue.nAry * eachData.id + 1;
-                            int pastChildId = Math.min(firstChildId + newValue.nAry, newValue.agents.length); //value past the end of the to-create list.
+                            int firstChildId = currentValue.nAry * eachData.id + 1;
+                            int pastChildId = Math.min(firstChildId + currentValue.nAry, currentValue.agents.length); //value past the end of the to-create list.
                             for (int i = firstChildId; i < pastChildId; ++i) {
                                 GridPositionData newData = new GridPositionData();
                                 newData.id = i;
@@ -309,6 +311,15 @@ public class MemeticoContentController implements ContentController {
                             //if it is an orphan, we can position it now; (this ensures the left-most branch is full if the tree were to be unbalanced)
                             if (eachNode.isLeaf()) {
                                 eachData.column = columnsAllocated++;
+
+                                //we want placeholders to leave empty columns between subpopulations visually
+                                if(eachData.id != currentValue.agents.length-1 && eachNode.getParent().getChildren().indexOf(eachNode) == eachNode.getParent().getChildren().size()-1) {
+                                    GridPositionData placeholderData = new GridPositionData();
+                                    placeholderData.id = -1;
+                                    placeholderData.row = eachData.row;
+                                    placeholderData.column = columnsAllocated++;
+                                    arrangementInstructions.add(placeholderData);
+                                }
                                 arrangementInstructions.add(eachData);
                             } else {
                                 arrangementStack.push(eachNode);
@@ -344,9 +355,19 @@ public class MemeticoContentController implements ContentController {
                     }
 
                     for(GridPositionData eachData : arrangementInstructions) {
-                        Node eachAgent = agentNodes.get(eachData.id);
-                        GridPane.setRowIndex(eachAgent, eachData.row);
-                        GridPane.setColumnIndex(eachAgent, eachData.column);
+                        if(eachData.id == -1) {
+                            //create a placeholder
+                            Pane placeHolder = new Pane();
+                            placeHolder.setMinWidth(25);
+                            agentNodes.add(placeHolder);
+                            GridPane.setRowIndex(placeHolder, eachData.row);
+                            GridPane.setColumnIndex(placeHolder, eachData.column);
+                            GridPane.setColumnSpan(placeHolder, 1);
+                        } else {
+                            Node eachAgent = agentNodes.get(eachData.id);
+                            GridPane.setRowIndex(eachAgent, eachData.row);
+                            GridPane.setColumnIndex(eachAgent, eachData.column);
+                        }
                     }
                 }
         } catch (InvalidArgumentException e) {
@@ -397,6 +418,7 @@ public class MemeticoContentController implements ContentController {
             String structPop = "Ternary Tree";
             long MaxTime = 100, MaxGenNum;
             int PopSize = 13, mutationRate = 5;
+            int numReplications = 1;
 
 
             try {
@@ -452,7 +474,7 @@ public class MemeticoContentController implements ContentController {
 
                 Memetico meme = new Memetico(logger, memeticoInstance, structSol, structPop, MetodoConstrutivo,
                         PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao,
-                        MaxTime, MaxGenNum, tspLibInstance.getName(), targetCost, fileOut,
+                        MaxTime, MaxGenNum, numReplications, tspLibInstance.getName(), targetCost, fileOut,
                         compact_fileOut);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

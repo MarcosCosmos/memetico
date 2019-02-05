@@ -45,7 +45,7 @@ public class PlaybackController implements Initializable {
     private ChoiceBox<Double> cbSpeed;
 
     private transient IntegerProperty frameCount = new SimpleIntegerProperty(0);
-    private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(false);
+    private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(true);
     private final transient ReadOnlyIntegerWrapper frameIndex = new ReadOnlyIntegerWrapper(0);
     private final transient EventHandler<ActionEvent> frameUpdater = new EventHandler<ActionEvent>() {
         @Override
@@ -96,14 +96,15 @@ public class PlaybackController implements Initializable {
                 );
         cbSpeed.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
+                    playbackTimeline.stop();
                     ObservableList<KeyFrame> frames = playbackTimeline.getKeyFrames();
+                    frames.clear();
                     frames.add(new KeyFrame(Duration.millis(100/ newValue), frameUpdater));
+                    playbackTimeline.play();
                 }
         );
-        cbSpeed.setValue(1.0);
-//        playbackTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(100/speedChoice.getValue().doubleValue()), frameUpdater));
         playbackTimeline.setCycleCount(Animation.INDEFINITE);
-        playbackTimeline.play();
+        cbSpeed.setValue(1.0);
     }
 
     public ReadOnlyIntegerProperty frameIndexProperty() {

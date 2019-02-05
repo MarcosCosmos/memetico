@@ -10,6 +10,10 @@ public class NullPCLogger extends NullLogger<PCAlgorithmState> implements IPCLog
     }
 
     @Override
+    public void tryLog(String instanceName, Population population, int generation) throws InterruptedException {
+    }
+
+    @Override
     public void startClock() {
     }
 

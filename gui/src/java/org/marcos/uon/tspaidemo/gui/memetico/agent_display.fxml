@@ -3,8 +3,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <fx:root type="GridPane" styleClass="agentRoot" xmlns:fx="http://javafx.com/fxml">
-    <Text GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="1">ID:</Text>
-    <Text GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtAgentId"/>
+    <HBox GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" alignment="CENTER">
+        <Text styleClass="lblAgentId">Agent&#160;</Text>
+        <Text GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtAgentId"/>
+    </HBox>
     <Text GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="1">Pocket:</Text>
     <Text GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtPocketCost"/>
     <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="cbTogglePocket"/>

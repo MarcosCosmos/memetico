@@ -1,10 +1,8 @@
 package memetico;
 
-import javafx.beans.property.StringProperty;
 import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
 import memetico.logging.PCAlgorithmState;
-import memetico.logging.PCLogger;
 import org.marcos.uon.tspaidemo.util.log.ILogger;
 
 import java.text.*;
@@ -23,7 +21,7 @@ public class Memetico {
     ConstructionAlgorithms refConstr = null;
     MutationOperators refMut = null;
     DiCycleRestartOperators refRestart = null;
-    static int nrReplications = 30;
+//    static int numReplications = 30;
 
     private IPCLogger logger;
 
@@ -41,7 +39,7 @@ public class Memetico {
      * @param structPop: struct of the base.Population
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
-    public Memetico(IPCLogger logger, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, String name, long OptimalSol, DataOutputStream fileOut, DataOutputStream compact_fileOut) throws Exception {
+    public Memetico(IPCLogger logger, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, String name, long OptimalSol, DataOutputStream fileOut, DataOutputStream compact_fileOut) throws Exception {
         this.logger = logger;
         int GenNum = 0, i;
         double TotalTime = 0, bestTime = 0, auxTime, recombineTime;
@@ -59,7 +57,7 @@ public class Memetico {
 //   base.Agent refAgent = null;
 
         //System.out.println('\n' + "Opening file " + name);
-        for (count = 0; count < nrReplications; count++) {
+        for (count = 0; count < numReplications; count++) {
             recombineTime = time_vmp = time_init = 0;
             GenNum = 0;
 
@@ -121,7 +119,7 @@ public class Memetico {
                 best_aux = memePop.bestAgent.bestCost;
 
                 /* This seems to be the correct point at which to log since it's above the break? */
-                logger.log(name, memePop, GenNum);
+                logger.tryLog(name, memePop, GenNum);
 
                 // if (memePop.bestAgent.bestCost <= OptimalSol)  break;
                 if (pocCurPop[0].pocket.cost <= OptimalSol) break;
@@ -197,6 +195,9 @@ public class Memetico {
         }*/
             } // end of while, exiting the generations loop.
 
+
+            logger.log(name, memePop, ++GenNum);
+
             TotalTime = (System.currentTimeMillis() - TotalTime);
 
 //      if (count==0)                                 //?
@@ -225,8 +226,8 @@ public class Memetico {
 
 //   afileOut.close();
 
-        initialSolution = initialSolution / nrReplications;
-        Quality = Quality / nrReplications;
+        initialSolution = initialSolution / numReplications;
+        Quality = Quality / numReplications;
         Quality = (100 * (Quality - OptimalSol) / OptimalSol);
         AverQuality += Quality;
 
@@ -235,17 +236,17 @@ public class Memetico {
             compact_fileOut.writeBytes(String.valueOf(prec.format((double) (initialSolution))) + '\t');                /*solucao inicial*/
             compact_fileOut.writeBytes(String.valueOf(prec.format((double) (100 * (initialSolution - OptimalSol) / OptimalSol))) + '\t');    /*qualidade de solucao inicial*/
             compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Quality))) + '\t');                    /*qualidade da solucao final*/
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_time / nrReplications))) + '\t');            /*tempo total medio*/
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_Gen / nrReplications))) + '\t');            /*numero de geracoes*/
-            compact_fileOut.writeBytes(String.valueOf((int) (cont_OptimalSol)) + " (" + String.valueOf((int) (nrReplications)) + ")" + '\n');/*numero de solucoes otimas*/
+            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_time / numReplications))) + '\t');            /*tempo total medio*/
+            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_Gen / numReplications))) + '\t');            /*numero de geracoes*/
+            compact_fileOut.writeBytes(String.valueOf((int) (cont_OptimalSol)) + " (" + String.valueOf((int) (numReplications)) + ")" + '\n');/*numero de solucoes otimas*/
         } catch (IOException e) {
             throw new Exception("File not properly opened" + e.toString());
         }
 
-        AverTotalTime += (Aver_time / nrReplications);
+        AverTotalTime += (Aver_time / numReplications);
         AverPopInit += initialSolution;
         AverSolOpt += cont_OptimalSol;
-        AverGen += (Aver_Gen / nrReplications);
+        AverGen += (Aver_Gen / numReplications);
     }
 
 
@@ -253,6 +254,7 @@ public class Memetico {
     public static void main(IPCLogger logger, String args[]) {
         long MaxTime = 100, MaxGenNum;
         int PopSize = 13, mutationRate = 5, count;
+        int numReplications = 30;
         Instance inst = null;
         Vector matRT[];
         Reduction reduction = null;
@@ -411,7 +413,7 @@ public class Memetico {
 
                 Memetico meme = new Memetico(logger, inst, structSol, structPop, MetodoConstrutivo,
                         PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao,
-                        MaxTime, MaxGenNum, Names[count], OptimalSol[count], fileOut,
+                        MaxTime, MaxGenNum, numReplications, Names[count], OptimalSol[count], fileOut,
                         compact_fileOut);
             }//for
 
@@ -419,7 +421,7 @@ public class Memetico {
             compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverQuality / countNames))) + '\t');
             compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverTotalTime / countNames))) + '\t');
             compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverGen / countNames))) + '\t');
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverSolOpt / countNames))) + "/" + String.valueOf((int) (nrReplications)) + '\n');
+            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverSolOpt / countNames))) + "/" + String.valueOf((int) (numReplications)) + '\n');
 
             compact_fileOut.close();
             fileOut.close();

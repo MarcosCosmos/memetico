@@ -32,6 +32,7 @@
             <HBox>
                 <Label fx:id="lblSpeed">Speed:</Label>
                 <ChoiceBox fx:id="cbSpeed">
+                    <Double fx:value="0.00138888888"/>
                     <Double fx:value="0.015" />
                     <Double fx:value="0.033" />
                     <Double fx:value="0.1" />

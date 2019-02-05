@@ -23,6 +23,10 @@
     visibility:hidden;
 }
 
+.agentRoot {
+    -fx-padding: 5px;
+}
+
 .agentInfo {
     -fx-padding: 5px 0 0 0;
 }

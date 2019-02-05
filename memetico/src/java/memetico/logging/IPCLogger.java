@@ -7,6 +7,8 @@ import org.marcos.uon.tspaidemo.util.log.ILogger;
 public interface IPCLogger extends ILogger<PCAlgorithmState> {
     void log(String instanceName, Population population, int generation) throws InterruptedException;
 
+    void tryLog(String instanceName, Population population, int generation) throws InterruptedException;
+
     /**
      * Causes the current cpu time to be recorded for the purposes of logging, may influence future logs.
      */
