@@ -99,7 +99,7 @@ public class PlaybackController implements Initializable {
                     playbackTimeline.stop();
                     ObservableList<KeyFrame> frames = playbackTimeline.getKeyFrames();
                     frames.clear();
-                    frames.add(new KeyFrame(Duration.millis(100/ newValue), frameUpdater));
+                    frames.add(new KeyFrame(Duration.millis(100/newValue), frameUpdater));
                     playbackTimeline.play();
                 }
         );

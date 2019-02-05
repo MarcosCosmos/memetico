@@ -84,7 +84,7 @@ public class MemeticoContentController implements ContentController {
         double padding = Math.max(canvasBounds.getMinX() * 2, canvasBounds.getMinY() * 2);
         double scaleHeight = availableHeight / (canvasBounds.getHeight() + padding);
         //technically this is effected by divider style, not sure how to compute that yet
-        double availableWidth = newValue12.doubleValue();
+        double availableWidth = graphWrapper.getWidth();
         double scaleWidth = availableWidth / (canvasBounds.getWidth() + padding);
         double chosenScale = Math.min(scaleWidth, scaleHeight);
 //        double newTranslate = ((availableWidth)*(chosenScale)/2 + canvasBounds.getMinX()*2);
@@ -226,7 +226,8 @@ public class MemeticoContentController implements ContentController {
                     lastScale = 1;
                     //enable auto sizing
                     graphWrapper.widthProperty().addListener(autoSizeListener);
-                    autoSizeListener.changed(null, graphWrapper.getWidth(), graphWrapper.getWidth());
+                    graphWrapper.heightProperty().addListener(autoSizeListener);
+                    autoSizeListener.changed(null, -1, -1);
                 }
                 lastDrawnGraphName = currentValue.instanceName;
             }

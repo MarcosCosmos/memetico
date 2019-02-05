@@ -7,7 +7,7 @@
 }
 /* note that tour edges created using the TourEdge class, the css class .tour is used instead */
 .prediction .line {
-    -fx-stroke: yellow;
+    -fx-stroke: black;
 }
 
 .target .line {
@@ -15,7 +15,7 @@
 }
 
 .graph, #graphWrapper {
-    -fx-background-color:black;
+    -fx-background-color:white;
 }
 
 .graph .label {
