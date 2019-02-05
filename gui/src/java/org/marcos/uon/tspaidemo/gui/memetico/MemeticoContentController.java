@@ -30,6 +30,7 @@ import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
+import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 
 import java.io.*;
 import java.net.URL;
@@ -37,6 +38,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MemeticoContentController implements ContentController {
+    //used during agent display arrangement
+    private static class GridPositionData {
+        public int id = -1;
+        public int row = -1;
+        public int column = -1;
+    }
+
     //todo: possibly make this a parameter instead
     /**
      * Measured as checks per second
@@ -203,7 +211,7 @@ public class MemeticoContentController implements ContentController {
 
     private void handleStateChange(ObservableValue<? extends PCAlgorithmState> observable, PCAlgorithmState oldValue, PCAlgorithmState newValue) {
         TSPLibInstance baseInstance = baseInstances.get(newValue.instanceName);
-        ObservableList<Node> displayNodes = agentsGrid.getChildren();
+        ObservableList<Node> agentNodes = agentsGrid.getChildren();
 
         try {
             //for all the graphs we are going to keep, if the instance changed, switch to the new one.
@@ -223,13 +231,13 @@ public class MemeticoContentController implements ContentController {
 
             boolean listUpdated = false;
 
-            if (newValue.agents.length < displayNodes.size()) {
+            if (newValue.agents.length < agentNodes.size()) {
                 //delete unneeded agent displays and states; todo: possibly just hide them for performance?
-                displayNodes.subList(newValue.agents.length, displayNodes.size()).clear();
+                agentNodes.subList(newValue.agents.length, agentNodes.size()).clear();
                 listUpdated = true;
-            } else if (newValue.agents.length > displayNodes.size()) {
+            } else if (newValue.agents.length > agentNodes.size()) {
                 //add needed agent displays
-                for (int i = displayNodes.size(); i < newValue.agents.length; ++i) {
+                for (int i = agentNodes.size(); i < newValue.agents.length; ++i) {
                     //create an observable reference to an agent state
                     ObjectProperty<PCAlgorithmState.AgentState> newState = new SimpleObjectProperty<>();
                     //create an observable property for the id
@@ -256,34 +264,91 @@ public class MemeticoContentController implements ContentController {
                     //give the state to the controller
                     AgentDisplay newNode = new AgentDisplay(newId, newState, newToggles[0], newToggles[1]);
 
-                    //position the node cheaply for now
-                    GridPane.setRowIndex(newNode, i);
+//                    //position the node cheaply for now
+//                    GridPane.setRowIndex(newNode, i);
 
                     //add the data to the lists
-                    displayNodes.add(newNode);
+                    agentNodes.add(newNode);
                     tourDisplayToggles.add(newToggles);
                 }
                 listUpdated = true;
             }
-//                //if the list was updated, the re-arrange the cells in the grid
-//                if(listUpdated) {
-//                    int height = (int)Math.ceil(Math.log(newValue.agents.length)/Math.log(newValue.nAry));
-//                    int[] indices = IntStream.generate(() -> newValue.nAry-1).limit(height).toArray();
-//                    int curCol = height-1;
-//                    int nodesSeen = newValue.agents.length-1;
-////                    {
-////                        Node eachNode = displayNodes.get(0);
-////                        GridPane.setRowIndex(eachNode, 0);
-////                        GridPane.setRowIndex(eachNode, curCol);
-////                        ++nodesSeen;
-////                    }
-//                    while(nodesSeen >= 0) {
-//                        GridPane.setRowIndex(displayNodes.get(nodesSeen), nodesSeen--);
-//                        if(curCol == height-1) {
-//                        }
-//
-//                    }
-//                }
+                //if the list was updated, the re-arrange the cells in the grid
+                if(listUpdated) {
+                    //use a tree structure for ease of understanding and debugging; populate using known structure from memetico
+                    int columnsAllocated = 0;
+
+                    List<GridPositionData> arrangementInstructions = new ArrayList<>(newValue.agents.length); //unordered list of instructions which can be used to assign grid positions
+
+                    //the following implements vertical-then-horizontal arrangement (root is at the center-top)
+                    {
+                        GridPositionData rootData = new GridPositionData();
+
+                        rootData.id = 0;
+                        rootData.row = 0;
+                        TreeNode<GridPositionData> root = new TreeNode<>(rootData);
+                        //construct the tree by having each node create and attach their children.
+                        Queue<TreeNode<GridPositionData>> creationQueue = new ArrayDeque<>();
+                        creationQueue.add(root);
+
+                        Stack<TreeNode<GridPositionData>> arrangementStack = new Stack<>();
+                        while (!creationQueue.isEmpty()) {
+                            TreeNode<GridPositionData> eachNode = creationQueue.remove();
+                            GridPositionData eachData = eachNode.getData();
+                            int firstChildId = newValue.nAry * eachData.id + 1;
+                            int pastChildId = Math.min(firstChildId + newValue.nAry, newValue.agents.length); //value past the end of the to-create list.
+                            for (int i = firstChildId; i < pastChildId; ++i) {
+                                GridPositionData newData = new GridPositionData();
+                                newData.id = i;
+                                newData.row = eachData.row + 1;
+                                TreeNode<GridPositionData> newNode = new TreeNode<>(newData);
+                                eachNode.attach(newNode);
+                                creationQueue.add(newNode);
+                            }
+                            //if it's not an orphan, add it to the stack to column-positioned later;
+                            //if it is an orphan, we can position it now; (this ensures the left-most branch is full if the tree were to be unbalanced)
+                            if (eachNode.isLeaf()) {
+                                eachData.column = columnsAllocated++;
+                                arrangementInstructions.add(eachData);
+                            } else {
+                                arrangementStack.push(eachNode);
+                            }
+                        }
+
+                        //we'll reuse the queue at the end for setting the actual params; it's slightly less efficient but separating it from the
+
+                        //all lowest-level nodes have been positioned, so we can safely position progressive parents
+                        while (!arrangementStack.isEmpty()) {
+                            TreeNode<GridPositionData> eachNode = arrangementStack.pop();
+                            GridPositionData eachData = eachNode.getData();
+                            List<TreeNode<GridPositionData>> eachChildren = eachNode.getChildren();
+                            //use the middle for odd-numbers and for evens, base it on which side we are on within the parents
+                            int childToAlignTo;
+                            if (eachChildren.size() % 2 == 1) {
+                                //uneven is the easy option
+                                childToAlignTo = eachChildren.size() / 2;
+                            } else if (!eachNode.isRoot()) {
+                                List<TreeNode<GridPositionData>> eachSiblings = eachNode.getParent().getChildren();
+                                if (eachSiblings.indexOf(eachNode) >= eachSiblings.size() / 2) {
+                                    childToAlignTo = eachChildren.size() / 2 - 1;
+                                } else {
+                                    childToAlignTo = eachChildren.size() / 2;
+                                }
+                            } else {
+
+                                childToAlignTo = eachChildren.size() / 2 - 1;
+                            }
+                            eachData.column = eachNode.getChildren().get(childToAlignTo).getData().column;
+                            arrangementInstructions.add(eachData);
+                        }
+                    }
+
+                    for(GridPositionData eachData : arrangementInstructions) {
+                        Node eachAgent = agentNodes.get(eachData.id);
+                        GridPane.setRowIndex(eachAgent, eachData.row);
+                        GridPane.setColumnIndex(eachAgent, eachData.column);
+                    }
+                }
         } catch (InvalidArgumentException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -310,7 +375,11 @@ public class MemeticoContentController implements ContentController {
 
 //
 //            1=0*3+1+0
-//            4=(((0*3+1)+0)*3+1)+0
+//            4=(
+//                    (
+//                            (0*3+1)+a
+//                    )*3+1+b
+//            )+c
 //            7=((((0*3+1)+1)*3)+1)+0
 //            10=((((0*3+1)+2)*3)+1)+0
     }
