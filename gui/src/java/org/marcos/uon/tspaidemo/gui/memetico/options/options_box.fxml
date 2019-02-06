@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+<?import java.lang.String?>
+<ScrollPane fx:id="memeticoOptionsBoxRoot" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController">
+    <VBox>
+        <Text fx:id="memeticoMainOptionsTitle">Primary Options</Text>
+        <GridPane>
+            <Label GridPane.rowIndex="0" GridPane.columnIndex="0">Problem Instance:</Label>
+            <HBox GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
+                <Text fx:id="txtMemeticoSelectedProblem" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnMemeticoSelectProblem" onAction="#openProblemSelectionDialog">Choose File</Button>
+            </HBox>
+            <Label labelFor="$cbMemeticoSolutionType" GridPane.rowIndex="1" GridPane.columnIndex="0">Solution Type:</Label>
+            <ChoiceBox fx:id="cbMemeticoSolutionType" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                <String fx:value="Tour"/>
+                <String fx:value="Cost"/>
+            </ChoiceBox>
+            <!--<GridPane fx:id="gpMemeticoTourSolutionSelection" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.rowSpan="2" GridPane.columnSpan="2">-->
+                <!--<Label GridPane.rowIndex="0" GridPane.columnIndex="0">Tour:</Label>-->
+                <!--<HBox GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">-->
+                    <!--<Text fx:id="txtMemeticoSelectedTourSolution" HBox.hgrow="ALWAYS"/>-->
+                    <!--<Button fx:id="btnMemeticoSelectTourSolution" onAction="#openTourSelectionDialog">Choose File</Button>-->
+                <!--</HBox>-->
+                <!--<Label GridPane.rowIndex="1" GridPane.columnIndex="0" labelFor="$cbMemeticoToggleTarget">Show Tour?</Label>-->
+                <!--<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="cbMemeticoToggleTarget"/>-->
+            <!--</GridPane>-->
+            <!--<GridPane fx:id="gpMemeticoCostSolutionSelection" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.rowSpan="2" GridPane.columnSpan="2">-->
+                <!--<Label GridPane.rowIndex="0" GridPane.columnIndex="0" labelFor="$memeticoSolutionCostField">Cost:</Label>-->
+                <!--<TextField fx:id="memeticoSolutionCostField"/>-->
+            <!--</GridPane>-->
+        </GridPane>
+        <Text fx:id="memeticoAgentOptionsTitle">Agent Options</Text>
+        <VBox fx:id="memeticoAgentOptionsWrapper"/>
+    </VBox>
+</ScrollPane>

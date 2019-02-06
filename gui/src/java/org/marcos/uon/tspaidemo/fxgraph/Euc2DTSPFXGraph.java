@@ -142,7 +142,7 @@ public class Euc2DTSPFXGraph {
                 SimpleVertex a = cells.get(_a),
                         b = cells.get(_b)
                                 ;
-                SimpleEdge eachResult = edgePool.retrieve(a,b);
+                SimpleEdge eachResult = edgePool.retrieve(a,b, TARGET_STYLE_CLASSES);
                 eachResult.textProperty().set(String.valueOf(new Point2D(a.locationX().get(), b.locationY().get()).distance(b.locationX().get(), b.locationY().get())));
                 eachEdgeList.add(eachResult);
             }

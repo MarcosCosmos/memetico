@@ -11,29 +11,30 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
+import javafx.stage.Stage;
 import javafx.util.Duration;
-import memetico.ATSPInstance;
-import memetico.GraphInstance;
-import memetico.Instance;
-import memetico.Memetico;
+import memetico.*;
 import memetico.logging.PCAlgorithmState;
 import memetico.logging.PCLogger;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
+import org.marcos.uon.tspaidemo.gui.main.PlaybackController;
+import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MemeticoContentController implements ContentController {
     //used during agent display arrangement
@@ -58,6 +59,8 @@ public class MemeticoContentController implements ContentController {
     @FXML
     private BorderPane graphWrapper;
 
+    private OptionsBoxController optionsBoxController;
+
     private transient ObjectProperty<PCAlgorithmState> state = new SimpleObjectProperty<>();
     private transient PCLogger logger;
     private transient BasicLogger<PCAlgorithmState>.View theView;
@@ -68,14 +71,12 @@ public class MemeticoContentController implements ContentController {
     private IntegerProperty generationValue = new SimpleIntegerProperty();
     private Map<String, TSPLibInstance> baseInstances = new HashMap<>();
 
-    private List<BooleanProperty[]> tourDisplayToggles = new ArrayList<>();
-
     private String lastDrawnGraphName = null;
     private int lastDrawnFrameIndex = -1;
     private Euc2DTSPFXGraph fxGraph;
 
     private double lastScale = 0;
-    private final ChangeListener<Number> autoSizeListener = (observable12, oldValue12, newValue12) -> {
+    private void autoSizeListener(ObservableValue<? extends Number> observable12, Number oldValue12, Number newValue12){
         //reset to the old position
         PannableCanvas graphCanvas = fxGraph.getCanvas();
         BoundingBox canvasBounds = fxGraph.getLogicalBounds();
@@ -105,7 +106,24 @@ public class MemeticoContentController implements ContentController {
         logger = new PCLogger(1);
         try {
             theView = logger.newView();
+                //set up the content display with an observable reference to the current state to display.
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource(
+                                "options/options_box.fxml"
+                        )
+                );
+                loader.load();
+                optionsBoxController = loader.getController();
+                optionsBoxController.agentCountProperty().bind(
+                        Bindings.createIntegerBinding(
+                                () -> (state.isNull().get() ? 0 : state.get().agents.length),
+                                state
+                        )
+                );
+
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -131,6 +149,9 @@ public class MemeticoContentController implements ContentController {
         );
         generationText.textProperty()
                 .bind(generationValue.asString());
+
+        //setup an options box
+
 
         //setup a timeline to poll for log updates, and update the number of frames accordingly
         redrawTimeline.getKeyFrames().add(
@@ -177,27 +198,31 @@ public class MemeticoContentController implements ContentController {
             //clear and re-draw tours
             fxGraph.clearPredictions();
 
-            for (int i = 0; i < tourDisplayToggles.size(); ++i) {
-                BooleanProperty[] eachToggles = tourDisplayToggles.get(i);
+            TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
+            List<BooleanProperty[]> toggles = optionsBoxController.getSolutionDisplayToggles();
+            for (int i = 0; i < toggles.size(); ++i) {
+                BooleanProperty[] eachToggles = toggles.get(i);
                 for (int k = 0; k < eachToggles.length; ++k) {
                     if (eachToggles[k].get()) {
+                        PCAlgorithmState.LightDiCycle eachSolution = (
+                                k == 0 ?
+                                        state.get()
+                                                .agents[i]
+                                                .pocket
+                                        :
+                                        state.get()
+                                                .agents[i]
+                                                .current
+                        );
+                        int nextCity, city = 0;
+                        int[][] edgesToAdd = new int[theInstance.getDimension()][];
+                        for(int j = 0; j<theInstance.getDimension(); ++j) {
+                            nextCity = eachSolution.arcArray[city].tip;
+                            edgesToAdd[j] = new int[]{city, nextCity};
+                            city = nextCity;
+                        }
                         fxGraph.addPredictionEdges(
-                                Arrays.stream(
-                                        (
-                                                k == 0 ?
-                                                        state.get()
-                                                                .agents[i]
-                                                                .pocket
-                                                        :
-                                                        state.get()
-                                                                .agents[i]
-                                                                .current
-                                        ).arcArray
-                                )
-                                        .map(
-                                                each -> new int[]{each.from, each.tip}
-                                        )
-                                        .collect(Collectors.toList())
+                                Arrays.asList(edgesToAdd)
                         );
                     }
                 }
@@ -225,9 +250,9 @@ public class MemeticoContentController implements ContentController {
                     graphWrapper.setCenter(fxGraph.getGraphic());
                     lastScale = 1;
                     //enable auto sizing
-                    graphWrapper.widthProperty().addListener(autoSizeListener);
-                    graphWrapper.heightProperty().addListener(autoSizeListener);
-                    autoSizeListener.changed(null, -1, -1);
+                    graphWrapper.widthProperty().addListener(this::autoSizeListener);
+                    graphWrapper.heightProperty().addListener(this::autoSizeListener);
+                    autoSizeListener(null, -1, -1);
                 }
                 lastDrawnGraphName = currentValue.instanceName;
             }
@@ -259,20 +284,14 @@ public class MemeticoContentController implements ContentController {
 //                            newController.setup(newId, newState);
 //                        }
 
-
-                    BooleanProperty[] newToggles = {new SimpleBooleanProperty(i == 0), new SimpleBooleanProperty(false)};
-                    for (BooleanProperty eachProp : newToggles) {
-                        eachProp.addListener((observable1, oldValue1, newValue1) -> updateTours());
-                    }
                     //give the state to the controller
-                    AgentDisplay newNode = new AgentDisplay(newId, newState, newToggles[0], newToggles[1]);
+                    AgentDisplay newNode = new AgentDisplay(newId, newState);
 
 //                    //position the node cheaply for now
 //                    GridPane.setRowIndex(newNode, i);
 
                     //add the data to the lists
                     agentNodes.add(newNode);
-                    tourDisplayToggles.add(newToggles);
                 }
                 listUpdated = true;
             }
@@ -486,6 +505,13 @@ public class MemeticoContentController implements ContentController {
             }
         });
         theThread.start();
+    }
+
+    public void showOptionsBox() {
+        final Stage optionsStage = new Stage();
+        Scene newScane = new Scene(optionsBoxController.getRoot(), 300, 200);
+        optionsStage.setScene(newScane);
+        optionsStage.show();
     }
 
 }

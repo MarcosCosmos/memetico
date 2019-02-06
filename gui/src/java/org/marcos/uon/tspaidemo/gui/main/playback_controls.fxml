@@ -46,6 +46,7 @@
                     <Double fx:value="60" />
                 </ChoiceBox>
             </HBox>
+            <Text fx:id="txtTest"/>
         </HBox>
     </right>
 </BorderPane>

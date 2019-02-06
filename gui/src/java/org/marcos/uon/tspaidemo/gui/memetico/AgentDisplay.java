@@ -19,14 +19,14 @@ public class AgentDisplay extends GridPane {
     private final transient Text txtAgentId;
     private final transient Text txtPocketCost;
     private final transient Text txtCurrentCost;
-    private final transient CheckBox cbTogglePocket, cbToggleCurrent;
+//    private final transient CheckBox cbTogglePocket, cbToggleCurrent;
 
 
     private final IntegerProperty agentDisplayId = new SimpleIntegerProperty(0);
     private final ObjectProperty<PCAlgorithmState.AgentState> state = new SimpleObjectProperty<>();
 
 
-    public AgentDisplay(IntegerProperty agentDisplayId, ObjectProperty<PCAlgorithmState.AgentState> stateProperty, BooleanProperty pocketSelection, BooleanProperty currentSelection) throws IOException {
+    public AgentDisplay(IntegerProperty agentDisplayId, ObjectProperty<PCAlgorithmState.AgentState> stateProperty/*, BooleanProperty pocketSelection, BooleanProperty currentSelection*/) throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
                 "agent_display.fxml"));
@@ -44,9 +44,9 @@ public class AgentDisplay extends GridPane {
 //        lblCurrentCost = (Label) lookup(".lblCurrentCost");
         txtAgentId = (Text) lookup(".txtAgentId");
         txtPocketCost = (Text) lookup(".txtPocketCost");
-        cbTogglePocket = (CheckBox) lookup(".cbTogglePocket");
         txtCurrentCost = (Text) lookup(".txtCurrentCost");
-        cbToggleCurrent = (CheckBox) lookup(".cbToggleCurrent");
+//        cbTogglePocket = (CheckBox) lookup(".cbTogglePocket");
+//        cbToggleCurrent = (CheckBox) lookup(".cbToggleCurrent");
 
 
         this.agentDisplayId.bind(agentDisplayId);
@@ -60,21 +60,23 @@ public class AgentDisplay extends GridPane {
                 () -> String.valueOf(state.get().current.cost),
                 state
         ));
-        if(pocketSelection != null) {
-            pocketSelection.bind(cbTogglePocket.selectedProperty());
-            cbTogglePocket.setVisible(true);
-        } else {
-            cbTogglePocket.setVisible(false);
-        }
-        if(currentSelection != null) {
-            currentSelection.bind(cbToggleCurrent.selectedProperty());
-            cbToggleCurrent.setVisible(true);
-        } else {
-            cbToggleCurrent.setVisible(false);
-        }
+//        if(pocketSelection != null) {
+//            cbTogglePocket.setSelected(pocketSelection.get());
+//            pocketSelection.bind(cbTogglePocket.selectedProperty());
+//            cbTogglePocket.setVisible(true);
+//        } else {
+//            cbTogglePocket.setVisible(false);
+//        }
+//        if(currentSelection != null) {
+//            cbToggleCurrent.setSelected(currentSelection.get());
+//            currentSelection.bind(cbToggleCurrent.selectedProperty());
+//            cbToggleCurrent.setVisible(true);
+//        } else {
+//            cbToggleCurrent.setVisible(false);
+//        }
     }
 
-    public AgentDisplay(IntegerProperty agentDisplayId, ObjectProperty<PCAlgorithmState.AgentState> stateProperty) throws IOException {
-        this(agentDisplayId, stateProperty, null, null);
-    }
+//    public AgentDisplay(IntegerProperty agentDisplayId, ObjectProperty<PCAlgorithmState.AgentState> stateProperty) throws IOException {
+//        this(agentDisplayId, stateProperty, null, null);
+//    }
 }

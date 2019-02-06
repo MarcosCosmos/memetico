@@ -18,7 +18,10 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.sql.Time;
+import java.time.Instant;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Note importantly that the logview is currently only updated by main visualisation controller; this works well but only under the assumption that all accesses to the log view share a thread (which they under standard javafx which uses a single thread at time of writing)
@@ -34,9 +37,15 @@ public class PlaybackController implements Initializable {
     @FXML
     private Button btnPlayPause;
     @FXML
-    private Text txtCurFrame, txtMinFrame, txtMaxFrame;
+    private Text txtCurFrame, txtMinFrame, txtMaxFrame, txtTest;
 
     private boolean wasPlaying = false;
+
+    private double leftOverFrames = 0;
+    private long lastUpdateTime;
+
+    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
+    private final DoubleProperty speedInterval = new SimpleDoubleProperty(100/1.0);
 
     /**
      * Values are measured as FPS
@@ -47,17 +56,7 @@ public class PlaybackController implements Initializable {
     private transient IntegerProperty frameCount = new SimpleIntegerProperty(0);
     private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(true);
     private final transient ReadOnlyIntegerWrapper frameIndex = new ReadOnlyIntegerWrapper(0);
-    private final transient EventHandler<ActionEvent> frameUpdater = new EventHandler<ActionEvent>() {
-        @Override
-        public void handle(ActionEvent event) {
-            if(isPlaying.get()) {
-                int curIndex = frameIndex.get();
-                if (curIndex < frameCount.get() - 1) {
-                    frameIndex.set(curIndex + 1);
-                }
-            }
-        }
-    };
+
     private transient Timeline playbackTimeline = new Timeline();
 
     @Override
@@ -94,17 +93,29 @@ public class PlaybackController implements Initializable {
                                 isPlaying
                         )
                 );
-        cbSpeed.valueProperty().addListener(
+        frameInterval.addListener(
                 (observable, oldValue, newValue) -> {
                     playbackTimeline.stop();
                     ObservableList<KeyFrame> frames = playbackTimeline.getKeyFrames();
                     frames.clear();
-                    frames.add(new KeyFrame(Duration.millis(100/newValue), frameUpdater));
+                    frames.add(new KeyFrame(frameInterval.get(), this::frameUpdate));
                     playbackTimeline.play();
                 }
         );
+
+        playbackTimeline.getKeyFrames().add(new KeyFrame(frameInterval.get(), this::frameUpdate));
         playbackTimeline.setCycleCount(Animation.INDEFINITE);
+        playbackTimeline.play();
         cbSpeed.setValue(1.0);
+        speedInterval.bind(Bindings.createDoubleBinding(() -> 100/cbSpeed.valueProperty().get(), cbSpeed.valueProperty()));
+        lastUpdateTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+
+        isPlaying.addListener((obvs, old, newVal) -> {
+            if(!old && newVal) {
+                lastUpdateTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+                leftOverFrames = 0;
+            }
+        });
     }
 
     public ReadOnlyIntegerProperty frameIndexProperty() {
@@ -125,5 +136,32 @@ public class PlaybackController implements Initializable {
      */
     public void bindframeCount(ObservableValue<Number> source) {
         frameCount.bind(source);
+    }
+
+    public Duration getFrameInterval() {
+        return frameInterval.get();
+    }
+
+    public ObjectProperty<Duration> frameIntervalProperty() {
+        return frameInterval;
+    }
+
+    public void setFrameInterval(Duration frameInterval) {
+        this.frameInterval.set(frameInterval);
+    }
+
+    void frameUpdate(ActionEvent event) {
+        if(isPlaying.get()) {
+            int curIndex = frameIndex.get();
+            if (curIndex < frameCount.get() - 1) {
+                long currentUpdateTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+                long elapsed = currentUpdateTime-lastUpdateTime;
+                double framesPassed = Duration.millis(elapsed).divide(speedInterval.get()).toMillis()+leftOverFrames;
+                int framesToJump = (int)framesPassed;
+                frameIndex.set(Math.min(curIndex + framesToJump, frameCount.get()-1));
+                leftOverFrames = framesPassed-framesToJump;
+                lastUpdateTime = currentUpdateTime;
+            }
+        }
     }
 }

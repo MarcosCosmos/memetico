@@ -2,16 +2,24 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.Button?>
 <VBox fx:id="contentRoot" fx:controller="org.marcos.uon.tspaidemo.gui.memetico.MemeticoContentController"
       xmlns:fx="http://javafx.com/fxml">
-    <VBox fx:id="dataWrapper" alignment="CENTER">
-        <HBox>
-            <Label fx:id="generationLabel" styleClass="test">Generation:</Label>
-            <Text fx:id="generationText">Test</Text>
-        </HBox>
-        <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
-            <GridPane fx:id="agentsGrid" />
-        </HBox>
-    </VBox>
+    <BorderPane>
+        <left>
+            <VBox fx:id="dataWrapper" alignment="CENTER">
+                <HBox>
+                    <Label fx:id="generationLabel" styleClass="test">Generation:</Label>
+                    <Text fx:id="generationText">Test</Text>
+                </HBox>
+                <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
+                    <GridPane fx:id="agentsGrid" />
+                </HBox>
+            </VBox>
+        </left>
+        <right>
+            <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
+        </right>
+    </BorderPane>
     <BorderPane fx:id="graphWrapper" VBox.vgrow="ALWAYS"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
 </VBox>

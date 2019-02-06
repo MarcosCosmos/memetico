@@ -9,8 +9,8 @@
     </HBox>
     <Text GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="1">Pocket:</Text>
     <Text GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtPocketCost"/>
-    <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="cbTogglePocket"/>
     <Text GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="1">Current:</Text>
     <Text GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtCurrentCost"/>
-    <CheckBox GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="cbToggleCurrent"/>
+    <!--<CheckBox GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="cbTogglePocket"/>-->
+    <!--<CheckBox GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="cbToggleCurrent"/>-->
 </fx:root>
