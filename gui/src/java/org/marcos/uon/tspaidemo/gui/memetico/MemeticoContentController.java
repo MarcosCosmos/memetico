@@ -7,7 +7,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -27,9 +26,9 @@ import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
-import org.marcos.uon.tspaidemo.gui.main.PlaybackController;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
+import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 
 import java.io.*;
@@ -45,10 +44,17 @@ public class MemeticoContentController implements ContentController {
     }
 
     //todo: possibly make this a parameter instead
-    /**
-     * Measured as checks per second
-     */
-    public static double LOG_POLL_RATE = 60;
+//    /**
+//     * Measured as checks per second
+//     */
+//    public static final double LOG_POLL_RATE = 60;
+
+    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
+
+    public static final MemeticoConfiguration DEFAULT_CONFIGURATION = new MemeticoConfiguration(
+            new File(MemeticoContentController.class.getClassLoader().getResource("a280.tsp").getFile()),
+            new File(MemeticoContentController.class.getClassLoader().getResource("a280.opt.tour").getFile())
+    );
 
     @FXML
     private VBox contentRoot;
@@ -76,6 +82,9 @@ public class MemeticoContentController implements ContentController {
     private Euc2DTSPFXGraph fxGraph;
 
     private double lastScale = 0;
+    ValidityFlag.Synchronised currentMemeticoContinuePermission;
+    Thread memeticoThread = null;
+
     private void autoSizeListener(ObservableValue<? extends Number> observable12, Number oldValue12, Number newValue12){
         //reset to the old position
         PannableCanvas graphCanvas = fxGraph.getCanvas();
@@ -150,25 +159,27 @@ public class MemeticoContentController implements ContentController {
         generationText.textProperty()
                 .bind(generationValue.asString());
 
-        //setup an options box
-
+        //todo: possibly collect this into common base class or leave frameupdate to only be called externally by a containing controller?
+        frameInterval.addListener(
+                (observable, oldValue, newValue) -> {
+                    redrawTimeline.stop();
+                    ObservableList<KeyFrame> frames = redrawTimeline.getKeyFrames();
+                    frames.clear();
+                    frames.add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
+                    redrawTimeline.play();
+                }
+        );
 
         //setup a timeline to poll for log updates, and update the number of frames accordingly
-        redrawTimeline.getKeyFrames().add(
-                new KeyFrame(Duration.millis(100 / LOG_POLL_RATE), (event) -> {
-                    try {
-                        theView.update();
-                        numberOfFrames.set(theView.size());
-                        updateDisplay();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                })
-        );
+
+        redrawTimeline.getKeyFrames().add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
         redrawTimeline.setCycleCount(Animation.INDEFINITE);
         redrawTimeline.play();
 
-        launchMemetico();
+        optionsBoxController.memeticoConfigurationProperty().addListener( (observable, oldValue, newValue) -> launchMemetico());
+
+        //load the default configuration
+        optionsBoxController.setMemeticoConfiguration(DEFAULT_CONFIGURATION);
     }
 
     public int getNumberOfFrames() {
@@ -195,7 +206,7 @@ public class MemeticoContentController implements ContentController {
     private void updateTours() {
         //disable auto scaling
         if (!fxGraph.isEmpty()) {
-            //clear and re-draw tours
+            //reset and re-draw tours
             fxGraph.clearPredictions();
 
             TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
@@ -231,7 +242,13 @@ public class MemeticoContentController implements ContentController {
         }
     }
 
-    private void updateDisplay() {
+    private void frameUpdate() {
+        try {
+            theView.update();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        numberOfFrames.set(theView.size());
         PCAlgorithmState currentValue = state.get();
         if(selectedFrameIndex.get() == lastDrawnFrameIndex || state.get() == null) {
             return; //cancel the update
@@ -426,8 +443,22 @@ public class MemeticoContentController implements ContentController {
     }
 
     private void launchMemetico() {
+        if(memeticoThread != null && memeticoThread.isAlive()) {
+            //tell memetico to stop, then wait for that to happen safely
+            currentMemeticoContinuePermission.invalidate();
+            try {
+                memeticoThread.join();
+                logger.reset();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        currentMemeticoContinuePermission = new ValidityFlag.Synchronised();
+        final MemeticoConfiguration finalizedConfig = optionsBoxController.getMemeticoConfiguration();
+        final ValidityFlag.ReadOnly finalizedContinuePermission = currentMemeticoContinuePermission.getReadOnly();
         //launch memetico
-        Thread theThread = new Thread(() -> {
+        memeticoThread = new Thread(() -> {
             String MetodoConstrutivo = "Nearest Neighbour";
             String BuscaLocal = "Recursive base.Arc Insertion";//Recursive base.Arc Insertion";
             String SingleorDouble = "Double";
@@ -440,20 +471,14 @@ public class MemeticoContentController implements ContentController {
             int PopSize = 13, mutationRate = 5;
             int numReplications = 1;
 
-
             try {
-                File probFile = new File(getClass().getClassLoader().getResource("att532.tsp").getFile());
-
-                TSPLibInstance tspLibInstance = new TSPLibInstance(probFile);
+                TSPLibInstance tspLibInstance = new TSPLibInstance(finalizedConfig.problemFile);
 
                 baseInstances.put(tspLibInstance.getName(), tspLibInstance);
 
                 Instance memeticoInstance;
 
                 switch (tspLibInstance.getDataType()) {
-//                        case TSP:
-//                            memeticoInstance = new TSPInstance();
-//                            break;
                     case ATSP:
                     default:
                         //atsp should be safe (ish) even if it is in fact tsp
@@ -472,7 +497,7 @@ public class MemeticoContentController implements ContentController {
                     }
                 }
 
-                MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(((GraphInstance) memeticoInstance).getDimension()));
+                MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(memeticoInstance.getDimension()));
 
                 FileOutputStream dataOut = null;
                 dataOut = new FileOutputStream("result.txt");
@@ -482,17 +507,70 @@ public class MemeticoContentController implements ContentController {
                 DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
 
                 long targetCost; //for letting the solver know when it's found the optimal (if known)
-                //a280: this one has a tour
-//                    {
-//                        File tourFile = new File(getClass().getClassLoader().getResource("a280.opt.tour").getFile());
-//                        tspLibInstance.addTour(tourFile);
-//                        targetCost = (long) tspLibInstance.getTours().get(0).distance(tspLibInstance);
-////                        tspLibInstance.getTours().clear();
-//                    }
-                //att532: this one just has known cost
-                targetCost = 27686;
+                switch (finalizedConfig.solutionType) {
+                    case TOUR:
+                        tspLibInstance.addTour(finalizedConfig.tourFile);
+                        targetCost = (long) tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
+                        break;
+                    case COST:
+                        targetCost = finalizedConfig.targetCost;
+                    default:
+                        targetCost = -1;
 
-                Memetico meme = new Memetico(logger, memeticoInstance, structSol, structPop, MetodoConstrutivo,
+                }
+
+
+//                File probFile = new File(getClass().getClassLoader().getResource("att532.tsp").getFile());
+//
+//                TSPLibInstance tspLibInstance = new TSPLibInstance(probFile);
+//
+//                baseInstances.put(tspLibInstance.getName(), tspLibInstance);
+//
+//                Instance memeticoInstance;
+//
+//                switch (tspLibInstance.getDataType()) {
+////                        case TSP:
+////                            memeticoInstance = new TSPInstance();
+////                            break;
+//                    case ATSP:
+//                    default:
+//                        //atsp should be safe (ish) even if it is in fact tsp
+//                        memeticoInstance = new ATSPInstance();
+//                }
+//
+//                //give the memeticoInstance the required data
+//                memeticoInstance.setDimension(tspLibInstance.getDimension());
+//                {
+//                    DistanceTable distanceTable = tspLibInstance.getDistanceTable();
+//                    double[][] memeticoMat = ((GraphInstance) memeticoInstance).getMatDist();
+//                    for (int i = 0; i < memeticoInstance.getDimension(); ++i) {
+//                        for (int k = 0; k < memeticoInstance.getDimension(); ++k) {
+//                            memeticoMat[i][k] = distanceTable.getDistanceBetween(i, k);
+//                        }
+//                    }
+//                }
+//
+//                MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(((GraphInstance) memeticoInstance).getDimension()));
+//
+//                FileOutputStream dataOut = null;
+//                dataOut = new FileOutputStream("result.txt");
+//                DataOutputStream fileOut = new DataOutputStream(dataOut);
+//
+//                FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
+//                DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
+//
+//                long targetCost; //for letting the solver know when it's found the optimal (if known)
+//                //a280: this one has a tour
+////                    {
+////                        File tourFile = new File(getClass().getClassLoader().getResource("a280.opt.tour").getFile());
+////                        tspLibInstance.addTour(tourFile);
+////                        targetCost = (long) tspLibInstance.getTours().get(0).distance(tspLibInstance);
+//////                        tspLibInstance.getTours().reset();
+////                    }
+//                //att532: this one just has known cost
+//                targetCost = 27686;
+
+                Memetico meme = new Memetico(logger, finalizedContinuePermission, memeticoInstance, structSol, structPop, MetodoConstrutivo,
                         PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao,
                         MaxTime, MaxGenNum, numReplications, tspLibInstance.getName(), targetCost, fileOut,
                         compact_fileOut);
@@ -504,7 +582,7 @@ public class MemeticoContentController implements ContentController {
                 e.printStackTrace();
             }
         });
-        theThread.start();
+        memeticoThread.start();
     }
 
     public void showOptionsBox() {
@@ -513,6 +591,19 @@ public class MemeticoContentController implements ContentController {
         optionsStage.setScene(newScane);
         optionsStage.show();
     }
+
+    public Duration getFrameInterval() {
+        return frameInterval.get();
+    }
+
+    public ObjectProperty<Duration> frameIntervalProperty() {
+        return frameInterval;
+    }
+
+    public void setFrameInterval(Duration frameInterval) {
+        this.frameInterval.set(frameInterval);
+    }
+
 
 }
 

@@ -7,8 +7,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -18,8 +16,6 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.net.URL;
-import java.sql.Time;
-import java.time.Instant;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
@@ -57,7 +53,7 @@ public class PlaybackController implements Initializable {
     private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(true);
     private final transient ReadOnlyIntegerWrapper frameIndex = new ReadOnlyIntegerWrapper(0);
 
-    private transient Timeline playbackTimeline = new Timeline();
+    private transient Timeline redrawTimeLine = new Timeline();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -95,17 +91,17 @@ public class PlaybackController implements Initializable {
                 );
         frameInterval.addListener(
                 (observable, oldValue, newValue) -> {
-                    playbackTimeline.stop();
-                    ObservableList<KeyFrame> frames = playbackTimeline.getKeyFrames();
+                    redrawTimeLine.stop();
+                    ObservableList<KeyFrame> frames = redrawTimeLine.getKeyFrames();
                     frames.clear();
-                    frames.add(new KeyFrame(frameInterval.get(), this::frameUpdate));
-                    playbackTimeline.play();
+                    frames.add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
+                    redrawTimeLine.play();
                 }
         );
 
-        playbackTimeline.getKeyFrames().add(new KeyFrame(frameInterval.get(), this::frameUpdate));
-        playbackTimeline.setCycleCount(Animation.INDEFINITE);
-        playbackTimeline.play();
+        redrawTimeLine.getKeyFrames().add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
+        redrawTimeLine.setCycleCount(Animation.INDEFINITE);
+        redrawTimeLine.play();
         cbSpeed.setValue(1.0);
         speedInterval.bind(Bindings.createDoubleBinding(() -> 100/cbSpeed.valueProperty().get(), cbSpeed.valueProperty()));
         lastUpdateTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
@@ -150,7 +146,7 @@ public class PlaybackController implements Initializable {
         this.frameInterval.set(frameInterval);
     }
 
-    void frameUpdate(ActionEvent event) {
+    private void frameUpdate() {
         if(isPlaying.get()) {
             int curIndex = frameIndex.get();
             if (curIndex < frameCount.get() - 1) {

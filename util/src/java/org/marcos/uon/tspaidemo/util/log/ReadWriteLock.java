@@ -1,10 +1,15 @@
 package org.marcos.uon.tspaidemo.util.log;
 //not the correct place for it perhaps, (loggers outside of this solver may also want so a more central package/etc may be preferrable
-class ReadWriteLock {
+public class ReadWriteLock {
     static final int WRITE_LOCKED = -1, FREE = 0;
 
     private int numberOfReaders = FREE;
     private Thread currentWriteLockOwner;
+
+    @FunctionalInterface
+    public interface LockingRunnable {
+        void run() throws InterruptedException;
+    }
 
     public synchronized void acquireReadLock() throws InterruptedException {
         while(numberOfReaders == WRITE_LOCKED) wait();
@@ -26,5 +31,17 @@ class ReadWriteLock {
         numberOfReaders = FREE;
         currentWriteLockOwner = null;
         notifyAll();
+    }
+
+    public void withReadLock(LockingRunnable toDo) throws InterruptedException {
+        acquireReadLock();
+        toDo.run();
+        releaseReadLock();
+    }
+
+    public void withWriteLock(LockingRunnable toDo) throws InterruptedException {
+        acquireWriteLock();
+        toDo.run();
+        releaseWriteLock();
     }
 }

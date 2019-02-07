@@ -34,14 +34,17 @@ public class PCAlgorithmState {
     public final String instanceName;
     public final int generation;
     public final int nAry;
-    public final double logTime;
+    /**
+     * Measured in nanoseconds
+     */
+    public final long logTime;
     public final AgentState[] agents;
 
     /**
      * Note: the cost value (in the SolutionStructure class) is expected to be already computed for all srcs
      * @param src
      */
-    public PCAlgorithmState(String instanceName, Population src, int generation, double logTime) {
+    public PCAlgorithmState(String instanceName, Population src, int generation, long logTime) {
         this.instanceName = instanceName;
         this.generation = generation;
         this.nAry = src.n_ary;

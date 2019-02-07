@@ -22,8 +22,20 @@ public class NullLogger<T> implements ILogger<T> {
         }
 
         @Override
-        public void update() throws InterruptedException {
+        public boolean update() throws InterruptedException {
+            return false;
         }
+
+        @Override
+        public boolean tryUpdate() throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public boolean isValid() throws InterruptedException {
+            return false;
+        }
+
     }
     @Override
     public View<T> newView() throws InterruptedException {
@@ -36,5 +48,9 @@ public class NullLogger<T> implements ILogger<T> {
 
     @Override
     public void logAll(Collection<T> states) throws InterruptedException {
+    }
+
+    @Override
+    public void reset() {
     }
 }

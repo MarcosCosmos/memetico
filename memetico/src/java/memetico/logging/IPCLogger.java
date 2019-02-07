@@ -1,18 +1,22 @@
 package memetico.logging;
 
-import memetico.Instance;
 import memetico.Population;
+import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 import org.marcos.uon.tspaidemo.util.log.ILogger;
 
+import java.util.Collection;
+
 public interface IPCLogger extends ILogger<PCAlgorithmState> {
+    interface View extends ILogger.View<PCAlgorithmState> {
+        double getStartTime();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    View newView() throws InterruptedException;
     void log(String instanceName, Population population, int generation) throws InterruptedException;
 
     void tryLog(String instanceName, Population population, int generation) throws InterruptedException;
-
-    /**
-     * Causes the current cpu time to be recorded for the purposes of logging, may influence future logs.
-     */
-    void startClock();
-    //gets the time the clock was started
-    double getStartTime();
 }

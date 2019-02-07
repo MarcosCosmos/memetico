@@ -12,7 +12,30 @@ public interface ILogger<T> {
      * Views should be considered externally unmodifiable
      */
     interface View<T> extends List<T> {
-        void update() throws InterruptedException;
+        /**
+         * Updates, ensuring that the end state is valid
+         * @throws InterruptedException
+         * @return a boolean indicating whether or not the view was valid at the beginning of the update (if false, the underlying logger has been reset)
+         * @see #tryUpdate()
+         * @see #isValid()
+         */
+        boolean update() throws InterruptedException;
+        /**
+         * Tries to update (succeeds only if the view is still valid); if the view is not valid, no changes will occur
+         * @throws InterruptedException
+         * @return a boolean indicating whether or not the view was valid at the beginning of the update (if false, the underlying logger has been reset)
+         * @see #update()
+         * @see #isValid()
+         */
+        boolean tryUpdate() throws InterruptedException;
+        /**
+         * Checks if the current state is valid (that the underlying logger has not been cleared.
+         * This is useful if you want to keep a backup of the current view contents before updating (or use a separate view for the new data); (You can also use {@code #tryUpdate()} for this)
+         * @see #update()
+         * @see #tryUpdate()
+         * @return
+         */
+        boolean isValid() throws InterruptedException;
     }
 
     /**
@@ -40,4 +63,9 @@ public interface ILogger<T> {
      * @see #log(T)
      */
     void logAll(Collection<T> states) throws InterruptedException;
+
+    /**
+     * Resets the logger to a valid initial state
+     */
+    void reset() throws InterruptedException;
 }

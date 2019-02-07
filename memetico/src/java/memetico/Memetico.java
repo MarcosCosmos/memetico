@@ -4,6 +4,7 @@ import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
 import memetico.logging.PCAlgorithmState;
 import org.marcos.uon.tspaidemo.util.log.ILogger;
+import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 
 import java.text.*;
 
@@ -24,7 +25,6 @@ public class Memetico {
 //    static int numReplications = 30;
 
     private IPCLogger logger;
-
     private static double AverTotalTime = 0, AverPopInit = 0,
             AverSolOpt = 0, AverGen = 0, AverQuality = 0;
     private static double initialSolution = 0;
@@ -39,7 +39,7 @@ public class Memetico {
      * @param structPop: struct of the base.Population
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
-    public Memetico(IPCLogger logger, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, String name, long OptimalSol, DataOutputStream fileOut, DataOutputStream compact_fileOut) throws Exception {
+    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, String name, long OptimalSol, DataOutputStream fileOut, DataOutputStream compact_fileOut) throws Exception {
         this.logger = logger;
         int GenNum = 0, i;
         double TotalTime = 0, bestTime = 0, auxTime, recombineTime;
@@ -74,7 +74,7 @@ public class Memetico {
 
 
             TotalTime = System.currentTimeMillis();
-            logger.startClock();
+            logger.reset();
             // we initialize the population of agents
             // with a method based on the nearest neighbour heuristic for the TSP
             NNInicializePop(refConstr, 0, (int) (Math.random() * ((GraphInstance) inst).dimension),
@@ -117,6 +117,11 @@ public class Memetico {
                 } else memePop.newBestSol++;
 
                 best_aux = memePop.bestAgent.bestCost;
+
+                //decide whether or not to continue (if not, break out of this loop and do the final logging)
+                if (!continuePermission.isValid()) {
+                    break;
+                }
 
                 /* This seems to be the correct point at which to log since it's above the break? */
                 logger.tryLog(name, memePop, GenNum);
@@ -411,7 +416,7 @@ public class Memetico {
                 MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(((GraphInstance) inst).dimension));
 //          if(MaxGenNum < 200) MaxGenNum = 200;
 
-                Memetico meme = new Memetico(logger, inst, structSol, structPop, MetodoConstrutivo,
+                Memetico meme = new Memetico(logger, () -> true, inst, structSol, structPop, MetodoConstrutivo,
                         PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao,
                         MaxTime, MaxGenNum, numReplications, Names[count], OptimalSol[count], fileOut,
                         compact_fileOut);
