@@ -8,10 +8,16 @@
     <BorderPane>
         <left>
             <VBox fx:id="dataWrapper" alignment="CENTER">
-                <HBox>
-                    <Label fx:id="generationLabel" styleClass="test">Generation:</Label>
-                    <Text fx:id="generationText">Test</Text>
+                <HBox alignment="CENTER">
+                    <Text fx:id="lblProblemName">Problem Name:&#160;</Text>
+                    <Text fx:id="txtProblemName"/>
                 </HBox>
+                <GridPane>
+                    <Text fx:id="lblTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="0">Target cost:</Text>
+                    <Text fx:id="txtTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Text fx:id="lblTeneration" GridPane.rowIndex="1" GridPane.columnIndex="0">Generation:</Text>
+                    <Text fx:id="txtGeneration" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                </GridPane>
                 <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
                     <GridPane fx:id="agentsGrid" />
                 </HBox>

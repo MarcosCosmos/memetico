@@ -3,7 +3,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import java.lang.*?>
-<BorderPane fx:id="playbackControls" fx:controller="org.marcos.uon.tspaidemo.gui.main.PlaybackController"
+<BorderPane fx:id="playbackControlsRoot" fx:controller="org.marcos.uon.tspaidemo.gui.main.PlaybackController"
             xmlns:fx="http://javafx.com/fxml">
     <center>
         <BorderPane fx:id="sliderWrapper">
@@ -30,7 +30,7 @@
             <Button fx:id="btnStop" text="■" onAction="#stopPlayback"/>
             <Button fx:id="btnPlayPause" onAction="#togglePlayState">/</Button>
             <HBox>
-                <Label fx:id="lblSpeed">Speed:</Label>
+                <Label fx:id="lblSpeed">Speed:&#160;</Label>
                 <ChoiceBox fx:id="cbSpeed">
                     <Double fx:value="0.00138888888"/>
                     <Double fx:value="0.015" />
@@ -50,32 +50,3 @@
         </HBox>
     </right>
 </BorderPane>
-
-        <!--<Text id="welcome-text" text="Welcome"-->
-        <!--GridPane.columnIndex="0" GridPane.rowIndex="0"-->
-        <!--GridPane.columnSpan="2"/>-->
-
-        <!--<Label text="User Name:"-->
-        <!--GridPane.columnIndex="0" GridPane.rowIndex="1"/>-->
-
-        <!--<TextField-->
-        <!--GridPane.columnIndex="1" GridPane.rowIndex="1"/>-->
-
-        <!--<Label text="Password:"-->
-        <!--GridPane.columnIndex="0" GridPane.rowIndex="2"/>-->
-
-        <!--<PasswordField fx:id="passwordField"-->
-        <!--GridPane.columnIndex="1" GridPane.rowIndex="2"/>-->
-
-        <!--<HBox spacing="10" alignment="bottom_right"-->
-        <!--GridPane.columnIndex="1" GridPane.rowIndex="4">-->
-        <!--<Button text="Sign In"-->
-        <!--onAction="#handleSubmitButtonAction"/>-->
-        <!--</HBox>-->
-
-        <!--<Text fx:id="actiontarget"-->
-        <!--GridPane.columnIndex="1" GridPane.rowIndex="6"/>-->
-
-        <!--<stylesheets>-->
-        <!--<URL value="@Login.css" />-->
-        <!--</stylesheets>-->

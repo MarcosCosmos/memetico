@@ -9,9 +9,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -27,6 +30,9 @@ public class PlaybackController implements Initializable {
     private static final String PLAY_TEXT = "▶";
 
     @FXML
+    private BorderPane playbackControlsRoot;
+
+    @FXML
     private Slider sldrFrameIndex;
     @FXML
     private Button btnStop;
@@ -40,7 +46,7 @@ public class PlaybackController implements Initializable {
     private double leftOverFrames = 0;
     private long lastUpdateTime;
 
-    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
+//    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
     private final DoubleProperty speedInterval = new SimpleDoubleProperty(100/1.0);
 
     /**
@@ -53,7 +59,7 @@ public class PlaybackController implements Initializable {
     private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(true);
     private final transient ReadOnlyIntegerWrapper frameIndex = new ReadOnlyIntegerWrapper(0);
 
-    private transient Timeline redrawTimeLine = new Timeline();
+//    private transient Timeline redrawTimeLine = new Timeline();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -89,22 +95,6 @@ public class PlaybackController implements Initializable {
                                 isPlaying
                         )
                 );
-        frameInterval.addListener(
-                (observable, oldValue, newValue) -> {
-                    redrawTimeLine.stop();
-                    ObservableList<KeyFrame> frames = redrawTimeLine.getKeyFrames();
-                    frames.clear();
-                    frames.add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
-                    redrawTimeLine.play();
-                }
-        );
-
-        redrawTimeLine.getKeyFrames().add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
-        redrawTimeLine.setCycleCount(Animation.INDEFINITE);
-        redrawTimeLine.play();
-        cbSpeed.setValue(1.0);
-        speedInterval.bind(Bindings.createDoubleBinding(() -> 100/cbSpeed.valueProperty().get(), cbSpeed.valueProperty()));
-        lastUpdateTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
 
         isPlaying.addListener((obvs, old, newVal) -> {
             if(!old && newVal) {
@@ -134,19 +124,7 @@ public class PlaybackController implements Initializable {
         frameCount.bind(source);
     }
 
-    public Duration getFrameInterval() {
-        return frameInterval.get();
-    }
-
-    public ObjectProperty<Duration> frameIntervalProperty() {
-        return frameInterval;
-    }
-
-    public void setFrameInterval(Duration frameInterval) {
-        this.frameInterval.set(frameInterval);
-    }
-
-    private void frameUpdate() {
+    public void frameUpdate() {
         if(isPlaying.get()) {
             int curIndex = frameIndex.get();
             if (curIndex < frameCount.get() - 1) {
@@ -159,5 +137,9 @@ public class PlaybackController implements Initializable {
                 lastUpdateTime = currentUpdateTime;
             }
         }
+    }
+
+    public Parent getRoot() {
+        return playbackControlsRoot;
     }
 }

@@ -2,9 +2,6 @@ package org.marcos.uon.tspaidemo.gui.memetico;
 
 import com.fxgraph.graph.PannableCanvas;
 import com.sun.javaws.exceptions.InvalidArgumentException;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -13,12 +10,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import memetico.*;
 import memetico.logging.PCAlgorithmState;
 import memetico.logging.PCLogger;
@@ -43,13 +40,7 @@ public class MemeticoContentController implements ContentController {
         public int column = -1;
     }
 
-    //todo: possibly make this a parameter instead
-//    /**
-//     * Measured as checks per second
-//     */
-//    public static final double LOG_POLL_RATE = 60;
-
-    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
+//    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
 
     public static final MemeticoConfiguration DEFAULT_CONFIGURATION = new MemeticoConfiguration(
             new File(MemeticoContentController.class.getClassLoader().getResource("a280.tsp").getFile()),
@@ -59,7 +50,7 @@ public class MemeticoContentController implements ContentController {
     @FXML
     private VBox contentRoot;
     @FXML
-    private Text generationText;
+    private Text txtGeneration, txtProblemName, txtTargetCost;
     @FXML
     private GridPane agentsGrid;
     @FXML
@@ -70,7 +61,6 @@ public class MemeticoContentController implements ContentController {
     private transient ObjectProperty<PCAlgorithmState> state = new SimpleObjectProperty<>();
     private transient PCLogger logger;
     private transient BasicLogger<PCAlgorithmState>.View theView;
-    private final transient Timeline redrawTimeline = new Timeline();
     private transient ReadOnlyIntegerWrapper numberOfFrames = new ReadOnlyIntegerWrapper(0);
     private transient IntegerProperty selectedFrameIndex = new SimpleIntegerProperty(0);
 
@@ -130,9 +120,7 @@ public class MemeticoContentController implements ContentController {
                         )
                 );
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
 
@@ -156,25 +144,57 @@ public class MemeticoContentController implements ContentController {
                         state
                 )
         );
-        generationText.textProperty()
+        txtGeneration.textProperty()
                 .bind(generationValue.asString());
-
-        //todo: possibly collect this into common base class or leave frameupdate to only be called externally by a containing controller?
-        frameInterval.addListener(
-                (observable, oldValue, newValue) -> {
-                    redrawTimeline.stop();
-                    ObservableList<KeyFrame> frames = redrawTimeline.getKeyFrames();
-                    frames.clear();
-                    frames.add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
-                    redrawTimeline.play();
-                }
+        ObjectProperty<MemeticoConfiguration> configProp = optionsBoxController.memeticoConfigurationProperty();
+        txtProblemName.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> state.get() == null ? "None" : state.get().instanceName,
+                        state
+                )
+        );
+        txtTargetCost.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> {
+                            MemeticoConfiguration config = configProp.get();
+                            if (config == null) {
+                                return "Unknown";
+                            } else {
+                                switch (config.solutionType) {
+                                    case TOUR:
+                                        if (state.get() == null) {
+                                            return "Uknown";
+                                        } else {
+                                            TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
+                                            return String.valueOf((int)theInstance.getTours().get(theInstance.getTours().size() - 1).distance(theInstance));
+                                        }
+                                    case COST:
+                                        return String.valueOf(config.targetCost);
+                                    default:
+                                        return "ERROR";
+                                }
+                            }
+                        },
+                        state
+                )
         );
 
-        //setup a timeline to poll for log updates, and update the number of frames accordingly
-
-        redrawTimeline.getKeyFrames().add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
-        redrawTimeline.setCycleCount(Animation.INDEFINITE);
-        redrawTimeline.play();
+//        //todo: possibly collect this into common base class or leave frameupdate to only be called externally by a containing controller?
+//        frameInterval.addListener(
+//                (observable, oldValue, newValue) -> {
+//                    redrawTimeline.stop();
+//                    ObservableList<KeyFrame> frames = redrawTimeline.getKeyFrames();
+//                    frames.clear();
+//                    frames.add(new KeyFrame(frameInterval.get(), (e) -> contentUpdate()));
+//                    redrawTimeline.play();
+//                }
+//        );
+//
+//        //setup a timeline to poll for log updates, and update the number of frames accordingly
+//
+//        redrawTimeline.getKeyFrames().add(new KeyFrame(frameInterval.get(), (e) -> contentUpdate()));
+//        redrawTimeline.setCycleCount(Animation.INDEFINITE);
+//        redrawTimeline.play();
 
         optionsBoxController.memeticoConfigurationProperty().addListener( (observable, oldValue, newValue) -> launchMemetico());
 
@@ -242,13 +262,16 @@ public class MemeticoContentController implements ContentController {
         }
     }
 
-    private void frameUpdate() {
+    public void frameCountUpdate() {
         try {
             theView.update();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         numberOfFrames.set(theView.size());
+    }
+
+    public void contentUpdate() {
         PCAlgorithmState currentValue = state.get();
         if(selectedFrameIndex.get() == lastDrawnFrameIndex || state.get() == null) {
             return; //cancel the update
@@ -407,9 +430,7 @@ public class MemeticoContentController implements ContentController {
                         }
                     }
                 }
-        } catch (InvalidArgumentException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (InvalidArgumentException | IOException e) {
             e.printStackTrace();
         }
 
@@ -592,19 +613,24 @@ public class MemeticoContentController implements ContentController {
         optionsStage.show();
     }
 
-    public Duration getFrameInterval() {
-        return frameInterval.get();
+//    public Duration getFrameInterval() {
+//        return frameInterval.get();
+//    }
+//
+//    public ObjectProperty<Duration> frameIntervalProperty() {
+//        return frameInterval;
+//    }
+//
+//    public void setFrameInterval(Duration frameInterval) {
+//        this.frameInterval.set(frameInterval);
+//    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parent getRoot() {
+        return contentRoot;
     }
-
-    public ObjectProperty<Duration> frameIntervalProperty() {
-        return frameInterval;
-    }
-
-    public void setFrameInterval(Duration frameInterval) {
-        this.frameInterval.set(frameInterval);
-    }
-
-
 }
 
 

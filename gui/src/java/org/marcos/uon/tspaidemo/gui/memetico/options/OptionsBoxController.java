@@ -145,7 +145,7 @@ public class OptionsBoxController implements Initializable {
                     cbMemeticoSolutionType.setValue(newValue.solutionType.toString());
                     switch (newValue.solutionType) {
                         case TOUR:
-                            txtMemeticoSelectedTourSolution.setText(newValue.problemFile.getPath());
+                            txtMemeticoSelectedTourSolution.setText(newValue.tourFile.getPath());
                         case COST:
                             fldMemeticoSolutionCost.setText(String.valueOf(newValue.targetCost));
                             break;

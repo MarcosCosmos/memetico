@@ -11,7 +11,7 @@
           xmlns:fx="http://javafx.com/fxml">
     <HBox GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" alignment="CENTER">
         <Text styleClass="lblAgentId">Agent&#160;</Text>
-        <Text GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtAgentId"/>
+        <Text styleClass="txtAgentId"/>
     </HBox>
     <Label GridPane.rowIndex="1" GridPane.columnIndex="0">Show Pocket Solution?</Label>
     <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="cbTogglePocket"/>
