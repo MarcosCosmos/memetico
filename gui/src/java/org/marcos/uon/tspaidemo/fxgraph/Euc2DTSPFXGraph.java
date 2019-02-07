@@ -63,7 +63,7 @@ public class Euc2DTSPFXGraph {
                 SimpleEdge result = available.remove(available.size()-1);
                 result.sourceProperty().set(source);
                 result.targetProperty().set(target);
-                result.additionalStyleClassesProperty().bind(additionalStyleClasses);
+                result.setAdditionalStyleClasses(additionalStyleClasses);
                 return result;
             } else {
                 return new SimpleEdge(source, target, additionalStyleClasses);
@@ -132,28 +132,7 @@ public class Euc2DTSPFXGraph {
             model.addCell(eachCell);
         }
 
-        //todo: possibly add option to display base edgeset (as "normal" edges)
-
-        for(TSPLibTour eachTour : instance.getTours()) {
-            List<SimpleEdge> eachEdgeList = new ArrayList<>();
-            for(Edge eachEdge : eachTour.toEdges()) {
-                int _a = eachEdge.getId1();
-                int _b = eachEdge.getId2();
-                SimpleVertex a = cells.get(_a),
-                        b = cells.get(_b)
-                                ;
-                SimpleEdge eachResult = edgePool.retrieve(a,b, TARGET_STYLE_CLASSES);
-                eachResult.textProperty().set(String.valueOf(new Point2D(a.locationX().get(), b.locationY().get()).distance(b.locationX().get(), b.locationY().get())));
-                eachEdgeList.add(eachResult);
-            }
-            targets.add(Collections.unmodifiableList(eachEdgeList));
-        }
-        Stream.of(
-                normalEdges.stream(),
-                targets.stream()
-                        .flatMap(Collection::stream)
-        ).flatMap(each -> each)
-                .forEach(model::addEdge);
+        normalEdges.stream().forEach(model::addEdge);
 
 //        //scale the cells for visibility
 //        for(SimpleVertex each : cells) {

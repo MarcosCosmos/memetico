@@ -6,16 +6,19 @@ import com.fxgraph.graph.IEdge;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SimpleEdge implements IEdge {
     private final transient StringProperty textProperty = new SimpleStringProperty();
-    private final transient ListProperty<String> additionalStyleClasses = new SimpleListProperty<>();
-    private transient final EdgeGraphic theGraphic;
+    private final transient List<String> additionalStyleClasses = new ArrayList<>();
 
     private ObjectProperty<SimpleVertex> source = new SimpleObjectProperty<SimpleVertex>();
     private ObjectProperty<SimpleVertex> target = new SimpleObjectProperty<SimpleVertex>();
@@ -23,17 +26,16 @@ public class SimpleEdge implements IEdge {
     public SimpleEdge(SimpleVertex source, SimpleVertex target, ListProperty<String> additionalStyleClasses) {
         this.source.setValue(source);
         this.target.setValue(target);
-        this.additionalStyleClasses.bind(additionalStyleClasses);
-        theGraphic = new EdgeGraphic();
+        this.additionalStyleClasses.addAll(additionalStyleClasses);
     }
 
     public SimpleEdge(SimpleVertex source, SimpleVertex target) {
         this(source, target, new SimpleListProperty<>());
+
     }
 
     public EdgeGraphic getGraphic(Graph graph) {
-        theGraphic.getStyleClass().setAll(additionalStyleClasses);
-        return theGraphic;
+        return new EdgeGraphic();
     }
 
     public StringProperty textProperty() {
@@ -108,6 +110,9 @@ public class SimpleEdge implements IEdge {
             this.group.getStyleClass().add("edge");
             this.line.getStyleClass().add("line");
             this.text.getStyleClass().add("label");
+
+            this.getStyleClass().addAll(additionalStyleClasses);
+
         }
 
         public Group getGroup() {
@@ -122,12 +127,8 @@ public class SimpleEdge implements IEdge {
             return this.text;
         }
     }
-
-    public ObservableList<String> getAdditionalStyleClasses() {
-        return additionalStyleClasses.get();
-    }
-
-    public ListProperty<String> additionalStyleClassesProperty() {
-        return additionalStyleClasses;
+    public void setAdditionalStyleClasses(List<String> classes) {
+        this.additionalStyleClasses.clear();
+        this.additionalStyleClasses.addAll(classes);
     }
 }

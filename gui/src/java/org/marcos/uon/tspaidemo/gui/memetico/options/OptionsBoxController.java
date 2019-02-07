@@ -84,8 +84,8 @@ public class OptionsBoxController implements Initializable {
         try {
             if (newValue.intValue() < oldValue.intValue()) {
                 //delete unneeded agent displays and states; todo: possibly just hide them for performance?
-                children.subList(oldValue.intValue(), newValue.intValue()).clear();
-                solutionDisplayToggles.subList(oldValue.intValue(), newValue.intValue()).clear();
+                children.subList(newValue.intValue(), oldValue.intValue()).clear();
+                solutionDisplayToggles.subList(newValue.intValue(), oldValue.intValue()).clear();
             } else if (newValue.intValue() > oldValue.intValue()) {
                 for (int i = oldValue.intValue(); i < newValue.intValue(); ++i) {
                     Node eachSubBox = null;
@@ -99,9 +99,9 @@ public class OptionsBoxController implements Initializable {
                     };
                     children.add(eachSubBox);
                     solutionDisplayToggles.add(toggles);
-                    if (oldValue.intValue() == 0 && newValue.intValue() != 0 && i == 0) {
-                        toggles[0].setValue(true);
-                    }
+//                    if (oldValue.intValue() == 0 && newValue.intValue() != 0 && i == 0) {
+//                        toggles[0].setValue(true);
+//                    }
                 }
             }
         } catch (IOException e) {
@@ -111,6 +111,10 @@ public class OptionsBoxController implements Initializable {
 
     public Parent getRoot() {
         return memeticoOptionsBoxRoot;
+    }
+
+    public BooleanProperty getTargetDisplayToggle() {
+        return cbMemeticoToggleTarget.selectedProperty();
     }
 
     public ObservableList<BooleanProperty[]> getSolutionDisplayToggles() {
@@ -152,6 +156,7 @@ public class OptionsBoxController implements Initializable {
                     }
                 }
         );
+//        cbMemeticoToggleTarget.selectedProperty().set(true);
     }
 
     public MemeticoConfiguration getMemeticoConfiguration() {

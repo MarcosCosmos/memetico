@@ -53,11 +53,11 @@ public class AgentDisplay extends GridPane {
         this.state.bind(stateProperty);
         txtAgentId.textProperty().bind(this.agentDisplayId.asString());
         txtPocketCost.textProperty().bind(Bindings.createStringBinding(
-                () -> String.valueOf(state.get().pocket.cost),
+                () -> String.valueOf(state.get() == null ? "Uknown" : state.get().pocket.cost),
                 state
         ));
         txtCurrentCost.textProperty().bind(Bindings.createStringBinding(
-                () -> String.valueOf(state.get().current.cost),
+                () -> String.valueOf(state.get() == null ? "Uknown" : state.get().current.cost),
                 state
         ));
 //        if(pocketSelection != null) {

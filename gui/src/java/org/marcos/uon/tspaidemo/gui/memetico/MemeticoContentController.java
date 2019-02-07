@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,8 +21,12 @@ import memetico.*;
 import memetico.logging.PCAlgorithmState;
 import memetico.logging.PCLogger;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
+import org.jorlib.io.tspLibReader.TSPLibTour;
 import org.jorlib.io.tspLibReader.graph.DistanceTable;
+import org.jorlib.io.tspLibReader.graph.Edge;
 import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
+import org.marcos.uon.tspaidemo.fxgraph.SimpleEdge;
+import org.marcos.uon.tspaidemo.fxgraph.SimpleVertex;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
@@ -31,6 +36,7 @@ import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MemeticoContentController implements ContentController {
     //used during agent display arrangement
@@ -163,7 +169,7 @@ public class MemeticoContentController implements ContentController {
                                 switch (config.solutionType) {
                                     case TOUR:
                                         if (state.get() == null) {
-                                            return "Uknown";
+                                            return "Unknown";
                                         } else {
                                             TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
                                             return String.valueOf((int)theInstance.getTours().get(theInstance.getTours().size() - 1).distance(theInstance));
@@ -227,9 +233,21 @@ public class MemeticoContentController implements ContentController {
         //disable auto scaling
         if (!fxGraph.isEmpty()) {
             //reset and re-draw tours
+            fxGraph.clearTargets();
             fxGraph.clearPredictions();
 
             TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
+            if(optionsBoxController.getTargetDisplayToggle().get()) {
+                for(TSPLibTour eachTour : theInstance.getTours()) {
+                    fxGraph.addTargetEdges(
+                            eachTour.toEdges()
+                                    .stream()
+                                    .map(each -> new int[]{each.getId1(), each.getId2()})
+                                    .collect(Collectors.toList())
+                    );
+                }
+            }
+
             List<BooleanProperty[]> toggles = optionsBoxController.getSolutionDisplayToggles();
             for (int i = 0; i < toggles.size(); ++i) {
                 BooleanProperty[] eachToggles = toggles.get(i);
