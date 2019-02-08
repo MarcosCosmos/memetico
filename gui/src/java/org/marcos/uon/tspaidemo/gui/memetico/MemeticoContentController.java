@@ -9,7 +9,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
-import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -23,10 +22,8 @@ import memetico.logging.PCLogger;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.TSPLibTour;
 import org.jorlib.io.tspLibReader.graph.DistanceTable;
-import org.jorlib.io.tspLibReader.graph.Edge;
+import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.fxgraph.Euc2DTSPFXGraph;
-import org.marcos.uon.tspaidemo.fxgraph.SimpleEdge;
-import org.marcos.uon.tspaidemo.fxgraph.SimpleVertex;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
@@ -75,16 +72,15 @@ public class MemeticoContentController implements ContentController {
 
     private String lastDrawnGraphName = null;
     private int lastDrawnFrameIndex = -1;
-    private Euc2DTSPFXGraph fxGraph;
+    private CanvasTSPGraph displayGraph;
 
-    private double lastScale = 0;
+//    private double lastScale = 0;
+    private boolean toursOutdated = false;
     ValidityFlag.Synchronised currentMemeticoContinuePermission;
     Thread memeticoThread = null;
 
     private void autoSizeListener(ObservableValue<? extends Number> observable12, Number oldValue12, Number newValue12){
-        //reset to the old position
-        PannableCanvas graphCanvas = fxGraph.getCanvas();
-        BoundingBox canvasBounds = fxGraph.getLogicalBounds();
+        BoundingBox canvasBounds = displayGraph.getLogicalBounds();
 
         double availableHeight = graphWrapper.getHeight();
         double padding = Math.max(canvasBounds.getMinX() * 2, canvasBounds.getMinY() * 2);
@@ -93,15 +89,7 @@ public class MemeticoContentController implements ContentController {
         double availableWidth = graphWrapper.getWidth();
         double scaleWidth = availableWidth / (canvasBounds.getWidth() + padding);
         double chosenScale = Math.min(scaleWidth, scaleHeight);
-//        double newTranslate = ((availableWidth)*(chosenScale)/2 + canvasBounds.getMinX()*2);
-
-        Scale scale = new Scale();
-        scale.setPivotX(0);
-        scale.setPivotY(0);
-        scale.setX(chosenScale / lastScale);
-        scale.setY(chosenScale / lastScale);
-        graphCanvas.getTransforms().add(scale);
-        lastScale = chosenScale;
+        displayGraph.setScale(chosenScale);
     };
 
     @Override
@@ -119,12 +107,6 @@ public class MemeticoContentController implements ContentController {
                 );
                 loader.load();
                 optionsBoxController = loader.getController();
-                optionsBoxController.agentCountProperty().bind(
-                        Bindings.createIntegerBinding(
-                                () -> (state.isNull().get() ? 0 : state.get().agents.length),
-                                state
-                        )
-                );
 
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
@@ -185,22 +167,8 @@ public class MemeticoContentController implements ContentController {
                 )
         );
 
-//        //todo: possibly collect this into common base class or leave frameupdate to only be called externally by a containing controller?
-//        frameInterval.addListener(
-//                (observable, oldValue, newValue) -> {
-//                    redrawTimeline.stop();
-//                    ObservableList<KeyFrame> frames = redrawTimeline.getKeyFrames();
-//                    frames.clear();
-//                    frames.add(new KeyFrame(frameInterval.get(), (e) -> contentUpdate()));
-//                    redrawTimeline.play();
-//                }
-//        );
-//
-//        //setup a timeline to poll for log updates, and update the number of frames accordingly
-//
-//        redrawTimeline.getKeyFrames().add(new KeyFrame(frameInterval.get(), (e) -> contentUpdate()));
-//        redrawTimeline.setCycleCount(Animation.INDEFINITE);
-//        redrawTimeline.play();
+        optionsBoxController.getTargetDisplayToggle().addListener((e,o,n) -> toursOutdated = true);
+        optionsBoxController.getTargetDisplayToggle().set(true);
 
         optionsBoxController.memeticoConfigurationProperty().addListener( (observable, oldValue, newValue) -> launchMemetico());
 
@@ -226,28 +194,35 @@ public class MemeticoContentController implements ContentController {
      * Allows something else (i.e. the playback controller) to control which frame to show.
      */
     public void bindSelectedFrameIndex(ObservableValue<Number> source) {
+//        unbindSelectedFrameIndex();
         selectedFrameIndex.bind(source);
+    }
+
+    public void unbindSelectedFrameIndex() {
+        selectedFrameIndex.unbind();
     }
 
     private void updateTours() {
         //disable auto scaling
-        if (!fxGraph.isEmpty()) {
+        if (!displayGraph.isEmpty()) {
             //reset and re-draw tours
-            fxGraph.clearTargets();
-            fxGraph.clearPredictions();
+            displayGraph.clearTargets();
+            displayGraph.clearPredictions();
 
             TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
             if(optionsBoxController.getTargetDisplayToggle().get()) {
                 for(TSPLibTour eachTour : theInstance.getTours()) {
-                    fxGraph.addTargetEdges(
-                            eachTour.toEdges()
-                                    .stream()
-                                    .map(each -> new int[]{each.getId1(), each.getId2()})
-                                    .collect(Collectors.toList())
+                    List<int[]> edges = eachTour.toEdges()
+                            .stream()
+                            .map(each -> new int[]{each.getId1(), each.getId2()})
+                            .collect(Collectors.toList());
+                    displayGraph.addTargetEdges(
+                        edges
                     );
                 }
             }
 
+            PCAlgorithmState theState = state.get();
             List<BooleanProperty[]> toggles = optionsBoxController.getSolutionDisplayToggles();
             for (int i = 0; i < toggles.size(); ++i) {
                 BooleanProperty[] eachToggles = toggles.get(i);
@@ -255,11 +230,11 @@ public class MemeticoContentController implements ContentController {
                     if (eachToggles[k].get()) {
                         PCAlgorithmState.LightDiCycle eachSolution = (
                                 k == 0 ?
-                                        state.get()
+                                        theState
                                                 .agents[i]
                                                 .pocket
                                         :
-                                        state.get()
+                                        theState
                                                 .agents[i]
                                                 .current
                         );
@@ -270,14 +245,15 @@ public class MemeticoContentController implements ContentController {
                             edgesToAdd[j] = new int[]{city, nextCity};
                             city = nextCity;
                         }
-                        fxGraph.addPredictionEdges(
+                        displayGraph.addPredictionEdges(
                                 Arrays.asList(edgesToAdd)
                         );
                     }
                 }
             }
-            fxGraph.endUpdate();
         }
+        displayGraph.draw();
+        toursOutdated = false;
     }
 
     public void frameCountUpdate() {
@@ -291,70 +267,84 @@ public class MemeticoContentController implements ContentController {
 
     public void contentUpdate() {
         PCAlgorithmState currentValue = state.get();
-        if(selectedFrameIndex.get() == lastDrawnFrameIndex || state.get() == null) {
-            return; //cancel the update
-        }
+        //only check the complex logic if we can draw a state
+        if(selectedFrameIndex.get() != lastDrawnFrameIndex && state.get() != null) {
+            toursOutdated = true;
+            lastDrawnFrameIndex = selectedFrameIndex.get();
+            TSPLibInstance baseInstance = baseInstances.get(currentValue.instanceName);
+            ObservableList<Node> agentNodes = agentsGrid.getChildren();
 
-        lastDrawnFrameIndex = selectedFrameIndex.get();
-        TSPLibInstance baseInstance = baseInstances.get(currentValue.instanceName);
-        ObservableList<Node> agentNodes = agentsGrid.getChildren();
-
-        try {
-            //for all the graphs we are going to keep, if the instance changed, switch to the new one.
-            if (!currentValue.instanceName.equals(lastDrawnGraphName)) {
-                fxGraph = new Euc2DTSPFXGraph(baseInstance);
-                graphWrapper.getChildren().clear();
-                if (!fxGraph.isEmpty()) {
-                    graphWrapper.setCenter(fxGraph.getGraphic());
-                    lastScale = 1;
-                    //enable auto sizing
-                    graphWrapper.widthProperty().addListener(this::autoSizeListener);
-                    graphWrapper.heightProperty().addListener(this::autoSizeListener);
-                    autoSizeListener(null, -1, -1);
+            try {
+                //for all the graphs we are going to keep, if the instance changed, switch to the new one.
+                if (!currentValue.instanceName.equals(lastDrawnGraphName)) {
+                    displayGraph = new CanvasTSPGraph(baseInstance);
+                    graphWrapper.getChildren().clear();
+                    if (!displayGraph.isEmpty()) {
+                        graphWrapper.setCenter(displayGraph.getGraphic());
+                        //enable auto sizing
+                        graphWrapper.widthProperty().addListener(this::autoSizeListener);
+                        graphWrapper.heightProperty().addListener(this::autoSizeListener);
+                        autoSizeListener(null, -1, -1);
+                    }
+                    lastDrawnGraphName = currentValue.instanceName;
                 }
-                lastDrawnGraphName = currentValue.instanceName;
-            }
 
-            boolean listUpdated = false;
+                boolean listUpdated = false;
+                int oldCount = optionsBoxController.getSolutionDisplayToggles().size(), newCount = currentValue.agents.length;
+                optionsBoxController.adjustAgentOptionsDisplay(oldCount, newCount);
 
-            if (currentValue.agents.length < agentNodes.size()) {
-                //delete unneeded agent displays and states; todo: possibly just hide them for performance?
-                agentNodes.subList(currentValue.agents.length, agentNodes.size()).clear();
-                listUpdated = true;
-            } else if (currentValue.agents.length > agentNodes.size()) {
-                //add needed agent displays
-                for (int i = agentNodes.size(); i < currentValue.agents.length; ++i) {
-                    //create an observable reference to an agent state
-                    ObjectProperty<PCAlgorithmState.AgentState> newState = new SimpleObjectProperty<>();
-                    //create an observable property for the id
-                    IntegerProperty newId = new SimpleIntegerProperty(i); //just use it's index in the lists as the id for now
+                if (newCount < oldCount) {
+                    //delete unneeded agent displays and states; todo: possibly just hide them for performance?
+                    agentNodes.subList(newCount, agentNodes.size()).clear();
+                    listUpdated = true;
+                } else if (newCount > oldCount) {
+                    //add needed agent displays
+                    for (int i = oldCount; i < newCount; ++i) {
+                        //create an observable reference to an agent state
+                        ObjectProperty<PCAlgorithmState.AgentState> newState = new SimpleObjectProperty<>();
+                        //create an observable property for the id
+                        IntegerProperty newId = new SimpleIntegerProperty(i); //just use it's index in the lists as the id for now
 
-                    //bind the agent state to the algorithm state+id since it doubles as the index
-                    newState.bind(
-                            Bindings.createObjectBinding(
-                                    () -> state.get().agents[newId.get()],
-                                    state, newId
-                            )
-                    );
+                        //bind the agent state to the algorithm state+id since it doubles as the index
+                        newState.bind(
+                                Bindings.createObjectBinding(
+                                        () -> state.get().agents[newId.get()],
+                                        state, newId
+                                )
+                        );
 //
-//                        if(!fxGraph.isEmpty()) {
+//                        if(!displayGraph.isEmpty()) {
 //                        } else {
 //                            newController.setup(newId, newState);
 //                        }
 
-                    //give the state to the controller
-                    AgentDisplay newNode = new AgentDisplay(newId, newState);
+                        //give the state to the controller
+                        AgentDisplay newNode = new AgentDisplay(newId, newState);
 
 //                    //position the node cheaply for now
 //                    GridPane.setRowIndex(newNode, i);
 
-                    //add the data to the lists
-                    agentNodes.add(newNode);
+                        //add the data to the lists
+                        agentNodes.add(newNode);
+                    }
+                    List<BooleanProperty[]> displayToggles = optionsBoxController.getSolutionDisplayToggles();
+                    //addListeners for all the display toggles so that we still get graph display updates even when the playback is paused
+                    displayToggles.subList(oldCount, newCount).forEach(each -> {
+                        for (BooleanProperty eachToggle : each) {
+                            eachToggle.addListener((e, o, n) -> toursOutdated = true);
+                        }
+                    });
+
+                    if(oldCount == 0 && newCount != 0) {
+                        //pre-highlight the best found so far
+                        displayToggles.get(0)[0].set(true);
+                    }
+
+
+                    listUpdated = true;
                 }
-                listUpdated = true;
-            }
                 //if the list was updated, the re-arrange the cells in the grid
-                if(listUpdated) {
+                if (listUpdated) {
                     //use a tree structure for ease of understanding and debugging; populate using known structure from memetico
                     int columnsAllocated = 0;
 
@@ -391,7 +381,7 @@ public class MemeticoContentController implements ContentController {
                                 eachData.column = columnsAllocated++;
 
                                 //we want placeholders to leave empty columns between subpopulations visually
-                                if(eachData.id != currentValue.agents.length-1 && eachNode.getParent().getChildren().indexOf(eachNode) == eachNode.getParent().getChildren().size()-1) {
+                                if (eachData.id != currentValue.agents.length - 1 && eachNode.getParent().getChildren().indexOf(eachNode) == eachNode.getParent().getChildren().size() - 1) {
                                     GridPositionData placeholderData = new GridPositionData();
                                     placeholderData.id = -1;
                                     placeholderData.row = eachData.row;
@@ -432,8 +422,8 @@ public class MemeticoContentController implements ContentController {
                         }
                     }
 
-                    for(GridPositionData eachData : arrangementInstructions) {
-                        if(eachData.id == -1) {
+                    for (GridPositionData eachData : arrangementInstructions) {
+                        if (eachData.id == -1) {
                             //create a placeholder
                             Pane placeHolder = new Pane();
                             placeHolder.setMinWidth(25);
@@ -448,12 +438,14 @@ public class MemeticoContentController implements ContentController {
                         }
                     }
                 }
-        } catch (InvalidArgumentException | IOException e) {
-            e.printStackTrace();
+            } catch (InvalidArgumentException | IOException e) {
+                e.printStackTrace();
+            }
+
         }
-
-
-        updateTours();
+        if(toursOutdated) {
+            updateTours();
+        }
 //0
 //        1
 //                4

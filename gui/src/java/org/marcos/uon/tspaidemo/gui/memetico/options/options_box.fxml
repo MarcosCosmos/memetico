@@ -27,8 +27,6 @@
                         <Text fx:id="txtMemeticoSelectedTourSolution" HBox.hgrow="ALWAYS"/>
                         <Button fx:id="btnMemeticoSelectTourSolution" onAction="#openTourSelectionDialog">Choose File</Button>
                     </HBox>
-                    <Label GridPane.rowIndex="1" GridPane.columnIndex="0" labelFor="$cbMemeticoToggleTarget">Show Tour?</Label>
-                    <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="cbMemeticoToggleTarget"/>
                 </GridPane>
                 <GridPane fx:id="gpMemeticoCostSolutionSelection" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.rowSpan="1" GridPane.columnSpan="2">
                     <Label GridPane.rowIndex="0" GridPane.columnIndex="0" labelFor="$fldMemeticoSolutionCost">Cost:</Label>
@@ -38,7 +36,11 @@
             <Button fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
         </VBox>
         <VBox>
-            <Text fx:id="memeticoAgentOptionsTitle">Agent Display Options</Text>
+            <Text fx:id="memeticoAgentOptionsTitle">Display Options</Text>
+            <GridPane fx:id="gpMemeticoTargetDisplayToggleWrapper">
+                <Label GridPane.rowIndex="1" GridPane.columnIndex="0" labelFor="$cbMemeticoToggleTarget">Show Tour?</Label>
+                <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="cbMemeticoToggleTarget"/>
+            </GridPane>
             <VBox fx:id="memeticoAgentOptionsWrapper"/>
         </VBox>
     </VBox>

@@ -18,15 +18,17 @@ import java.util.List;
 
 public class SimpleEdge implements IEdge {
     private final transient StringProperty textProperty = new SimpleStringProperty();
-    private final transient List<String> additionalStyleClasses = new ArrayList<>();
 
-    private ObjectProperty<SimpleVertex> source = new SimpleObjectProperty<SimpleVertex>();
-    private ObjectProperty<SimpleVertex> target = new SimpleObjectProperty<SimpleVertex>();
+    private final ObjectProperty<SimpleVertex> source = new SimpleObjectProperty<SimpleVertex>();
+    private final ObjectProperty<SimpleVertex> target = new SimpleObjectProperty<SimpleVertex>();
+
+    private final EdgeGraphic theGraphic;
 
     public SimpleEdge(SimpleVertex source, SimpleVertex target, ListProperty<String> additionalStyleClasses) {
         this.source.setValue(source);
         this.target.setValue(target);
-        this.additionalStyleClasses.addAll(additionalStyleClasses);
+        theGraphic = new EdgeGraphic();
+        theGraphic.getStyleClass().setAll(additionalStyleClasses);
     }
 
     public SimpleEdge(SimpleVertex source, SimpleVertex target) {
@@ -35,7 +37,7 @@ public class SimpleEdge implements IEdge {
     }
 
     public EdgeGraphic getGraphic(Graph graph) {
-        return new EdgeGraphic();
+        return theGraphic;
     }
 
     public StringProperty textProperty() {
@@ -110,9 +112,6 @@ public class SimpleEdge implements IEdge {
             this.group.getStyleClass().add("edge");
             this.line.getStyleClass().add("line");
             this.text.getStyleClass().add("label");
-
-            this.getStyleClass().addAll(additionalStyleClasses);
-
         }
 
         public Group getGroup() {
@@ -127,8 +126,7 @@ public class SimpleEdge implements IEdge {
             return this.text;
         }
     }
-    public void setAdditionalStyleClasses(List<String> classes) {
-        this.additionalStyleClasses.clear();
-        this.additionalStyleClasses.addAll(classes);
+    public void setAdditionalStyleClasses(ListProperty<String> classes) {
+        theGraphic.getStyleClass().setAll(classes);
     }
 }

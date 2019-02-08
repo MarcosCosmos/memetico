@@ -59,7 +59,7 @@ public class VisualisationController implements Initializable {
             playbackController = loader.getController();
 
             contentController.bindSelectedFrameIndex(playbackController.frameIndexProperty());
-            playbackController.bindframeCount(contentController.numberOfFramesProperty());
+            playbackController.bindFrameCount(contentController.numberOfFramesProperty());
 
             //trigger subpanes to update at our target framerate
             //todo: possibly collect this into common base class or leave frameupdate to only be called externally by a containing controller?

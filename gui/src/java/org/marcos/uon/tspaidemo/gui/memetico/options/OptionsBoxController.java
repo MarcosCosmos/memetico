@@ -43,19 +43,21 @@ public class OptionsBoxController implements Initializable {
     private GridPane gpMemeticoTourSolutionSelection;
     @FXML
     private GridPane gpMemeticoCostSolutionSelection;
+    @FXML
+    private GridPane gpMemeticoTargetDisplayToggleWrapper;
 
-    private IntegerProperty agentCount = new SimpleIntegerProperty(0);
+//    private IntegerProperty agentCount = new SimpleIntegerProperty(0);
     private ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final ObjectProperty<MemeticoConfiguration> memeticoConfiguration = new SimpleObjectProperty<>();
 
-    public int getAgentCount() {
-        return agentCount.get();
-    }
-
-    public IntegerProperty agentCountProperty() {
-        return agentCount;
-    }
+//    public int getAgentCount() {
+//        return agentCount.get();
+//    }
+//
+//    public IntegerProperty agentCountProperty() {
+//        return agentCount;
+//    }
 
     public void openProblemSelectionDialog() {
         FileChooser fileChooser = new FileChooser();
@@ -66,7 +68,6 @@ public class OptionsBoxController implements Initializable {
             //reset the solution information
             txtMemeticoSelectedTourSolution.setText("");
             fldMemeticoSolutionCost.setText("");
-
         }
     }
 
@@ -79,15 +80,15 @@ public class OptionsBoxController implements Initializable {
         }
     }
 
-    private void populateAgentOptions(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+    public void adjustAgentOptionsDisplay(int oldCount, int newCount) {
         List<Node> children = memeticoAgentOptionsWrapper.getChildren();
         try {
-            if (newValue.intValue() < oldValue.intValue()) {
+            if (newCount < oldCount) {
                 //delete unneeded agent displays and states; todo: possibly just hide them for performance?
-                children.subList(newValue.intValue(), oldValue.intValue()).clear();
-                solutionDisplayToggles.subList(newValue.intValue(), oldValue.intValue()).clear();
-            } else if (newValue.intValue() > oldValue.intValue()) {
-                for (int i = oldValue.intValue(); i < newValue.intValue(); ++i) {
+                children.subList(newCount, oldCount).clear();
+                solutionDisplayToggles.subList(newCount, oldCount).clear();
+            } else if (newCount > oldCount) {
+                for (int i = oldCount; i < newCount; ++i) {
                     Node eachSubBox = null;
 
                     eachSubBox = FXMLLoader.load(getClass().getResource("agent_solution_toggles.fxml"));
@@ -99,7 +100,7 @@ public class OptionsBoxController implements Initializable {
                     };
                     children.add(eachSubBox);
                     solutionDisplayToggles.add(toggles);
-//                    if (oldValue.intValue() == 0 && newValue.intValue() != 0 && i == 0) {
+//                    if (oldValue == 0 && newValue != 0 && i == 0) {
 //                        toggles[0].setValue(true);
 //                    }
                 }
@@ -137,7 +138,18 @@ public class OptionsBoxController implements Initializable {
                     }
                 }
         );
-        agentCount.addListener(this::populateAgentOptions);
+
+        memeticoConfigurationProperty().addListener(((observable, oldValue, newValue) -> {
+            switch (newValue.solutionType) {
+                case TOUR:
+                    gpMemeticoTargetDisplayToggleWrapper.setVisible(true);
+                    break;
+                case COST:
+                    gpMemeticoTargetDisplayToggleWrapper.setVisible(false);
+                    break;
+            }
+        }));
+//        agentCount.addListener(this::adjustAgentOptions);
         fldMemeticoSolutionCost.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 fldMemeticoSolutionCost.setText(newValue.replaceAll("[^\\d]", ""));

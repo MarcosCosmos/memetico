@@ -16,6 +16,7 @@ import org.jorlib.io.tspLibReader.graph.Edge;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,6 +39,8 @@ public class Euc2DTSPFXGraph {
     protected static final class SimpleEdgePool {
         private final List<SimpleEdge> available = new ArrayList<>();
 
+
+
         public SimpleEdgePool() {
 
         }
@@ -59,14 +62,25 @@ public class Euc2DTSPFXGraph {
          * @return
          */
         public SimpleEdge retrieve(SimpleVertex source, SimpleVertex target, ListProperty<String> additionalStyleClasses) {
+            long start;
+            long end;
+            start = System.nanoTime();
             if(!available.isEmpty()) {
                 SimpleEdge result = available.remove(available.size()-1);
                 result.sourceProperty().set(source);
                 result.targetProperty().set(target);
                 result.setAdditionalStyleClasses(additionalStyleClasses);
+
+                end = System.nanoTime();
+                System.out.print((end-start)/1E6);
+                System.out.println(" ");
                 return result;
             } else {
-                return new SimpleEdge(source, target, additionalStyleClasses);
+                SimpleEdge result = new SimpleEdge(source, target, additionalStyleClasses);
+                end = System.nanoTime();
+                System.out.print((end-start)/1E6);
+                System.out.println(";");
+                return result;
             }
         }
         public SimpleEdge retrieve(SimpleVertex source, SimpleVertex target) {
@@ -191,15 +205,37 @@ public class Euc2DTSPFXGraph {
         //        graph.beginUpdate(); //only one of beginUpdate/endUpdate actually need to be called; begin update should probably never be called since it just wipes the canvas without changing other lists?
 //        Model model = fxGraph.getModel();
         List<SimpleEdge> edgeList = new ArrayList<>();
+//        long bigStart = System.nanoTime();
         for(int[] eachEdge : newEdges) {
+//            long start;
+//            long end;
+//            start = System.nanoTime();
             SimpleVertex a = cells.get(eachEdge[0]),
                     b = cells.get(eachEdge[1])
                             ;
+//            end = System.nanoTime();
+//            System.out.print(280*(end-start)/1E6);
+//            System.out.print(" ");
+//            start = System.nanoTime();
             SimpleEdge eachResult = constructor.apply(a,b);
+//            end = System.nanoTime();
+//            System.out.print(280*(end-start)/1E6);
+//            System.out.print(" ");
+
+//            start = System.nanoTime();
             eachResult.textProperty().set(String.valueOf(new Point2D(a.locationX().get(), b.locationY().get()).distance(b.locationX().get(), b.locationY().get())));
             edgeList.add(eachResult);
-//            model.addEdge(eachResult);
+//            end = System.nanoTime();
+//            System.out.print(280*(end-start)/1E6);
+//            System.out.println();
         }
+        long bigEnd = System.nanoTime();
+
+//        System.out.println(TimeUnit.NANOSECONDS.toMillis(bigEnd-bigStart));
+//
+//        System.out.println();
+//        System.out.println();
+//        System.out.println();
         //add the return-to-start
 
         edgeCategory.add(Collections.unmodifiableList(edgeList));
@@ -275,7 +311,7 @@ public class Euc2DTSPFXGraph {
 //        fxGraph.getModel().getRemovedCells().addAll(fxGraph.getModel().getAllCells()); //remove cells
         fxGraph.getModel().getAllCells().clear();
         fxGraph.getModel().getAllEdges().clear();
-        fxGraph.getModel().getAddedEdges().addAll(
+        fxGraph.getModel().getAddedEdges().setAll(
                 Stream.of(
                         normalEdges.stream(),
                         Stream.concat(targets.stream(), predictions.stream())
@@ -284,7 +320,7 @@ public class Euc2DTSPFXGraph {
                         .flatMap(Function.identity())
                         .collect(Collectors.toList())
         );
-        fxGraph.getModel().getAddedCells().addAll(cells);
+        fxGraph.getModel().getAddedCells().setAll(cells);
         fxGraph.endUpdate();
     }
 }

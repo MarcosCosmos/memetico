@@ -120,8 +120,13 @@ public class PlaybackController implements Initializable {
     /**
      * Allows something else (i.e. the playback controller) to control which frame to show.
      */
-    public void bindframeCount(ObservableValue<Number> source) {
+    public void bindFrameCount(ObservableValue<Number> source) {
+//        unbindFrameCount();
         frameCount.bind(source);
+    }
+
+    public void unbindFrameCount() {
+        frameCount.unbind();
     }
 
     public void frameUpdate() {
