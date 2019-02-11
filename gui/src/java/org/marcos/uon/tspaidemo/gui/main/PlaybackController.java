@@ -73,9 +73,6 @@ public class PlaybackController implements Initializable {
 
         sldrFrameIndex.valueProperty().bindBidirectional(frameIndex);
 
-        frameIndex.addListener((a,b,c) -> {
-            int i=0;
-        });
 
         sldrFrameIndex.setOnMousePressed((event) -> {
             wasPlaying = isPlaying.get();
@@ -102,6 +99,13 @@ public class PlaybackController implements Initializable {
                 leftOverFrames = 0;
             }
         });
+
+
+        cbSpeed.setValue(1.0);
+        speedInterval.bind(Bindings.createDoubleBinding(
+                () -> 100/cbSpeed.getValue(),
+                cbSpeed.valueProperty()
+        ));
     }
 
     public ReadOnlyIntegerProperty frameIndexProperty() {

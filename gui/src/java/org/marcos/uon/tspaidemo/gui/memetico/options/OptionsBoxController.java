@@ -1,7 +1,7 @@
 package org.marcos.uon.tspaidemo.gui.memetico.options;
 
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,47 +9,59 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import memetico.Population;
+import memetico.util.CrossoverOpName;
+import memetico.util.LocalSearchOpName;
+import memetico.util.RestartOpName;
 import org.marcos.uon.tspaidemo.gui.memetico.MemeticoConfiguration;
+import org.marcos.uon.tspaidemo.gui.memetico.ProblemConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class OptionsBoxController implements Initializable {
+
+
+    private Stage theStage;
 
     @FXML
     private ScrollPane memeticoOptionsBoxRoot;
     @FXML
-    private Text txtMemeticoSelectedProblem, txtMemeticoSelectedTourSolution;
-    @FXML
-    private Button btnMemeticoSelectProblem;
+    private Button btnMemeticoSelectProblem, btnMemeticoSelectTour;
     @FXML
     private CheckBox cbMemeticoToggleTarget;
     @FXML
     private VBox memeticoAgentOptionsWrapper;
     @FXML
-    private TextField fldMemeticoSolutionCost;
+    private TextField fldMemeticoTourCost, fldMemeticoPopDepth, fldMemeticoMutRate,fldMemeticoMaxGen;
     @FXML
-    private ChoiceBox<String> cbMemeticoSolutionType;
+    private ChoiceBox<String> choiceMemeticoSolutionType, choiceMemeticoLocalSearch, choiceMemeticoCrossover, choiceMemeticoRestart;
+
     @FXML
-    private GridPane gpMemeticoTourSolutionSelection;
-    @FXML
-    private GridPane gpMemeticoCostSolutionSelection;
-    @FXML
-    private GridPane gpMemeticoTargetDisplayToggleWrapper;
+    private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget;
 
 //    private IntegerProperty agentCount = new SimpleIntegerProperty(0);
     private ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
 
+    private final ObjectProperty<ProblemConfiguration> problemConfiguration = new SimpleObjectProperty<>();
+
     private final ObjectProperty<MemeticoConfiguration> memeticoConfiguration = new SimpleObjectProperty<>();
+
+
+    //called when the user wants to apply their selected configuration
+    private Runnable applyConfigFunc = () -> {};
 
 //    public int getAgentCount() {
 //        return agentCount.get();
@@ -64,10 +76,10 @@ public class OptionsBoxController implements Initializable {
         fileChooser.setTitle("Select Problem File");
         File selection = fileChooser.showOpenDialog(new Stage());
         if (selection != null) {
-            txtMemeticoSelectedProblem.setText(selection.getPath());
+            lblMemeticoProblemFile.setText(selection.getPath());
             //reset the solution information
-            txtMemeticoSelectedTourSolution.setText("");
-            fldMemeticoSolutionCost.setText("");
+            lblMemeticoTourFile.setText("");
+            fldMemeticoTourCost.setText("");
         }
     }
 
@@ -76,7 +88,7 @@ public class OptionsBoxController implements Initializable {
         fileChooser.setTitle("Select Tour File");
         File selection = fileChooser.showOpenDialog(new Stage());
         if (selection != null) {
-            txtMemeticoSelectedTourSolution.setText(selection.getPath());
+            lblMemeticoTourFile.setText(selection.getPath());
         }
     }
 
@@ -110,10 +122,6 @@ public class OptionsBoxController implements Initializable {
         }
     }
 
-    public Parent getRoot() {
-        return memeticoOptionsBoxRoot;
-    }
-
     public BooleanProperty getTargetDisplayToggle() {
         return cbMemeticoToggleTarget.selectedProperty();
     }
@@ -122,53 +130,113 @@ public class OptionsBoxController implements Initializable {
         return solutionDisplayToggles;
     }
 
+    public ProblemConfiguration getProblemConfiguration() {
+        return problemConfiguration.get();
+    }
+
+    public ObjectProperty<ProblemConfiguration> problemConfigurationProperty() {
+        return problemConfiguration;
+    }
+
+    public void setProblemConfiguration(ProblemConfiguration problemConfiguration) {
+        this.problemConfiguration.set(problemConfiguration);
+    }
+
+    private static ChangeListener<String> generateIntFieldFixer(TextField target) {
+        return (observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                target.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        };
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        cbMemeticoSolutionType.valueProperty().addListener(
+        memeticoOptionsBoxRoot.getStylesheets().add(getClass().getResource("options_box.css").toExternalForm());
+        memeticoOptionsBoxRoot.getStylesheets().add(getClass().getResource("../../main/common.css").toExternalForm());
+        choiceMemeticoSolutionType.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     switch (newValue){
                         case "Tour":
-                            gpMemeticoTourSolutionSelection.setVisible(true);
-                            gpMemeticoCostSolutionSelection.setVisible(false);
+                            lblMemeticoTourFileDesc.setVisible(true);
+                            lblMemeticoTourFile.setVisible(true);
+                            btnMemeticoSelectTour.setVisible(true);
+                            lblMemeticoTourCost.setVisible(false);
+                            fldMemeticoTourCost.setVisible(false);
                             break;
                         case "Cost":
-                            gpMemeticoTourSolutionSelection.setVisible(false);
-                            gpMemeticoCostSolutionSelection.setVisible(true);
+                            lblMemeticoTourFileDesc.setVisible(false);
+                            lblMemeticoTourFile.setVisible(false);
+                            btnMemeticoSelectTour.setVisible(false);
+                            lblMemeticoTourCost.setVisible(true);
+                            fldMemeticoTourCost.setVisible(true);
                             break;
                     }
                 }
         );
 
-        memeticoConfigurationProperty().addListener(((observable, oldValue, newValue) -> {
-            switch (newValue.solutionType) {
-                case TOUR:
-                    gpMemeticoTargetDisplayToggleWrapper.setVisible(true);
-                    break;
-                case COST:
-                    gpMemeticoTargetDisplayToggleWrapper.setVisible(false);
-                    break;
-            }
-        }));
-//        agentCount.addListener(this::adjustAgentOptions);
-        fldMemeticoSolutionCost.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                fldMemeticoSolutionCost.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-        memeticoConfiguration.addListener(
+        fldMemeticoTourCost.textProperty().addListener(generateIntFieldFixer(fldMemeticoTourCost));
+        fldMemeticoPopDepth.textProperty().addListener(generateIntFieldFixer(fldMemeticoPopDepth));
+        fldMemeticoMutRate.textProperty().addListener(generateIntFieldFixer(fldMemeticoMutRate));
+        fldMemeticoMaxGen.textProperty().addListener(generateIntFieldFixer(fldMemeticoMaxGen));
+
+
+
+        choiceMemeticoLocalSearch.getItems().addAll(
+                Arrays.stream(LocalSearchOpName.values())
+                        .map(Object::toString)
+                        .collect(Collectors.toList())
+        );
+
+        choiceMemeticoCrossover.getItems().addAll(
+                Arrays.stream(CrossoverOpName.values())
+                        .map(Object::toString)
+                        .collect(Collectors.toList())
+        );
+
+        choiceMemeticoRestart.getItems().addAll(
+                Arrays.stream(RestartOpName.values())
+                    .map(Object::toString)
+                    .collect(Collectors.toList())
+        );
+
+        //bind the displayed fields etc to the actual problem via listeners
+        problemConfiguration.addListener(
                 (observable, oldValue, newValue) -> {
-                    txtMemeticoSelectedProblem.setText(newValue.problemFile.getPath());
-                    cbMemeticoSolutionType.setValue(newValue.solutionType.toString());
+                    lblMemeticoProblemFile.setText(newValue.problemFile.getPath());
+                    choiceMemeticoSolutionType.setValue(newValue.solutionType.toString());
                     switch (newValue.solutionType) {
                         case TOUR:
-                            txtMemeticoSelectedTourSolution.setText(newValue.tourFile.getPath());
+                            lblMemeticoTourFile.setText(newValue.tourFile.getPath());
+                            lblMemeticoToggleTarget.setVisible(true);
+                            cbMemeticoToggleTarget.setVisible(true);
+                            break;
                         case COST:
-                            fldMemeticoSolutionCost.setText(String.valueOf(newValue.targetCost));
+                            fldMemeticoTourCost.setText(String.valueOf(newValue.targetCost));
+                            lblMemeticoToggleTarget.setVisible(false);
+                            cbMemeticoToggleTarget.setVisible(false);
                             break;
                     }
                 }
         );
-//        cbMemeticoToggleTarget.selectedProperty().set(true);
+        memeticoConfiguration.addListener((observable, oldValue, newValue) -> {
+            int popSize = newValue.populationSize;
+            int popDepth = (int)Math.ceil(
+                    (Math.log(
+                        ( (Population.DEFAULT_N_ARY-1) * popSize ) + 1
+                    ) / Math.log(Population.DEFAULT_N_ARY)) - 1
+            );
+            fldMemeticoPopDepth.setText(String.valueOf(popDepth));
+            fldMemeticoMutRate.setText(String.valueOf(newValue.mutationRate));
+            fldMemeticoMaxGen.setText(String.valueOf(newValue.maxGenerations));
+            choiceMemeticoLocalSearch.setValue(newValue.localSearchOp);
+            choiceMemeticoCrossover.setValue(newValue.crossoverOp);
+            choiceMemeticoRestart.setValue(newValue.restartOp);
+        });
+
+        theStage = new Stage();
+        Scene newScane = new Scene(memeticoOptionsBoxRoot, 300, 200);
+        theStage.setScene(newScane);
     }
 
     public MemeticoConfiguration getMemeticoConfiguration() {
@@ -184,16 +252,37 @@ public class OptionsBoxController implements Initializable {
     }
 
     public void applyConfiguration() {
-        File problemFile = new File(txtMemeticoSelectedProblem.getText());
-        switch(cbMemeticoSolutionType.getValue()) {
+        File problemFile = new File(lblMemeticoProblemFile.getText());
+        switch(choiceMemeticoSolutionType.getValue()) {
             case "Tour":
-                File tourFile = new File(txtMemeticoSelectedTourSolution.getText());
-                memeticoConfiguration.set(new MemeticoConfiguration(problemFile, tourFile));
+                File tourFile = new File(lblMemeticoTourFile.getText());
+                problemConfiguration.set(new ProblemConfiguration(problemFile, tourFile));
                 break;
             case "Cost":
-                int targetCost = Integer.parseInt(fldMemeticoSolutionCost.getText());
-                memeticoConfiguration.set(new MemeticoConfiguration(problemFile, targetCost));
+                int targetCost = Integer.parseInt(fldMemeticoTourCost.getText());
+                problemConfiguration.set(new ProblemConfiguration(problemFile, targetCost));
         }
+        int populationHeight = Integer.parseInt(fldMemeticoPopDepth.textProperty().get());
+        int populationSize = (int)((Math.pow(3, populationHeight+1)-1)/2.0);
+        int mutationRate = Integer.parseInt(fldMemeticoMutRate.textProperty().get());
+        int maxGenerations = Integer.parseInt(fldMemeticoMaxGen.textProperty().get());
+        memeticoConfiguration.set(new MemeticoConfiguration(populationSize, mutationRate, choiceMemeticoLocalSearch.getValue(), choiceMemeticoCrossover.getValue(), choiceMemeticoRestart.getValue(), maxGenerations));
+        applyConfigFunc.run();
+    }
 
+    /**
+     * Set an external function to be called when the user wants to apply their selected configuration
+     * @param applyConfigFunc
+     */
+    public void setApplyConfigFunc(Runnable applyConfigFunc) {
+        this.applyConfigFunc = applyConfigFunc;
+    }
+
+    public void open() {
+        theStage.show();
+    }
+
+    public void close() {
+        theStage.close();
     }
 }

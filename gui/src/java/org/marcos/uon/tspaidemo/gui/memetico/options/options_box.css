@@ -1,0 +1,26 @@
+.fileNameDisplay {
+    -fx-text-alignment: left;
+    -fx-alignment: center-left;
+    -fx-padding: 5px;
+    -fx-text-overrun: leading-ellipsis;
+    -fx-max-width: 300px;
+}
+
+.optionGrid > * {
+    -fx-text-alignment: left;
+    -fx-alignment: center-right;
+}
+
+.optionGrid {
+    -fx-vgap: 5px;
+    -fx-hgap: 5px;
+}
+
+.h1, .h2, .h3 {
+    -fx-text-alignment: left;
+    -fx-alignment: center-left;
+}
+
+#memeticoOptionsBoxRoot {
+    -fx-padding: 5px;
+}

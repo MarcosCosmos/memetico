@@ -21,11 +21,13 @@ public class PCAlgorithmState {
     }
 
     public static class AgentState {
+        public final int id;
         //todo: consider possibly using a thin solutionstructure here like for agent and algorithm?
         public final LightDiCycle pocket;          /* The "Pocket"  SolutionStructure    */
         public final LightDiCycle current;         /* The "Current" SolutionStructure    */
         //todo: possibly consider
-        public AgentState(DiCycle pocket, DiCycle current) {
+        public AgentState(int id, DiCycle pocket, DiCycle current) {
+            this.id = id;
             this.pocket = new LightDiCycle(pocket);
             this.current = new LightDiCycle(current);
         }
@@ -49,11 +51,10 @@ public class PCAlgorithmState {
         this.generation = generation;
         this.nAry = src.n_ary;
         this.logTime = logTime;
-        this.agents = Arrays.stream(src.pop).map(
-                each -> {
-                    PocCurAgent _each = (PocCurAgent)each;
-                    return new AgentState((DiCycle)_each.pocket, (DiCycle)_each.current);
-                }
-        ).toArray(AgentState[]::new);
+        this.agents = new AgentState[src.pop.length];
+        for(int i=0; i<agents.length; ++i) {
+            PocCurAgent each = (PocCurAgent)src.pop[i];
+            agents[i] = new AgentState(i, (DiCycle)each.pocket, (DiCycle)each.current);
+        }
     }
 }

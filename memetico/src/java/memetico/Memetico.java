@@ -272,7 +272,7 @@ public class Memetico {
         String BuscaLocal = "Recursive Arc Insertion";//Recursive Arc Insertion";
         String SingleorDouble = "Double";
         String OPCrossover = "Strategic Arc Crossover - SAX",
-                OPReStart = "RestartInsertion",
+                OPReStart = "Insertion",
                 OPMutacao = "MutationInsertion";
         String structSol = "DiCycle";
         String structPop = "Ternary Tree";
@@ -484,11 +484,11 @@ public class Memetico {
 
     /* ------------------------------------ selectRestartOperator ------------------------------------*/
     public DiCycleRestartOperators selectRestartOperator(DiCycleRestartOperators refRestart, String OPRestart, ConstructionAlgorithms refConstr) {
-        if (OPRestart.equals("RestartInsertion")) {
+        if (OPRestart.equals("Insertion")) {
             RestartInsertion mi = new RestartInsertion();
             mi.setConstAlg(refConstr);
             refRestart = mi;
-        } else if (OPRestart.equals("RestartCut")) {
+        } else if (OPRestart.equals("Cut")) {
             RestartCut mi = new RestartCut();
             mi.setConstAlg(refConstr);
             refRestart = mi;

@@ -7,12 +7,13 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 <GridPane xmlns="http://javafx.com/javafx"
-          xmlns:fx="http://javafx.com/fxml">
-    <HBox GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" alignment="CENTER">
+          xmlns:fx="http://javafx.com/fxml" styleClass="optionGrid">
+    <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" textAlignment="CENTER">
         <Text styleClass="lblAgentId">Agent&#160;</Text>
         <Text styleClass="txtAgentId"/>
-    </HBox>
+    </TextFlow>
     <Label GridPane.rowIndex="1" GridPane.columnIndex="0">Show Pocket Solution?</Label>
     <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="cbTogglePocket"/>
     <Label GridPane.rowIndex="2" GridPane.columnIndex="0">Show Current Solution?</Label>

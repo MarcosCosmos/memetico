@@ -38,6 +38,7 @@ public class VisualisationController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
 
         root.getStylesheets().add(getClass().getResource("visualisation.css").toExternalForm());
+        root.getStylesheets().add(getClass().getResource("common.css").toExternalForm());
         //todo: perhaps make the type of the logger and frame content to use generic/parameters given to this controller.?
         //set the frame content controller to a new
         try {

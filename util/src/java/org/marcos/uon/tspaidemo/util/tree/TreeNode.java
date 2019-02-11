@@ -34,7 +34,7 @@ public class TreeNode<T> {
         this.data = data;
     }
 
-    public TreeNode<T> getParent() {
+    public TreeNode<T> parent() {
         return parent;
     }
     public void attachTo(@NotNull TreeNode<T> parent) {
@@ -69,7 +69,40 @@ public class TreeNode<T> {
         children.forEach(TreeNode::detach);
     }
 
-    public List<TreeNode<T>> getChildren() {
+    public List<TreeNode<T>> children() {
         return Collections.unmodifiableList(children);
+    }
+
+    public TreeNode<T> previousSibling() {
+        if(isRoot()) {
+            return null;
+        } else {
+            int curIndex = parent.children.indexOf(this);
+            if(curIndex > 0) {
+                return parent.children.get(curIndex+1);
+            } else {
+                return null;
+            }
+        }
+    }
+    public boolean hasPreviousSibling() {
+        return previousSibling() != null;
+    }
+
+    public TreeNode<T> nextSibling() {
+        if(isRoot()) {
+            return null;
+        } else {
+            int curIndex = parent.children.indexOf(this);
+            if(curIndex < parent.children.size()-1) {
+                return parent.children.get(curIndex+1);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public boolean hasNextSibling() {
+        return nextSibling() != null;
     }
 }

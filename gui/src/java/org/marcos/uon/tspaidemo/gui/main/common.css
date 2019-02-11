@@ -1,0 +1,18 @@
+.h1 {
+    -fx-font-size: 2em;
+    -fx-padding: 0.67em 0 0.67em 0;
+}
+
+.h2 {
+    -fx-font-size: 1.5em;
+    -fx-padding: 0.83em 0 0.83em 0;
+}
+
+.h3 {
+    -fx-font-size: 1.17em;
+    -fx-padding: 1em 0 1em 0;
+}
+
+.h1, .h2, .h3 {
+    -fx-font-weight: bold;
+}

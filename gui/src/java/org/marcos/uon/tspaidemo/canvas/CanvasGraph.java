@@ -74,10 +74,10 @@ public class CanvasGraph extends Pane {
         double height = this.getHeight();
         GraphicsContext gc = backgroundLayer.getGraphicsContext2D();
         gc.setFill(backgroundColor);
-        gc.fillRect(0,0, width*scale, height*scale);
+        gc.fillRect(0,0, width, height);
 
         gc = edgesLayer.getGraphicsContext2D();
-        gc.clearRect(0,0, width*scale, height*scale);
+        gc.clearRect(0,0, width, height);
         for(Edge each : edges) {
             gc.setStroke(each.getLineStroke());
             gc.setLineWidth(scale);

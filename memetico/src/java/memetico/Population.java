@@ -9,7 +9,9 @@ public class Population {
     public Agent bestAgent,
             worstAgent;
 
-    public int n_ary = 3, newBestSol = 0;
+    public int n_ary = DEFAULT_N_ARY, newBestSol = 0;
+
+    public static final int DEFAULT_N_ARY = 3;
 
     public Agent pop[]; /* The population is declared as an array of agents */
 
@@ -21,7 +23,6 @@ public class Population {
         // this it totally instance and problem dependent and should not be here...
         popSize = size;
         nrParents = (int) Math.floor(popSize / n_ary);
-
         //Get the type of the agent to be used in this population
         switch (agentType) {
             case Agent.POKET_CURRENT:

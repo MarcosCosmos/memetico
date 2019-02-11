@@ -21,12 +21,10 @@ public class AgentDisplay extends GridPane {
     private final transient Text txtCurrentCost;
 //    private final transient CheckBox cbTogglePocket, cbToggleCurrent;
 
-
-    private final IntegerProperty agentDisplayId = new SimpleIntegerProperty(0);
     private final ObjectProperty<PCAlgorithmState.AgentState> state = new SimpleObjectProperty<>();
 
 
-    public AgentDisplay(IntegerProperty agentDisplayId, ObjectProperty<PCAlgorithmState.AgentState> stateProperty/*, BooleanProperty pocketSelection, BooleanProperty currentSelection*/) throws IOException {
+    public AgentDisplay() {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
                 "agent_display.fxml"));
@@ -38,20 +36,11 @@ public class AgentDisplay extends GridPane {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-
-//        lblAgentId = (Label) lookup(".lblAgentId");
-//        lblPocketCost = (Label) lookup(".lblPocketCost");
-//        lblCurrentCost = (Label) lookup(".lblCurrentCost");
         txtAgentId = (Text) lookup(".txtAgentId");
         txtPocketCost = (Text) lookup(".txtPocketCost");
         txtCurrentCost = (Text) lookup(".txtCurrentCost");
-//        cbTogglePocket = (CheckBox) lookup(".cbTogglePocket");
-//        cbToggleCurrent = (CheckBox) lookup(".cbToggleCurrent");
 
-
-        this.agentDisplayId.bind(agentDisplayId);
-        this.state.bind(stateProperty);
-        txtAgentId.textProperty().bind(this.agentDisplayId.asString());
+        txtAgentId.textProperty().bind(Bindings.createStringBinding(() -> state.get() == null ? "?" : String.valueOf(state.get().id), state));
         txtPocketCost.textProperty().bind(Bindings.createStringBinding(
                 () -> String.valueOf(state.get() == null ? "Uknown" : state.get().pocket.cost),
                 state
@@ -60,23 +49,17 @@ public class AgentDisplay extends GridPane {
                 () -> String.valueOf(state.get() == null ? "Uknown" : state.get().current.cost),
                 state
         ));
-//        if(pocketSelection != null) {
-//            cbTogglePocket.setSelected(pocketSelection.get());
-//            pocketSelection.bind(cbTogglePocket.selectedProperty());
-//            cbTogglePocket.setVisible(true);
-//        } else {
-//            cbTogglePocket.setVisible(false);
-//        }
-//        if(currentSelection != null) {
-//            cbToggleCurrent.setSelected(currentSelection.get());
-//            currentSelection.bind(cbToggleCurrent.selectedProperty());
-//            cbToggleCurrent.setVisible(true);
-//        } else {
-//            cbToggleCurrent.setVisible(false);
-//        }
     }
 
-//    public AgentDisplay(IntegerProperty agentDisplayId, ObjectProperty<PCAlgorithmState.AgentState> stateProperty) throws IOException {
-//        this(agentDisplayId, stateProperty, null, null);
-//    }
+    public PCAlgorithmState.AgentState getState() {
+        return state.get();
+    }
+
+    public ObjectProperty<PCAlgorithmState.AgentState> stateProperty() {
+        return state;
+    }
+
+    public void setState(PCAlgorithmState.AgentState state) {
+        this.state.set(state);
+    }
 }

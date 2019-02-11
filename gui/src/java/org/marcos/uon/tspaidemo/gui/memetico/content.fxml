@@ -3,29 +3,35 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.Button?>
-<VBox fx:id="contentRoot" fx:controller="org.marcos.uon.tspaidemo.gui.memetico.MemeticoContentController"
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.text.TextFlow?>
+<HBox fx:id="contentRoot" fx:controller="org.marcos.uon.tspaidemo.gui.memetico.MemeticoContentController"
       xmlns:fx="http://javafx.com/fxml">
-    <BorderPane>
-        <left>
-            <VBox fx:id="dataWrapper" alignment="CENTER">
-                <HBox alignment="CENTER">
-                    <Text fx:id="lblProblemName">Problem Name:&#160;</Text>
-                    <Text fx:id="txtProblemName"/>
-                </HBox>
-                <GridPane>
-                    <Text fx:id="lblTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="0">Target cost:</Text>
-                    <Text fx:id="txtTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                    <Text fx:id="lblTeneration" GridPane.rowIndex="1" GridPane.columnIndex="0">Generation:</Text>
-                    <Text fx:id="txtGeneration" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                </GridPane>
-                <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
-                    <GridPane fx:id="agentsGrid" />
-                </HBox>
-            </VBox>
-        </left>
-        <right>
-            <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
-        </right>
-    </BorderPane>
-    <BorderPane fx:id="graphWrapper" VBox.vgrow="ALWAYS"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
-</VBox>
+    <ScrollPane fx:id="infoPaneWrapper">
+        <BorderPane fx:id="infoPane">
+            <left>
+                <VBox fx:id="dataWrapper" alignment="CENTER">
+                    <TextFlow styleClass="h1" fx:id="tfProblemName">
+                        <Text fx:id="lblProblemName">Problem:&#160;</Text>
+                        <Text fx:id="txtProblemName"/>
+                    </TextFlow>
+                    <GridPane>
+                        <Text fx:id="lblTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="0">Target cost:</Text>
+                        <Text fx:id="txtTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Text fx:id="lblTeneration" GridPane.rowIndex="1" GridPane.columnIndex="0">Generation:</Text>
+                        <Text fx:id="txtGeneration" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    </GridPane>
+                    <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
+                        <GridPane fx:id="agentsGrid" />
+                        <!--<TreeView fx:id="agentsTree"/>-->
+                    </HBox>
+                </VBox>
+            </left>
+            <right>
+                <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
+            </right>
+        </BorderPane>
+    </ScrollPane>
+    <BorderPane fx:id="graphWrapper" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
+</HBox>

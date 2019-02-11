@@ -1,5 +1,13 @@
+#infoPane {
+    -fx-padding: 5px;
+}
 .dot {
     -fx-fill:red;
+}
+
+#tfProblemName {
+    -fx-text-alignment: center;
+    -fx-alignment: center;
 }
 
 .line {
@@ -27,15 +35,16 @@
     -fx-padding: 5px;
 }
 
+.agentRoot:focused {
+        -fx-focus-color: transparent;
+        -fx-background-insets: -1.4, 0, 1, 2;
+}
+
 .agentInfo {
     -fx-padding: 5px 0 0 0;
 }
 
 .lblAgentId, .txtAgentId {
     -fx-font-weight:bold;
-}
-
-.agentInfo CheckBox {
-    -fx-label-padding: 0 5px 0 10px;
 }
 
