@@ -36,7 +36,7 @@ public class Memetico {
 
     /**
      * @param structSol: struct of the Solution
-     * @param structPop: struct of the base.Population
+     * @param structPop: struct of the Population
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
     public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, String name, long OptimalSol, DataOutputStream fileOut, DataOutputStream compact_fileOut) throws Exception {
@@ -54,7 +54,7 @@ public class Memetico {
         // we set up a global upper bound, this should be done differently...
         double best_aux = Double.MAX_VALUE;
 
-//   base.Agent refAgent = null;
+//   Agent refAgent = null;
 
         //System.out.println('\n' + "Opening file " + name);
         for (count = 0; count < numReplications; count++) {
@@ -113,7 +113,7 @@ public class Memetico {
 //                            " GenNum: " + GenNum + " Tempo: " +
 //                            bestTime);
 
-//           ((base.DiCycle)((base.PocCurAgent)memePop.bestAgent).pocket).printDiCycle();
+//           ((DiCycle)((PocCurAgent)memePop.bestAgent).pocket).printDiCycle();
                 } else memePop.newBestSol++;
 
                 best_aux = memePop.bestAgent.bestCost;
@@ -196,7 +196,7 @@ public class Memetico {
 //        str = "";
           for(i=0; i < memePop.popSize; i++) {str += pocCurPop[i].pocket.cost; str += " ";}
           System.out.println("Pockets: "+str);
-           ((base.DiCycle)((base.PocCurAgent)memePop.bestAgent).pocket).printDiCycle();
+           ((DiCycle)((PocCurAgent)memePop.bestAgent).pocket).printDiCycle();
         }*/
             } // end of while, exiting the generations loop.
 
@@ -269,12 +269,12 @@ public class Memetico {
         // experiments. We are assuming they are located in the same directory.
         // A GUI would be needed here.
         String MetodoConstrutivo = "Nearest Neighbour";
-        String BuscaLocal = "Recursive base.Arc Insertion";//Recursive base.Arc Insertion";
+        String BuscaLocal = "Recursive Arc Insertion";//Recursive Arc Insertion";
         String SingleorDouble = "Double";
-        String OPCrossover = "Strategic base.Arc Crossover - SAX",
-                OPReStart = "base.RestartInsertion",
-                OPMutacao = "base.MutationInsertion";
-        String structSol = "base.DiCycle";
+        String OPCrossover = "Strategic Arc Crossover - SAX",
+                OPReStart = "RestartInsertion",
+                OPMutacao = "MutationInsertion";
+        String structSol = "DiCycle";
         String structPop = "Ternary Tree";
 //        String Names[] = {
 //                "br17.atsp", "ftv33.atsp", "ftv35.atsp", "ftv38.atsp", "p43.atsp", "ftv44.atsp",
@@ -448,7 +448,7 @@ public class Memetico {
 
 
     /* ------------------------------------ selectCrossoverOperator ------------------------------------*/
-/*public base.Agent selectSolutionStruct(base.Agent refAgent, String StructSol)
+/*public Agent selectSolutionStruct(Agent refAgent, String StructSol)
 {
    return(refAgent);
 }
@@ -457,15 +457,15 @@ public class Memetico {
     /* ------------------------------------ selectSolutionStruct -----------------------------------*/
 /*public SolutionStruct selectSolutionStruct (String SolutionStr)
 {
-   if (SolutionStr.equals("base.DiCycle")){
-      base.DiCycle dc = new base.DiCycle(base.Instance.Dimension);
+   if (SolutionStr.equals("DiCycle")){
+      DiCycle dc = new DiCycle(Instance.Dimension);
    }
    return();
 }
 */
     /* ------------------------------------ selectCrossoverOperator ------------------------------------*/
     public CrossoverOperators selectCrossoverOperator(CrossoverOperators refCrossover, String OPCrossover) {
-        if (OPCrossover.equals("Strategic base.Arc Crossover - SAX")) {
+        if (OPCrossover.equals("Strategic Arc Crossover - SAX")) {
             CrossoverSAX sax = new CrossoverSAX();
             refCrossover = sax;
         } else if (OPCrossover.equals("Distance Preserving Crossover - DPX")) {
@@ -484,11 +484,11 @@ public class Memetico {
 
     /* ------------------------------------ selectRestartOperator ------------------------------------*/
     public DiCycleRestartOperators selectRestartOperator(DiCycleRestartOperators refRestart, String OPRestart, ConstructionAlgorithms refConstr) {
-        if (OPRestart.equals("base.RestartInsertion")) {
+        if (OPRestart.equals("RestartInsertion")) {
             RestartInsertion mi = new RestartInsertion();
             mi.setConstAlg(refConstr);
             refRestart = mi;
-        } else if (OPRestart.equals("base.RestartCut")) {
+        } else if (OPRestart.equals("RestartCut")) {
             RestartCut mi = new RestartCut();
             mi.setConstAlg(refConstr);
             refRestart = mi;
@@ -520,7 +520,7 @@ public class Memetico {
 
     /* ------------------------------------ selectCrossoverOperator ------------------------------------*/
     public LocalSearchOperators selectLocalSearchOperator(LocalSearchOperators refLocalSearch, String OPLocalSearch, Instance inst) {
-        if (OPLocalSearch.equals("Recursive base.Arc Insertion")) {
+        if (OPLocalSearch.equals("Recursive Arc Insertion")) {
             LocalSearchRAI rai = new LocalSearchRAI(inst);
             refLocalSearch = rai;
         } else if (OPLocalSearch.equals("3opt")) {
@@ -555,9 +555,9 @@ public class Memetico {
             child.dontlook[i] = true;
 
 //   System.out.print("Parent 1 : ");
-//   ((base.DiCycle)parentA).printDiCycle();
+//   ((DiCycle)parentA).printDiCycle();
 //   System.out.print("Parent 2 : ");
-//   ((base.DiCycle)parentB).printDiCycle();
+//   ((DiCycle)parentB).printDiCycle();
 //   child.printDiCycle();
 
         for (int i = 1; i < memePop.nrParents; i++)
@@ -600,9 +600,9 @@ public class Memetico {
                 child.dontlook[i] = true;
 
 //   System.out.print("Parent 1 : ");
-//   ((base.DiCycle)parentA).printDiCycle();
+//   ((DiCycle)parentA).printDiCycle();
 //   System.out.print("Parent 2 : ");
-//   ((base.DiCycle)parentB).printDiCycle();
+//   ((DiCycle)parentB).printDiCycle();
 //   child.printDiCycle();
 
         child = new DiCycle(graphInst.dimension);
@@ -622,9 +622,9 @@ public class Memetico {
                 child.dontlook[i] = true;
 
 //   System.out.print("Parent 1 : ");
-//   ((base.DiCycle)parentA).printDiCycle();
+//   ((DiCycle)parentA).printDiCycle();
 //   System.out.print("Parent 2 : ");
-//   ((base.DiCycle)parentB).printDiCycle();
+//   ((DiCycle)parentB).printDiCycle();
 //   child.printDiCycle();
 
         child = new DiCycle(graphInst.dimension);
@@ -642,9 +642,9 @@ public class Memetico {
                 child.dontlook[i] = true;
 
 //   System.out.print("Parent 1 : ");
-//   ((base.DiCycle)parentA).printDiCycle();
+//   ((DiCycle)parentA).printDiCycle();
 //   System.out.print("Parent 2 : ");
-//   ((base.DiCycle)parentB).printDiCycle();
+//   ((DiCycle)parentB).printDiCycle();
 //   child.printDiCycle();
 
         child = new DiCycle(graphInst.dimension);
@@ -662,9 +662,9 @@ public class Memetico {
                 child.dontlook[i] = true;
 
 //   System.out.print("Parent 1 : ");
-//   ((base.DiCycle)parentA).printDiCycle();
+//   ((DiCycle)parentA).printDiCycle();
 //   System.out.print("Parent 2 : ");
-//   ((base.DiCycle)parentB).printDiCycle();
+//   ((DiCycle)parentB).printDiCycle();
 //   child.printDiCycle();
     }
 

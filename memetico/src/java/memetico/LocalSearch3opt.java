@@ -36,7 +36,7 @@ public class LocalSearch3opt extends DiCycleLocalSearchOperator {
     }
 
 
-    /* ------------------------------------ Recursive base.Arc Insertion ----------------------------------*/
+    /* ------------------------------------ Recursive Arc Insertion ----------------------------------*/
     private double calculateDelta1(DiCycle tIns, int i, int j, GraphInstance inst) {
         return (+inst.matDist[i][tIns.arcArray[j].tip]
                 - inst.matDist[i][tIns.arcArray[i].tip]

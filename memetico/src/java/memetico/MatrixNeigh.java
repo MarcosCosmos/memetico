@@ -51,8 +51,8 @@ public class MatrixNeigh {
     /**
      * <p> Sort the neighbors for a given city.</p>
      *
-     * @param Instance:base.GraphInstance The problem instance
-     * @param Solution:base.DiCycle       Solution structure that contains the cities.
+     * @param Instance:GraphInstance The problem instance
+     * @param Solution:DiCycle       Solution structure that contains the cities.
      * @param City:int               The city for each the neighbors matrix will sorted.
      */
     private void sortNeighbors(GraphInstance inst, DiCycle solution, int city) {
@@ -118,8 +118,8 @@ public class MatrixNeigh {
      * <p> Find the nearest neighbors for a given city in a given solution.</p>
      * <p> It fills the neighbors matrix for that city.</p>
      *
-     * @param Instance:base.GraphInstance The problem instance
-     * @param Solution:base.DiCycle       Solution structure that contains the cities
+     * @param Instance:GraphInstance The problem instance
+     * @param Solution:DiCycle       Solution structure that contains the cities
      * @param City:int               The city for each the neighbors matrix will be filled with.
      */
     public void fillWithNeighbors(GraphInstance inst, DiCycle solution, int city) {
@@ -286,10 +286,10 @@ public class MatrixNeigh {
      * <p> Returns the greatest neighbor in vector.</p>
      *
      * @param PredSuc:int            it is as sucessor or predecessor vector.
-     * @param Solution:base.DiCycle       Solution structure that contains the cities.
+     * @param Solution:DiCycle       Solution structure that contains the cities.
      * @param City:int               The city that will be used to get the neighbor.
      * @param Vector:int[]           List of neighbors
-     * @param Instance:base.GraphInstance The problem instance
+     * @param Instance:GraphInstance The problem instance
      */
     private double maxNeighbor(int Pred_or_Suc, DiCycle solution, int i, int vector[], GraphInstance inst) {
         int j;
@@ -383,9 +383,9 @@ public class MatrixNeigh {
      * <p> Remove the greatest cost neighbor in vector as given by cost.</p>
      *
      * @param PredSuc:int            it is as sucessor or predecessor vector.
-     * @param Solution:base.DiCycle       Solution structure that contains the cities.
+     * @param Solution:DiCycle       Solution structure that contains the cities.
      * @param Vector:int[]           List of neighbors
-     * @param Instance:base.GraphInstance The problem instance
+     * @param Instance:GraphInstance The problem instance
      */
     private void removeNeighbor(int Pre_or_Suc, DiCycle solution, int City_aux1, int City_aux2, int count, double cost, int Vetor[], GraphInstance inst) {
         int i, cont_aux = count, aux, aux1, City2 = City_aux2, City1 = City_aux1;

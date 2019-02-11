@@ -104,4 +104,4 @@ public class ATSPRTInstance extends ATSPInstance {
     }
 
 
-}/*end of base.Instance class*/
+}/*end of Instance class*/

@@ -12,4 +12,4 @@ public abstract class Reduction {
     //Methods declarations
     public abstract Instance runReduction(Instance inst);
 
-}/*end of base.Instance class*/
+}/*end of Instance class*/

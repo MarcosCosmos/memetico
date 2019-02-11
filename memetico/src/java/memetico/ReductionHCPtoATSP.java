@@ -13,8 +13,8 @@ public class ReductionHCPtoATSP extends Reduction {
         temp.setDimension(hcpInst.dimension);
 
 
-/*   for(int i=0; i<base.Instance.Dimension; i++){
-      for (j=0; j<base.Instance.Dimension; j++){
+/*   for(int i=0; i<Instance.Dimension; i++){
+      for (j=0; j<Instance.Dimension; j++){
 	 if (i == j) matDist.setValue(i, j, 0);
 	 else if(matDist.getValue(i, j) == 1) matDist.setValue(j, i, 1);
 

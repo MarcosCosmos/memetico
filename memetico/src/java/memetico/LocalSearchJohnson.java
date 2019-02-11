@@ -51,7 +51,7 @@ public class LocalSearchJohnson extends DiCycleLocalSearchOperator {
     }
 
 
-    /* ------------------------------------ Recursive base.Arc Insertion ----------------------------------*/
+    /* ------------------------------------ Recursive Arc Insertion ----------------------------------*/
     private int t3Get(int t1, int t2, double d1, DiCycle tIns, GraphInstance inst) {
         int t3;
         double d2;
@@ -65,7 +65,7 @@ public class LocalSearchJohnson extends DiCycleLocalSearchOperator {
     }
 
 
-    /* ------------------------------------ Recursive base.Arc Insertion ----------------------------------*/
+    /* ------------------------------------ Recursive Arc Insertion ----------------------------------*/
     private int t5Get(int t1, int t3, int t4, double d1, double d2, DiCycle tIns, GraphInstance inst) {
         int t5;
         double d3, d4;
@@ -86,7 +86,7 @@ public class LocalSearchJohnson extends DiCycleLocalSearchOperator {
     }
 
 
-    /* ------------------------------------ Recursive base.Arc Insertion ----------------------------------*/
+    /* ------------------------------------ Recursive Arc Insertion ----------------------------------*/
     private double delta(int t1, int t2, int t3, int t4, int t5, DiCycle tIns, GraphInstance inst) {
         return (-inst.matDist[t1][t2]
                 - inst.matDist[t3][t4]

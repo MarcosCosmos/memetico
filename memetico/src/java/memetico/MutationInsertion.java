@@ -2,7 +2,7 @@ package memetico;
 
 public class MutationInsertion extends DiCycleMutationOperators {
 
-    /* ------------------------------------ base.MutationInsertion -----------------*/
+    /* ------------------------------------ MutationInsertion -----------------*/
     public void runMutation(SolutionStructure child) {
         int i, j, rCity1, rCity2 = 0, aux = 0;
         DiCycle childDiCycle = (DiCycle) child;

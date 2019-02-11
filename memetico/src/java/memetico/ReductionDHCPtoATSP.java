@@ -27,4 +27,4 @@ public class ReductionDHCPtoATSP extends Reduction {
     }
 
 
-}/*end of base.Instance class*/
+}/*end of Instance class*/

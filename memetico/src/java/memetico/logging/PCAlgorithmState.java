@@ -22,8 +22,8 @@ public class PCAlgorithmState {
 
     public static class AgentState {
         //todo: consider possibly using a thin solutionstructure here like for agent and algorithm?
-        public final LightDiCycle pocket;          /* The "Pocket"  base.SolutionStructure    */
-        public final LightDiCycle current;         /* The "Current" base.SolutionStructure    */
+        public final LightDiCycle pocket;          /* The "Pocket"  SolutionStructure    */
+        public final LightDiCycle current;         /* The "Current" SolutionStructure    */
         //todo: possibly consider
         public AgentState(DiCycle pocket, DiCycle current) {
             this.pocket = new LightDiCycle(pocket);

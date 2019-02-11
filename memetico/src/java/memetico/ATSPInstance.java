@@ -68,4 +68,4 @@ public class ATSPInstance extends GraphInstance {
     }
 
 
-}/*end of base.Instance class*/
+}/*end of Instance class*/

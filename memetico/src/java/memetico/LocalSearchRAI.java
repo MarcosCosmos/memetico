@@ -37,12 +37,12 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
 
 
     /* ------------------------------------ Insert_Arc ------------------------------------*/
-    /*Tenta inserir o arco City->Neigh no base.DiCycle T*/
+    /*Tenta inserir o arco City->Neigh no DiCycle T*/
     private boolean insertArc(DiCycle tIns, int city, int neigh, GraphInstance inst, LinkedList lista) {
         /*ArcOut sera o arco que sera selecionado para ser excluido de T*/
         Arc arcOut = new Arc();
 
-        /*Se o base.DiCycle diminuira de tamanho, entao faca a insercao do arco Neigh->City e retire o arco ArcOut*/
+        /*Se o DiCycle diminuira de tamanho, entao faca a insercao do arco Neigh->City e retire o arco ArcOut*/
         if (testArcInsertion(tIns, city, neigh, arcOut, inst)) {
             tIns.changeDiCycle(inst, arcOut, city, neigh);
 
@@ -77,8 +77,8 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
     }
 
 
-    /* ------------------------------------ base.LocalSearchRAI - ---------------*/
-    /*T: base.DiCycle a ser otimizado   City: cidade onde tenta-se inserir arco antecessor e sucessor a City*/
+    /* ------------------------------------ LocalSearchRAI - ---------------*/
+    /*T: DiCycle a ser otimizado   City: cidade onde tenta-se inserir arco antecessor e sucessor a City*/
     public void localSearchRAI(DiCycle tIns, int initialCity, GraphInstance inst) {
         int neigh, indice;
         LinkedList lista = new LinkedList();
@@ -102,7 +102,7 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
             }
 
             neigh = matNeighbors.neighbors[initialCity][MatrixNeigh.PREDECESSOR][indice];
-            /*Se N_NEIGH esta setado para 1 e esta ja antecessora de InitialCity no base.DiCycle, entao nao ha mudanca*/
+            /*Se N_NEIGH esta setado para 1 e esta ja antecessora de InitialCity no DiCycle, entao nao ha mudanca*/
             if (tIns.arcArray[initialCity].from != neigh)
                 insertArc(tIns, neigh, initialCity, inst, lista);
 
@@ -110,7 +110,7 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
             indice = selectRand();
             /*Nao aceita que a cidade a ser inserida ja seja sucessora de InitialCity em T*/
             neigh = matNeighbors.neighbors[initialCity][MatrixNeigh.SUCCESSOR][indice];
-            /*Se N_Neigh esta setado para 1 e este ja sucessora de InitialCity no base.DiCycle, entao nao ha mudanca*/
+            /*Se N_Neigh esta setado para 1 e este ja sucessora de InitialCity no DiCycle, entao nao ha mudanca*/
             if (tIns.arcArray[initialCity].tip != neigh)
                 insertArc(tIns, initialCity, neigh, inst, lista);
         }
@@ -118,7 +118,7 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
 
 
     /* ------------------------------------ RecursiveArcInsertion_STSP ------------------------------------*/
-    /*T: base.DiCycle a ser otimizado   InitialCity: cidade onde tenta-se inserir arco antecessor e sucessor a InitialCity*/
+    /*T: DiCycle a ser otimizado   InitialCity: cidade onde tenta-se inserir arco antecessor e sucessor a InitialCity*/
     public void recursiveArcInsertion_STSP(DiCycle tIns, int initialCity, GraphInstance inst, LinkedList lista) {
         int neigh, indice; /*Ponto final (seta) do arco que esta sendo inserido*/
 
@@ -137,7 +137,7 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
             if (indice == -1) indice = 2;
         }
         neigh = matNeighbors.neighbors[initialCity][MatrixNeigh.SUCCESSOR][indice];
-        /*Se N_NEIGH esta setado para 1 e esta ja  antecessora de InitialCity no base.DiCycle, entao nao ha mudanca*/
+        /*Se N_NEIGH esta setado para 1 e esta ja  antecessora de InitialCity no DiCycle, entao nao ha mudanca*/
         if (tIns.arcArray[initialCity].from != neigh && tIns.arcArray[initialCity].tip != neigh)
             insertArc(tIns, neigh, initialCity, inst, lista);
 
@@ -152,7 +152,7 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
             if (indice == -1) indice = 2;
         }
         neigh = matNeighbors.neighbors[initialCity][MatrixNeigh.SUCCESSOR][indice];
-        /*Se N_Neigh esta setado para 1 e este ja  sucessora de InitialCity no base.DiCycle, entao nao ha mudanca*/
+        /*Se N_Neigh esta setado para 1 e este ja  sucessora de InitialCity no DiCycle, entao nao ha mudanca*/
         if (tIns.arcArray[initialCity].tip != neigh && tIns.arcArray[initialCity].from != neigh)
             insertArc(tIns, initialCity, neigh, inst, lista);
     }
@@ -175,7 +175,7 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
     /* ------------------------------------ Test_Insert_Arc ------------------------------------*/
     /*Verifica o valor que sera acrescido a T com insercao do arco City->Neigh e remocao do arco ArcOut*/
     private boolean testArcInsertion(DiCycle solution, int city, int neigh, Arc arcOut, GraphInstance inst) {
-        /*delta2 = custo de factibilizacao do base.DiCycle se insere arco (City->Neigh) e retira ArcOut*/
+        /*delta2 = custo de factibilizacao do DiCycle se insere arco (City->Neigh) e retira ArcOut*/
         double delta1, delta2 = Double.MAX_VALUE, cost = Double.MAX_VALUE;
         int nextCity, fromNeigh;
 
@@ -205,7 +205,7 @@ public class LocalSearchRAI extends DiCycleLocalSearchOperator {
             nextCity = solution.arcArray[city].tip;
             fromNeigh = solution.arcArray[neigh].from;
 
-            /*Procura um arco que diminua o base.DiCycle. Procura de Neigh ate City, ou ate encontralo*/
+            /*Procura um arco que diminua o DiCycle. Procura de Neigh ate City, ou ate encontralo*/
             while (arcOut.from != city && (delta1 + delta2) >= 0) {
 
                 delta2 = delta2Change1Arc(arcOut, nextCity, fromNeigh, inst);

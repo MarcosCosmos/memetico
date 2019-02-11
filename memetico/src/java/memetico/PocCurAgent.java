@@ -1,5 +1,5 @@
 package memetico;/*
- * File: base.PocCurAgent.java
+ * File: PocCurAgent.java
  *
  * Date      Authors
  * 8/20/99   Luciana Buriol and Pablo Moscato
@@ -17,14 +17,14 @@ package memetico;/*
  * It also contains reference to the Guiding Function
  * value which, is this case, is the objective function
  * value.
- * </p>The <a href="../AgentTypes/base.PocCurAgent.java">source</a>.
+ * </p>The <a href="../AgentTypes/PocCurAgent.java">source</a>.
  *
  * @author Luciana Buriol and Pablo Moscato
  **/
 
 public class PocCurAgent extends Agent {
-    public SolutionStructure pocket;          /* The "Pocket"  base.SolutionStructure    */
-    public SolutionStructure current;         /* The "Current" base.SolutionStructure    */
+    public SolutionStructure pocket;          /* The "Pocket"  SolutionStructure    */
+    public SolutionStructure current;         /* The "Current" SolutionStructure    */
     public int noChangeCounter = 0;
 
 
@@ -35,7 +35,7 @@ public class PocCurAgent extends Agent {
                 pocket = new DiCycle(size);
                 break;
             default:
-                throw new Exception("Invalid base.SolutionStructure Type");
+                throw new Exception("Invalid SolutionStructure Type");
         }
     }
 
@@ -77,7 +77,7 @@ public class PocCurAgent extends Agent {
     }
 
     /*
-      Given a new base.SolutionStructure The it inserts it into Pocket Current agent
+      Given a new SolutionStructure The it inserts it into Pocket Current agent
     */
     public void insertSolutionStructure(SolutionStructure child) {
         current = child;
@@ -91,7 +91,7 @@ public class PocCurAgent extends Agent {
 
 // if the current solution is better than the pocket solution
 // they switch places. In the TSP since the objective function is
-// just the length of the base.SolutionStructure, we just check the ``Cost'' field.
+// just the length of the SolutionStructure, we just check the ``Cost'' field.
 // For multiobjective optimization this must be changed to
 // some kind of dominance criteria (Pareto optimality, for instance).
 
@@ -127,10 +127,10 @@ public class PocCurAgent extends Agent {
         auxSolutionStructure = pocket;
         pocket = pcSource.pocket;
         pcSource.pocket = auxSolutionStructure;
-        //updates base.Agent�s cost
+        //updates Agent�s cost
         pcSource.cost = pcSource.pocket.cost;
         super.cost = pocket.cost;
-        //updates base.Agent�s bestCost
+        //updates Agent�s bestCost
         if (pcSource.pocket.cost < pcSource.current.cost)
             pcSource.bestCost = pcSource.pocket.cost;
         else
@@ -140,7 +140,7 @@ public class PocCurAgent extends Agent {
             super.bestCost = pocket.cost;
         else
             super.bestCost = current.cost;
-        //updates base.Agent�s avgCost
+        //updates Agent�s avgCost
         pcSource.avgCost = (pcSource.current.cost + pcSource.pocket.cost) / 2;
         super.avgCost = (current.cost + pocket.cost) / 2;
     }

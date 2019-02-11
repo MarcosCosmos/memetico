@@ -1,5 +1,5 @@
 package memetico;/*
- *File: base.Arc.java
+ *File: Arc.java
  *
  * Date      Authors
  * 8/22/99   Luciana Buriol and Pablo Moscato
@@ -11,7 +11,7 @@ package memetico;/*
 
 /**
  * A class for representing an arc of a directed graph.
- * </p>Here is the <a href="../graph/base.Arc.java">source</a>.
+ * </p>Here is the <a href="../graph/Arc.java">source</a>.
  *
  * @author Luciana Buriol and Pablo Moscato
  **/
@@ -31,7 +31,7 @@ public class Arc {
 
 
 // int TipInNextArc; // The SGB uses a field called `next' to refer to
-    // a pointer to an base.Arc (to have a linked list of
+    // a pointer to an Arc (to have a linked list of
     // arcs outgoing from `From').
 
     public Arc() {
@@ -40,13 +40,13 @@ public class Arc {
     }
 
     /**
-     * Copy constructor for base.Arc class.
+     * Copy constructor for Arc class.
      *
-     * @param arc:base.Arc base.Arc to be copied to this instance.
+     * @param arc:Arc Arc to be copied to this instance.
      */
     public Arc(Arc arc) {
         from = arc.from;
         tip = arc.tip;
     }
 
-}// end of class base.Arc
+}// end of class Arc

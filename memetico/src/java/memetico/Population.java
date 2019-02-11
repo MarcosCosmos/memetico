@@ -28,7 +28,7 @@ public class Population {
                 pop = new PocCurAgent[popSize];
                 break;
             default:
-                System.out.println("Invalid base.Agent Type");
+                System.out.println("Invalid Agent Type");
                 System.exit(1);
                 break;
         }
@@ -40,13 +40,13 @@ public class Population {
                     pop[i] = new PocCurAgent(inst.dimension, solutionStructureType);
                     break;
                 default:
-                    throw new Exception("Invalid base.Agent Type");
+                    throw new Exception("Invalid Agent Type");
             }
         }
     }
 
     /* ------------------------------------ EvaluatePop ------------------------------------*/
-// This should be done differently, we should pass a base.Population index
+// This should be done differently, we should pass a Population index
 // value of the population we would like to evaluate. Evaluating the
 // population means assining a guiding function value to each agent
 // in the population.
@@ -125,7 +125,7 @@ public class Population {
         // this should be changed for the MemePool, for instance here we
         // should have something like
         // Solution BestSolution=null
-        // not something referencing `base.SolutionStructure'...
+        // not something referencing `SolutionStructure'...
         Agent auxAgent = null;
 
         double minCost;
@@ -152,7 +152,7 @@ public class Population {
                 pop[parent].exchangeSolutionStructures(pop[minChild]);
             }
         }
-        //Update population best base.Agent
+        //Update population best Agent
         bestAgent = pop[0];
 
     }

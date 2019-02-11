@@ -51,7 +51,7 @@ class NearestNeigh extends DiCycleConstructAlgorithm {
         while (count < graphInst.dimension) {
             count++;
 
-            // we close the base.DiCycle returning to the first visited city
+            // we close the DiCycle returning to the first visited city
             if (count == graphInst.dimension)
                 nextCity = startingCity;
             else
@@ -103,7 +103,7 @@ class NearestNeigh extends DiCycleConstructAlgorithm {
             if (!visited[matNeighbors.neighbors[city][MatrixNeigh.SUCCESSOR][i]])
                 return (matNeighbors.neighbors[city][MatrixNeigh.SUCCESSOR][i]);
         // it was a greedy decision, we should also check what may happen
-        // if we replace with for (i=(base.MatrixNeigh.N_NEIGH-1); i>-1, i--)
+        // if we replace with for (i=(MatrixNeigh.N_NEIGH-1); i>-1, i--)
 
         // since the first N_NEIGH cities have been visited...
         // we need to find the nearest yet unvisited one...

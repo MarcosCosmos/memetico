@@ -40,7 +40,7 @@ public class DHCPInstance extends GraphInstance {
             /*Reads the Datas from the HCP file.*/
 
             do {
-//         if (i==base.Instance.Dimension-1) System.out.println((int) stokHCP.nval);
+//         if (i==Instance.Dimension-1) System.out.println((int) stokHCP.nval);
                 position = (int) stokHCP.nval - 1;
                 token = stokHCP.nextToken();
 
@@ -59,4 +59,4 @@ public class DHCPInstance extends GraphInstance {
     }
 
 
-}/*end of base.HCPInstance class*/
+}/*end of HCPInstance class*/

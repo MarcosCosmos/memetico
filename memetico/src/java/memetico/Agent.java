@@ -1,12 +1,12 @@
 package memetico;/*
- * File: base.Agent.java
+ * File: Agent.java
  *
  * Date      Authors
  * 8/26/99   Luciana Buriol and Pablo Moscato
  *
  */
 
-//package MemePool.base.Agent;
+//package MemePool.Agent;
 
 
 /**
@@ -18,7 +18,7 @@ package memetico;/*
  * it is addressing. Thus some types of agents
  * can contain several different representations.
  *
- * </p>The <a href="../base.Agent/base.Agent.java">source</a>.
+ * </p>The <a href="../Agent/Agent.java">source</a>.
  *
  * @author Pablo Moscato, Natalio Krasnogor, and Luciana Buriol
  **/
@@ -31,7 +31,7 @@ public abstract class Agent {
     //Variable Section
     static public int agentType = NONE;
     public double cost;
-    //In case of more than one base.SolutionStructure by agent
+    //In case of more than one SolutionStructure by agent
     public double avgCost;
     public double bestCost;
 
@@ -47,4 +47,4 @@ public abstract class Agent {
     abstract void exchangeSolutionStructures(Agent source);
 
     abstract boolean testValues(int values[][]);
-}// end of class base.Agent
+}// end of class Agent

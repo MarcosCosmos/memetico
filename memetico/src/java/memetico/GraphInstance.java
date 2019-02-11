@@ -34,4 +34,4 @@ public abstract class GraphInstance extends Instance {
     public void setMatDist(double[][] matDist) {
         this.matDist = matDist;
     }
-}/*end of Graph base.Instance class*/
+}/*end of Graph Instance class*/

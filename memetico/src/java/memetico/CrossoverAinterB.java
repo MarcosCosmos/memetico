@@ -2,7 +2,7 @@ package memetico;
 
 class CrossoverAinterB extends DiCycleCrossover {
 
-    /* ------------------------------------ base.CrossoverAinterB ------------------------------------*/
+    /* ------------------------------------ CrossoverAinterB ------------------------------------*/
     public void runCrossover(SolutionStructure parentA, SolutionStructure parentB, SolutionStructure child, Instance inst) {
         GraphInstance graphInst = (GraphInstance) inst;
         int stringNumber = 0, i, nextA, nextB, prevA, prevB;

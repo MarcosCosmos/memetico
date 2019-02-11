@@ -2,7 +2,7 @@ package memetico;
 
 class CrossoverSAX extends DiCycleCrossover {
 
-    /* ------------------------------------ base.CrossoverSAX ------------------------------------*/
+    /* ------------------------------------ CrossoverSAX ------------------------------------*/
     public void runCrossover(SolutionStructure parentA, SolutionStructure parentB, SolutionStructure child, Instance inst) throws Exception {
         GraphInstance graphInst = (GraphInstance) inst;
         int stringNumber = 0, i, arcMap[][];         /* data structure useful for the recombination */
@@ -25,7 +25,7 @@ class CrossoverSAX extends DiCycleCrossover {
         int i, neigh1, neigh2, cont_neighbs;
         boolean is_the_same = false;
 
-/*   if (base.Instance.problem==0) cont_neighs = 4;
+/*   if (Instance.problem==0) cont_neighs = 4;
    else */
         cont_neighbs = 2;
 
@@ -49,7 +49,7 @@ class CrossoverSAX extends DiCycleCrossover {
             }
 
             //TSP Simetrico
-/*      if (base.Instance.problem==0){
+/*      if (Instance.problem==0){
 	 int neigh3, neigh4;
 	 neigh3 = ParentA.ArcArray[i].From;
 	 neigh4 = ParentB.ArcArray[i].From;

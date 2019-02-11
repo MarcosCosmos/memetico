@@ -4,7 +4,7 @@ import java.io.*;
 
 
 public class DiCycle extends SolutionStructure {
-    /* base.DiCycle = a Double-Linked Cyclic Permutation of {1..N} integers */
+    /* DiCycle = a Double-Linked Cyclic Permutation of {1..N} integers */
 /* it also has a boolean array of ``don't look bits'' which is
    generally useful for some local search implementations         */
 
@@ -33,9 +33,9 @@ public class DiCycle extends SolutionStructure {
     }
 
     /**
-     * Copy Constructor for base.DiCycle.
+     * Copy Constructor for DiCycle.
      *
-     * @param solution:base.DiCycle Solution to be copied to this instance.
+     * @param solution:DiCycle Solution to be copied to this instance.
      */
     public DiCycle(DiCycle solution) {
         size = solution.size;
@@ -312,8 +312,8 @@ public class DiCycle extends SolutionStructure {
      * <p>    It returns the new cost if it is smaller than current cost;
      * otherwise, it returns the current cost.</p>
      *
-     * @param inst:base.ATSPRTInstance base.Instance of the problem so that the cost can be calculated
-     * @param arcOut:base.Arc          base.Arc to be removed.
+     * @param inst:ATSPRTInstance Instance of the problem so that the cost can be calculated
+     * @param arcOut:Arc          Arc to be removed.
      * @param city:int            New arc�s starting point.
      * @param neigh:int           New arc�s ending point.
      */
@@ -375,8 +375,8 @@ public class DiCycle extends SolutionStructure {
     /**
      * It inserts an arc from city to neigh, removes an arc a1, and do the appropriate patching.
      *
-     * @param inst:base.GraphInstance base.Instance of the problem.
-     * @param arcOut:base.Arc         base.Arc to be removed.
+     * @param inst:GraphInstance Instance of the problem.
+     * @param arcOut:Arc         Arc to be removed.
      * @param city:int           New arc�s starting point.
      * @param neigh:int          New arc�s ending point.
      */
