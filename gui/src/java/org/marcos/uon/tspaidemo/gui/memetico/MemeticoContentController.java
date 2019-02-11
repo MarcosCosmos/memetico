@@ -61,14 +61,17 @@ public class MemeticoContentController implements ContentController {
     public static final MemeticoConfiguration DEFAULT_CONFIG = new MemeticoConfiguration(13, 5, LocalSearchOpName.RAI.toString(), CrossoverOpName.SAX.toString(), RestartOpName.INSERTION.toString());
 
     @FXML
-    private ScrollPane infoPaneWrapper;
+    private ScrollPane infoPane;
+    @FXML
+    private VBox infoBox;
     @FXML
     private HBox contentRoot;
     @FXML
     private Text txtGeneration, txtProblemName, txtTargetCost;
-
     @FXML
     private GridPane agentsGrid;
+    @FXML
+    private BorderPane titleBar, graphWrapper;
 
 //    @FXML
 //    private TreeView<PCAlgorithmState.AgentState> agentsTree;
@@ -76,9 +79,6 @@ public class MemeticoContentController implements ContentController {
     private List<AgentDisplay> agentControllers = new ArrayList<>();
 
     private List<TreeItem<PCAlgorithmState.AgentState>> agentItems = new ArrayList<>();
-
-    @FXML
-    private BorderPane infoPane, graphWrapper;
 
     private OptionsBoxController optionsBoxController;
 
@@ -120,8 +120,8 @@ public class MemeticoContentController implements ContentController {
         contentRoot.getStylesheets().add(getClass().getResource("content.css").toExternalForm());
         contentRoot.getStylesheets().add(getClass().getResource("../main/common.css").toExternalForm());
 
-        infoPaneWrapper.prefViewportHeightProperty().bind(infoPane.heightProperty());
-        infoPaneWrapper.prefViewportWidthProperty().bind(infoPane.widthProperty());
+        infoPane.prefViewportHeightProperty().bind(infoBox.heightProperty());
+        infoPane.prefViewportWidthProperty().bind(infoBox.widthProperty());
         //create the logger and get a view
         logger = new PCLogger(1);
         try {

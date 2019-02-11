@@ -31,20 +31,24 @@
     visibility:hidden;
 }
 
-.agentRoot {
-    -fx-padding: 5px;
-}
-
-.agentRoot:focused {
-        -fx-focus-color: transparent;
-        -fx-background-insets: -1.4, 0, 1, 2;
-}
-
-.agentInfo {
-    -fx-padding: 5px 0 0 0;
-}
-
-.lblAgentId, .txtAgentId {
+.agentDisplayTitle {
     -fx-font-weight:bold;
+
+    -fx-font-size: 1.17em;
+    -fx-padding: 0.25em 0 0.25em 0;
 }
 
+/*.lblAgentId, .txtAgentId {
+    -fx-font-weight:bold;
+}*/
+
+.dataGrid {
+    -fx-hgap: 5px;
+    -fx-vgap: 5px;
+}
+
+
+#agentsGrid {
+    -fx-padding: 0.75em 0 0 0;
+    -fx-vgap: 0.75em;
+}

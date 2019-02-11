@@ -3,9 +3,17 @@
     -fx-padding: 0.67em 0 0.67em 0;
 }
 
+.h1.halfPad {
+    -fx-padding: 0.345em 0 0.345em 0;
+}
+
 .h2 {
     -fx-font-size: 1.5em;
     -fx-padding: 0.83em 0 0.83em 0;
+}
+
+.h2.halfPad {
+    -fx-padding: 0.415em 0 0.415em 0;
 }
 
 .h3 {
@@ -13,6 +21,18 @@
     -fx-padding: 1em 0 1em 0;
 }
 
-.h1, .h2, .h3 {
+.h3.halfPad {
+    -fx-padding: 0.585em 0 0.585em 0;
+}
+
+.h4 {
+    -fx-padding: 1.33em 0 1.33em 0;
+}
+
+.h4.halfPad {
+    -fx-padding: 0.665em 0 0.665em 0;
+}
+
+.h1, .h2, .h3, .h4 {
     -fx-font-weight: bold;
 }

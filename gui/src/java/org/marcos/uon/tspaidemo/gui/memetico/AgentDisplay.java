@@ -6,13 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import memetico.logging.PCAlgorithmState;
 
 import java.io.IOException;
 
 
-public class AgentDisplay extends GridPane {
+public class AgentDisplay extends Pane {
 //    private final transient Label lblAgentId;
 //    private final transient Label lblPocketCost;
 //private final transient Label lblCurrentCost;

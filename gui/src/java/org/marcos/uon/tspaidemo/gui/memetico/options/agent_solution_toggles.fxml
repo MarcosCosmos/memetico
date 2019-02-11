@@ -10,7 +10,7 @@
 <?import javafx.scene.text.TextFlow?>
 <GridPane xmlns="http://javafx.com/javafx"
           xmlns:fx="http://javafx.com/fxml" styleClass="optionGrid">
-    <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" textAlignment="CENTER">
+    <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" textAlignment="CENTER" styleClass="h3">
         <Text styleClass="lblAgentId">Agent&#160;</Text>
         <Text styleClass="txtAgentId"/>
     </TextFlow>
