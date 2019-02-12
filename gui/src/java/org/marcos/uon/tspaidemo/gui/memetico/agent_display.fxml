@@ -2,15 +2,19 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.control.Label?>
 <fx:root type="Pane" xmlns:fx="http://javafx.com/fxml">
     <GridPane styleClass="dataGrid">
-        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="agentDisplayTitle">
+        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="3" styleClass="agentDisplayTitle">
             <Text styleClass="lblAgentId">Agent&#160;</Text>
             <Text styleClass="txtAgentId"/>
         </TextFlow>
-        <Text GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="1">Pocket:</Text>
-        <Text GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtPocketCost"/>
-        <Text GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="1">Current:</Text>
-        <Text GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="1" styleClass="txtCurrentCost"/>
+        <Text GridPane.rowIndex="1" GridPane.columnIndex="0">Pocket:</Text>
+        <Text GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="txtPocketCost"/>
+        <Label GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="tourColorSample,pocketColorSample">&#160;</Label>
+        <Text GridPane.rowIndex="2" GridPane.columnIndex="0">Current:</Text>
+        <Text GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="txtCurrentCost"/>
+        <Label GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="tourColorSample,currentColorSample">&#160;</Label>
     </GridPane>
 </fx:root>

@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import memetico.*;
 import memetico.logging.PCAlgorithmState;
@@ -71,7 +72,7 @@ public class MemeticoContentController implements ContentController {
 
     private List<AgentDisplay> agentControllers = new ArrayList<>();
 
-    private List<TreeItem<PCAlgorithmState.AgentState>> agentItems = new ArrayList<>();
+//    private List<TreeItem<PCAlgorithmState.AgentState>> agentItems = new ArrayList<>();
 
     private OptionsBoxController optionsBoxController;
 
@@ -256,6 +257,7 @@ public class MemeticoContentController implements ContentController {
             List<BooleanProperty[]> toggles = optionsBoxController.getSolutionDisplayToggles();
             for (int i = 0; i < toggles.size(); ++i) {
                 BooleanProperty[] eachToggles = toggles.get(i);
+                AgentDisplay eachAgentController = agentControllers.get(i);
                 for (int k = 0; k < eachToggles.length; ++k) {
                     if (eachToggles[k].get()) {
                         PCAlgorithmState.LightDiCycle eachSolution = (
@@ -276,7 +278,8 @@ public class MemeticoContentController implements ContentController {
                             city = nextCity;
                         }
                         displayGraph.addPredictionEdges(
-                                Arrays.asList(edgesToAdd)
+                                Arrays.asList(edgesToAdd),
+                                (k == 0 ? eachAgentController.getPocketColor() : eachAgentController.getCurrentColor())
                         );
                     }
                 }
@@ -473,6 +476,24 @@ public class MemeticoContentController implements ContentController {
                             GridPane.setRowIndex(eachAgent, eachData.row);
                             GridPane.setColumnIndex(eachAgent, eachData.column);
                         }
+                    }
+
+                    //setup some colours
+
+                    //clear the old colours
+                    double hueSegmentSize = 360.0/(newCount);
+                    for(int i=0; i<newCount; ++i) {
+                        AgentDisplay eachAgent = agentControllers.get(i);
+                        double eachHue = hueSegmentSize*GridPane.getRowIndex(eachAgent);
+
+                        //L_hsl = 0.25, 0.75; -> V_hsv = 0.5, 1.0
+                        //S_hsl = 1 -> 1, 0.5;
+
+//                        eachAgent.setPocketColor(Color.hsb(eachHue, 0.8, 0.6, 0.8));
+//                        eachAgent.setCurrentColor(Color.hsb(eachHue, 0.6, 0.8, 0.8));
+
+                        eachAgent.setPocketColor(Color.hsb(eachHue, 1, 1, 0.75));
+                        eachAgent.setCurrentColor(Color.hsb(eachHue, 1, 0.75, 0.75));
                     }
 
 //                    //the following populates the treeview

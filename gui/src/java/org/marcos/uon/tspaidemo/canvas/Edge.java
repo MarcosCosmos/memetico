@@ -8,14 +8,21 @@ public class Edge {
     private String label;
     private Color lineStroke;
     private Color labelFill;
+    private double lineWidth;
 
-    public Edge(Vertex a, Vertex b, String label, Color lineStroke, Color labelFill) {
+    public Edge(Vertex a, Vertex b, String label, Color lineStroke, Color labelFill, double lineWidth) {
         this.a = a;
         this.b = b;
         this.label = label;
         this.lineStroke = lineStroke;
         this.labelFill = labelFill;
+        this.lineWidth = lineWidth;
     }
+
+    public Edge(Vertex a, Vertex b, String label, Color lineStroke, Color labelFill) {
+        this(a,b,label,lineStroke,labelFill,1);
+    }
+
 
     public Vertex getA() {
         return a;
@@ -55,5 +62,13 @@ public class Edge {
 
     public void setLabelFill(Color labelFill) {
         this.labelFill = labelFill;
+    }
+
+    public double getLineWidth() {
+        return lineWidth;
+    }
+
+    public void setLineWidth(double lineWidth) {
+        this.lineWidth = lineWidth;
     }
 }

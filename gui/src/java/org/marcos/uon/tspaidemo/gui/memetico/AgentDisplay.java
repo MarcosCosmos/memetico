@@ -3,10 +3,11 @@ package org.marcos.uon.tspaidemo.gui.memetico;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import memetico.logging.PCAlgorithmState;
 
@@ -20,9 +21,11 @@ public class AgentDisplay extends Pane {
     private final transient Text txtAgentId;
     private final transient Text txtPocketCost;
     private final transient Text txtCurrentCost;
+    private final transient Label pocketColorSample, currentColorSample;
 //    private final transient CheckBox cbTogglePocket, cbToggleCurrent;
 
     private final ObjectProperty<PCAlgorithmState.AgentState> state = new SimpleObjectProperty<>();
+    private final ObjectProperty<Color> pocketColor = new SimpleObjectProperty<>(), currentColor = new SimpleObjectProperty<>();
 
 
     public AgentDisplay() {
@@ -40,6 +43,8 @@ public class AgentDisplay extends Pane {
         txtAgentId = (Text) lookup(".txtAgentId");
         txtPocketCost = (Text) lookup(".txtPocketCost");
         txtCurrentCost = (Text) lookup(".txtCurrentCost");
+        pocketColorSample = (Label) lookup(".pocketColorSample");
+        currentColorSample = (Label) lookup(".currentColorSample");
 
         txtAgentId.textProperty().bind(Bindings.createStringBinding(() -> state.get() == null ? "?" : String.valueOf(state.get().id), state));
         txtPocketCost.textProperty().bind(Bindings.createStringBinding(
@@ -50,6 +55,20 @@ public class AgentDisplay extends Pane {
                 () -> String.valueOf(state.get() == null ? "Uknown" : state.get().current.cost),
                 state
         ));
+
+        pocketColorSample.backgroundProperty().bind(
+                Bindings.createObjectBinding(
+                    () -> new Background(new BackgroundFill(pocketColor.getValue(), CornerRadii.EMPTY, Insets.EMPTY)),
+                    pocketColor
+                )
+        );
+
+        currentColorSample.backgroundProperty().bind(
+                Bindings.createObjectBinding(
+                        () -> new Background(new BackgroundFill(currentColor.getValue(), CornerRadii.EMPTY, Insets.EMPTY)),
+                        currentColor
+                )
+        );
     }
 
     public PCAlgorithmState.AgentState getState() {
@@ -62,5 +81,29 @@ public class AgentDisplay extends Pane {
 
     public void setState(PCAlgorithmState.AgentState state) {
         this.state.set(state);
+    }
+
+    public Color getPocketColor() {
+        return pocketColor.get();
+    }
+
+    public ObjectProperty<Color> pocketColorProperty() {
+        return pocketColor;
+    }
+
+    public void setPocketColor(Color pocketColor) {
+        this.pocketColor.set(pocketColor);
+    }
+
+    public Color getCurrentColor() {
+        return currentColor.get();
+    }
+
+    public ObjectProperty<Color> currentColorProperty() {
+        return currentColor;
+    }
+
+    public void setCurrentColor(Color currentColor) {
+        this.currentColor.set(currentColor);
     }
 }

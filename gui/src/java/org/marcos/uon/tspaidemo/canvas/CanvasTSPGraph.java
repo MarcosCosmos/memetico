@@ -2,6 +2,7 @@ package org.marcos.uon.tspaidemo.canvas;
 
 import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.geometry.BoundingBox;
+import javafx.scene.Parent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
@@ -17,7 +18,7 @@ public class CanvasTSPGraph {
     private List<List<Edge>> targets;
     private List<List<Edge>> predictions;
     public static final double DEFAULT_DOT_RADIUS = 3;
-    public static final Color DEFAULT_DOT_COLOR = Color.RED;
+    public static final Color DEFAULT_DOT_COLOR = Color.BLACK;
     public static final Color DEFAULT_EDGE_COLOR = Color.BLACK;
     public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
     public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
@@ -110,6 +111,10 @@ public class CanvasTSPGraph {
         addEdges(targets, edges, DEFAULT_TARGET_EDGE_COLOR);
     }
 
+    public void addPredictionEdges(List<int[]> edges, Color stroke) {
+        addEdges(predictions, edges, stroke);
+    }
+
     public void addPredictionEdges(List<int[]> edges) {
         addEdges(predictions, edges, DEFAULT_PREDICTION_COLOR);
     }
@@ -150,8 +155,19 @@ public class CanvasTSPGraph {
     public void draw() {
         List<Edge> edgesToUse = internalGraphic.getEdges();
         edgesToUse.clear();
-        edgesToUse.addAll(normalEdges);
-        targets.forEach(edgesToUse::addAll);
+        //display prexisting edges as hollow for ease of distinction
+        for(Edge eachEdge : normalEdges) {
+            //one big edge with the chosen colour, one inner edge with the background
+            edgesToUse.add(new Edge(eachEdge.getA(), eachEdge.getB(), eachEdge.getLabel(), eachEdge.getLineStroke(), eachEdge.getLabelFill(), 2*eachEdge.getLineWidth()));
+            edgesToUse.add(new Edge(eachEdge.getA(), eachEdge.getB(), eachEdge.getLabel(), internalGraphic.getBackgroundColor(), eachEdge.getLabelFill(), eachEdge.getLineWidth()));
+        }
+        for (List<Edge> eachList : targets) {
+            for(Edge eachEdge : eachList) {
+                //one big edge with the chosen colour, one inner edge with the background
+                edgesToUse.add(new Edge(eachEdge.getA(), eachEdge.getB(), eachEdge.getLabel(), eachEdge.getLineStroke(), eachEdge.getLabelFill(), 2*eachEdge.getLineWidth()));
+                edgesToUse.add(new Edge(eachEdge.getA(), eachEdge.getB(), eachEdge.getLabel(), internalGraphic.getBackgroundColor(), eachEdge.getLabelFill(), eachEdge.getLineWidth()));
+            }
+        }
         predictions.forEach(edgesToUse::addAll);
         internalGraphic.draw();
     }
