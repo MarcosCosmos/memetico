@@ -35,5 +35,9 @@
                     </HBox>
                 </VBox>
     </ScrollPane>
-    <BorderPane fx:id="graphWrapper" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"/> <!-- empty dummy pane; simplifies update code to always have 2 items -->
+    <BorderPane fx:id="graphWrapper" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+        <center>
+            <BorderPane fx:id="graphContainer"/>
+        </center>
+    </BorderPane>
 </HBox>

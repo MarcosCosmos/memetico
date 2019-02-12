@@ -10,13 +10,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import javafx.util.Callback;
 import memetico.*;
 import memetico.logging.PCAlgorithmState;
 import memetico.logging.PCLogger;
@@ -33,15 +30,11 @@ import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 
-import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.stream.Stream.generate;
 
 public class MemeticoContentController implements ContentController {
     //used during agent display arrangement
@@ -71,7 +64,7 @@ public class MemeticoContentController implements ContentController {
     @FXML
     private GridPane agentsGrid;
     @FXML
-    private BorderPane titleBar, graphWrapper;
+    private BorderPane titleBar, graphContainer;
 
 //    @FXML
 //    private TreeView<PCAlgorithmState.AgentState> agentsTree;
@@ -103,14 +96,16 @@ public class MemeticoContentController implements ContentController {
     private void autoSizeListener(ObservableValue<? extends Number> observable12, Number oldValue12, Number newValue12){
         BoundingBox canvasBounds = displayGraph.getLogicalBounds();
 
-        double availableHeight = graphWrapper.getHeight();
+        double availableHeight = graphContainer.getHeight();
         double padding = Math.max(canvasBounds.getMinX() * 2, canvasBounds.getMinY() * 2);
         double scaleHeight = availableHeight / (canvasBounds.getHeight() + padding);
         //technically this is effected by divider style, not sure how to compute that yet
-        double availableWidth = graphWrapper.getWidth();
+        double availableWidth = graphContainer.getWidth();
         double scaleWidth = availableWidth / (canvasBounds.getWidth() + padding);
         double chosenScale = Math.min(scaleWidth, scaleHeight);
         displayGraph.setScale(chosenScale);
+
+        displayGraph.getGraphic().setMaxSize(canvasBounds.getWidth()*chosenScale, canvasBounds.getHeight()*chosenScale);
         toursOutdated = true;
     };
 
@@ -314,12 +309,12 @@ public class MemeticoContentController implements ContentController {
                 //for all the graphs we are going to keep, if the instance changed, switch to the new one.
                 if (!currentValue.instanceName.equals(lastDrawnGraphName)) {
                     displayGraph = new CanvasTSPGraph(baseInstance);
-                    graphWrapper.getChildren().clear();
+                    graphContainer.getChildren().clear();
                     if (!displayGraph.isEmpty()) {
-                        graphWrapper.setCenter(displayGraph.getGraphic());
+                        graphContainer.setCenter(displayGraph.getGraphic());
                         //enable auto sizing
-                        graphWrapper.widthProperty().addListener(this::autoSizeListener);
-                        graphWrapper.heightProperty().addListener(this::autoSizeListener);
+                        graphContainer.widthProperty().addListener(this::autoSizeListener);
+                        graphContainer.heightProperty().addListener(this::autoSizeListener);
                         autoSizeListener(null, -1, -1);
                     }
                     lastDrawnGraphName = currentValue.instanceName;

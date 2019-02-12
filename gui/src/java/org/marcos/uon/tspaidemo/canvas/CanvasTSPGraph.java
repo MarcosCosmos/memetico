@@ -65,6 +65,12 @@ public class CanvasTSPGraph {
                 normalEdges.add(new Edge(vertices.get(each.getId1()), vertices.get(each.getId2()), String.valueOf(a.getLocation().distance(b.getLocation())), DEFAULT_EDGE_COLOR, DEFAULT_LABEL_COLOR));
             }
         }
+
+        //clip the logical bounds to remove excess min x/y
+        BoundingBox logicalBounds = getLogicalBounds();
+        for (Vertex each: vertices) {
+            each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
+        }
     }
 
     /**
@@ -117,6 +123,7 @@ public class CanvasTSPGraph {
      * @return
      */
     public BoundingBox getLogicalBounds() {
+//        (todo: cater for text in the bounds check?)
         double minX=Double.POSITIVE_INFINITY, minY=Double.POSITIVE_INFINITY, maxX=Double.NEGATIVE_INFINITY, maxY=Double.NEGATIVE_INFINITY;
         for(Vertex each : internalGraphic.getVertices()) {
             double x = each.getLocation().getX();

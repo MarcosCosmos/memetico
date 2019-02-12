@@ -80,7 +80,7 @@ public class CanvasGraph extends Pane {
         gc.clearRect(0,0, width, height);
         for(Edge each : edges) {
             gc.setStroke(each.getLineStroke());
-            gc.setLineWidth(scale);
+            gc.setLineWidth(Math.max(0.5, scale));
             Vertex a = each.getA(), b = each.getB();
             double halfRad = a.getDotRadius()/2;
             Point2D halfRadVec = new Point2D(halfRad, halfRad);
@@ -92,7 +92,7 @@ public class CanvasGraph extends Pane {
         gc.clearRect(0,0, width, height);
         for (Vertex each : vertices) {
            Point2D point = each.getLocation().multiply(scale);
-           double radius = each.getDotRadius()*scale;
+           double radius = Math.max(1.5, each.getDotRadius()*scale);
            gc.setFill(each.getDotFill());
            gc.fillOval(point.getX(), point.getY(), radius, radius);
         }
