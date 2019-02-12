@@ -5,15 +5,13 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -36,11 +34,13 @@ public class CanvasGraph extends Pane {
     }
     private abstract class LayerImpl<T> extends ArrayList<T> implements Layer<T> {
         protected final Canvas canvas;
-        protected int priority; //higher is better
+        protected int priority = -1; //higher is better
         protected boolean requiresRedraw;
 
         public LayerImpl(int priority) {
             canvas = new Canvas();
+            this.priority = priority;
+            requestReorder();
         }
 
         public int getPriority() {
@@ -79,11 +79,12 @@ public class CanvasGraph extends Pane {
         @Override
         public void redraw() {
             GraphicsContext gc = canvas.getGraphicsContext2D();
-            gc.clearRect(0,0, getWidth(), getHeight());
+            gc.clearRect(0,0, canvas.getWidth(), canvas.getHeight());
             for (Vertex each : this) {
                 double radiusToUse = Math.max(1.5, each.getDotRadius()*scale);
+                double halfRad = radiusToUse/2;
                 gc.setFill(each.getDotFill());
-                Point2D minCorner = each.getLocation().multiply(scale).subtract(new Point2D(radiusToUse, radiusToUse));
+                Point2D minCorner = each.getLocation().multiply(scale).subtract(new Point2D(halfRad, halfRad));
                 gc.fillOval(minCorner.getX(), minCorner.getY(), radiusToUse, radiusToUse);
             }
             requiresRedraw = false;
@@ -102,7 +103,7 @@ public class CanvasGraph extends Pane {
             for(Edge each : this) {
                 gc.setStroke(each.getLineStroke());
                 gc.setLineWidth(Math.max(0.5, scale*each.getLineWidth()));
-                Point2D aPos = each.getA().getLocation(), bPos = each.getB().getLocation();
+                Point2D aPos = each.getA().getLocation().multiply(scale), bPos = each.getB().getLocation().multiply(scale);
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
             }
             requiresRedraw = false;
@@ -122,15 +123,25 @@ public class CanvasGraph extends Pane {
         layers = FXCollections.observableArrayList();
 
         layers.addListener((ListChangeListener<Layer>) c -> {
+                List<Node> children = getChildren();
                 while(c.next()) {
                     if (c.wasRemoved()) {
-                        c.getRemoved()
-                                .forEach(eachElm -> getChildren().remove(eachElm.getCanvas()));
+
+                        for(Layer each : c.getRemoved()) {
+                            Canvas eachCanvas = each.getCanvas();
+                            eachCanvas.widthProperty().unbind();
+                            eachCanvas.heightProperty().unbind();
+                            children.remove(eachCanvas);
+                        }
                         requiresReordering = true;
                     }
                     if (c.wasAdded()) {
-                        c.getAddedSubList()
-                                .forEach(eachElm -> getChildren().add(eachElm.getCanvas()));
+                        for(Layer each : c.getAddedSubList()) {
+                            Canvas eachCanvas = each.getCanvas();
+                            eachCanvas.widthProperty().bind(widthProperty());
+                            eachCanvas.heightProperty().bind(heightProperty());
+                            children.add(eachCanvas);
+                        }
                         requiresReordering = true;
                     }
                 }
@@ -154,12 +165,14 @@ public class CanvasGraph extends Pane {
     public void draw() {
         if(requiresReordering) {
             layers.sorted(Comparator.comparing(Layer::getPriority)).forEach(each -> each.getCanvas().toFront());
+            requiresReordering = false;
         }
         for (Layer each: layers) {
             if(each.requiresRedraw()) {
                 each.redraw();
             }
         }
+        int done = 0;
     }
 
     public void requestReorder() {
@@ -192,5 +205,12 @@ public class CanvasGraph extends Pane {
         EdgeLayer result = new EdgeLayer(priority);
         layers.add(result);
         return result;
+    }
+
+    /**
+     * Flag all layers as needing to redraw (because, for example, the canvas size has changed)
+     */
+    public void requestAllRedraw() {
+        layers.forEach(Layer::requestRedraw);
     }
 }

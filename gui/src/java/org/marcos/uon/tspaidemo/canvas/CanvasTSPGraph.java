@@ -40,11 +40,10 @@ public class CanvasTSPGraph {
     public CanvasTSPGraph(TSPLibInstance instance) throws InvalidArgumentException {
         showTargets = true;
         internalGraphic = new CanvasGraph();
-
-        vertexLayer = internalGraphic.addVertexLayer(100);
         normalEdgeLayer = internalGraphic.addEdgeLayer(0);
-        targetLayer = internalGraphic.addEdgeLayer(1);
-        predictionLayer = internalGraphic.addEdgeLayer(2);
+        targetLayer = internalGraphic.addEdgeLayer(10);
+        predictionLayer = internalGraphic.addEdgeLayer(20);
+        vertexLayer = internalGraphic.addVertexLayer(100);
 
         targets = new ArrayList<>();
         predictions = new ArrayList<>();
@@ -210,6 +209,10 @@ public class CanvasTSPGraph {
 
     public void draw() {
         internalGraphic.draw();
+    }
+
+    public void requestRedraw() {
+        internalGraphic.requestAllRedraw();
     }
 
     public double getScale() {

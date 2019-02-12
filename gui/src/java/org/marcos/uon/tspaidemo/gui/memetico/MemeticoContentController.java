@@ -107,6 +107,7 @@ public class MemeticoContentController implements ContentController {
         displayGraph.setScale(chosenScale);
 
         displayGraph.getGraphic().setMaxSize(canvasBounds.getWidth()*chosenScale, canvasBounds.getHeight()*chosenScale);
+        displayGraph.requestRedraw();
         toursOutdated = true;
     };
 
