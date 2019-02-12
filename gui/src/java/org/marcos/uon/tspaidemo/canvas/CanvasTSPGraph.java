@@ -125,28 +125,27 @@ public class CanvasTSPGraph {
         predictionLayer.clear();
         predictionLayer.requestRedraw();
     }
-
-    private void addEdges(List<List<Edge>> edgeCategory, List<int[]> newEdges, Color strokeColour) {
-        List<Edge> edgeList = new ArrayList<>();
-        for(int[] eachEdge : newEdges) {
-            Vertex a = vertexLayer.get(eachEdge[0]),
-                    b = vertexLayer.get(eachEdge[1])
-                            ;
-            Edge eachResult = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), strokeColour, DEFAULT_LABEL_COLOR);
-            edgeList.add(eachResult);
-        }
-        edgeCategory.add(Collections.unmodifiableList(edgeList));
-    }
+//
+//    private void addEdges(List<List<Edge>> edgeCategory, List<int[]> newEdges, Color strokeColour) {
+//        List<Edge> edgeList = new ArrayList<>();
+//        for(int[] eachEdge : newEdges) {
+//            Vertex a = vertexLayer.get(eachEdge[0]),
+//                    b = vertexLayer.get(eachEdge[1])
+//                            ;
+//            Edge eachResult = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), strokeColour, DEFAULT_LABEL_COLOR);
+//            edgeList.add(eachResult);
+//        }
+//        edgeCategory.add(Collections.unmodifiableList(edgeList));
+//    }
 
     public void addTargetEdges(List<int[]> edges) {
-        addEdges(targets, edges, DEFAULT_TARGET_EDGE_COLOR);
         List<Edge> edgeList = new ArrayList<>();
         for(int[] eachEdge : edges) {
             Vertex a = vertexLayer.get(eachEdge[0]),
                     b = vertexLayer.get(eachEdge[1])
                             ;
             Edge coreEdge = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), internalGraphic.getBackgroundColor(), DEFAULT_LABEL_COLOR);
-            Edge outlineEdge = new Edge(coreEdge.getA(), coreEdge.getB(), coreEdge.getLabel(), DEFAULT_EDGE_COLOR, DEFAULT_LABEL_COLOR, 2*coreEdge.getLineWidth());
+            Edge outlineEdge = new Edge(coreEdge.getA(), coreEdge.getB(), coreEdge.getLabel(), DEFAULT_TARGET_EDGE_COLOR, DEFAULT_LABEL_COLOR, 2*coreEdge.getLineWidth());
             edgeList.add(coreEdge);
             targetLayer.add(outlineEdge);
             targetLayer.add(coreEdge);
@@ -170,7 +169,7 @@ public class CanvasTSPGraph {
     }
 
     public void addPredictionEdges(List<int[]> edges) {
-        addEdges(predictions, edges, DEFAULT_PREDICTION_COLOR);
+        addPredictionEdges(edges, DEFAULT_PREDICTION_COLOR);
     }
 
     public Region getGraphic() {
@@ -224,9 +223,9 @@ public class CanvasTSPGraph {
     }
 
     public void showTargets() {
-        targetLayer.getCanvas().setVisible(false);
+        targetLayer.getCanvas().setVisible(true);
     }
     public void hideTargets() {
-        targetLayer.getCanvas().setVisible(true);
+        targetLayer.getCanvas().setVisible(false);
     }
 }

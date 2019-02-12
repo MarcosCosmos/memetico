@@ -148,7 +148,7 @@ public class CanvasGraph extends Pane {
             }
         );
 
-        setBackgroundColor(backgroundColor);
+        setBackgroundColor(Color.WHITE);
         requiresReordering = false;
     }
 
@@ -159,6 +159,7 @@ public class CanvasGraph extends Pane {
 
     public void setBackgroundColor(Color backgroundColor) {
         setBackground(new Background(new BackgroundFill(backgroundColor, CornerRadii.EMPTY, Insets.EMPTY)));
+        this.backgroundColor = backgroundColor;
     }
 
     //draws/redraws the canvas on an as-needed basis
