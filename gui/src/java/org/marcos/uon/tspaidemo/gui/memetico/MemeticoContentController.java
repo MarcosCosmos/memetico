@@ -236,21 +236,14 @@ public class MemeticoContentController implements ContentController {
     private void updateTours() {
         //disable auto scaling
         if (!displayGraph.isEmpty()) {
-            //reset and re-draw tours
-            displayGraph.clearTargets();
+            //reset and re-draw predictions
             displayGraph.clearPredictions();
 
             TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
             if(optionsBoxController.getTargetDisplayToggle().get()) {
-                for(TSPLibTour eachTour : theInstance.getTours()) {
-                    List<int[]> edges = eachTour.toEdges()
-                            .stream()
-                            .map(each -> new int[]{each.getId1(), each.getId2()})
-                            .collect(Collectors.toList());
-                    displayGraph.addTargetEdges(
-                        edges
-                    );
-                }
+                displayGraph.showTargets();
+            } else {
+                displayGraph.hideTargets();
             }
 
             PCAlgorithmState theState = state.get();
