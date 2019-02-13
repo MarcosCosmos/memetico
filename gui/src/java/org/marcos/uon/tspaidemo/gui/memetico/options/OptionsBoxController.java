@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -271,5 +272,45 @@ public class OptionsBoxController implements Initializable {
 
     public void close() {
         theStage.close();
+    }
+
+    public void showAllPredictions() {
+        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
+            for (BooleanProperty eachToggle : eachToggles) {
+                eachToggle.set(true);
+            }
+        }
+    }
+
+    public void hideAllPredictions() {
+        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
+            for (BooleanProperty eachToggle : eachToggles) {
+                eachToggle.set(false);
+            }
+        }
+    }
+
+    public void showAllPockets() {
+        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
+            eachToggles[0].set(true);
+        }
+    }
+
+    public void hideAllPockets() {
+        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
+            eachToggles[0].set(false);
+        }
+    }
+
+    public void showAllCurrents() {
+        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
+            eachToggles[1].set(true);
+        }
+    }
+
+    public void hideAllCurrents() {
+        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
+            eachToggles[1].set(false);
+        }
     }
 }
