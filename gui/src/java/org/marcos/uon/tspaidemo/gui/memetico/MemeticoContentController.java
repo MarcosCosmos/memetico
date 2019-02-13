@@ -4,7 +4,9 @@ import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
@@ -37,16 +39,34 @@ import java.net.URL;
 import java.util.*;
 
 public class MemeticoContentController implements ContentController {
+    public static class ProblemInstance {
+        public final ProblemConfiguration configuration;
+        public final TSPLibInstance tspLibInstance;
+        public final long targetCost; //note that this isn't garaunteed to match the config (if for example, the config is based on a template, and wants a custom cost,
+
+        public ProblemInstance(ProblemConfiguration config) throws IOException {
+            configuration = config;
+            tspLibInstance = new TSPLibInstance(configuration.problemFile);
+            switch (configuration.solutionType) {
+                case TOUR:
+                    tspLibInstance.addTour(configuration.tourFile);
+                    targetCost = (long)tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
+                    break;
+                case COST:
+                    targetCost = config.targetCost;
+                    break;
+                default:
+                    targetCost = 0;
+            }
+        }
+    }
+
     //used during agent display arrangement
     private static class GridPositionData {
         public int id = -1;
         public int row = -1;
         public int column = -1;
     }
-    public static final ProblemConfiguration DEFAULT_PROBLEM = new ProblemConfiguration(
-            new File(MemeticoContentController.class.getClassLoader().getResource("a280.tsp").getFile()),
-            new File(MemeticoContentController.class.getClassLoader().getResource("a280.opt.tour").getFile())
-    );
 
     public static final MemeticoConfiguration DEFAULT_CONFIG = new MemeticoConfiguration(13, 5, LocalSearchOpName.RAI.toString(), CrossoverOpName.SAX.toString(), RestartOpName.INSERTION.toString());
 
@@ -74,7 +94,7 @@ public class MemeticoContentController implements ContentController {
     private transient IntegerProperty selectedFrameIndex = new SimpleIntegerProperty(0);
 
     private IntegerProperty generationValue = new SimpleIntegerProperty();
-    private Map<String, TSPLibInstance> baseInstances = new HashMap<>();
+    private Map<String, ProblemInstance> baseInstances = new HashMap<>();
 
     private String lastDrawnGraphName = null;
     private int lastDrawnFrameIndex = -1;
@@ -103,6 +123,16 @@ public class MemeticoContentController implements ContentController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        //load all the base instances into the map and template list for the options boz
+        try {
+            for (ProblemConfiguration eachProblem : OptionsBoxController.INCLUDED_PROBLEMS) {
+                ProblemInstance theInstance = new ProblemInstance(eachProblem);
+                baseInstances.put(theInstance.tspLibInstance.getName(), theInstance);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         contentRoot.getStylesheets().add(getClass().getResource("content.css").toExternalForm());
         contentRoot.getStylesheets().add(getClass().getResource("../main/common.css").toExternalForm());
 
@@ -145,6 +175,7 @@ public class MemeticoContentController implements ContentController {
                         state
                 )
         );
+
         txtGeneration.textProperty()
                 .bind(generationValue.asString());
 //        ObjectProperty<MemeticoConfiguration> configProp = optionsBoxController.memeticoConfigurationProperty();
@@ -167,8 +198,7 @@ public class MemeticoContentController implements ContentController {
                                         if (state.get() == null) {
                                             return "Unknown";
                                         } else {
-                                            TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
-                                            return String.valueOf((int)theInstance.getTours().get(theInstance.getTours().size() - 1).distance(theInstance));
+                                            return String.valueOf(baseInstances.get(state.get().instanceName).targetCost);
                                         }
                                     case COST:
                                         return String.valueOf(config.targetCost);
@@ -184,11 +214,20 @@ public class MemeticoContentController implements ContentController {
         optionsBoxController.getTargetDisplayToggle().addListener((e,o,n) -> toursOutdated = true);
         optionsBoxController.getTargetDisplayToggle().set(true);
 
+
+
+        //map the list of templates to the default base instances
+        optionsBoxController.templateNames().addAll(baseInstances.keySet());
+
         //set the default configuration
         optionsBoxController.setMemeticoConfiguration(DEFAULT_CONFIG);
-        optionsBoxController.setProblemConfiguration(DEFAULT_PROBLEM);
 
         optionsBoxController.setApplyConfigFunc(this::launchMemetico);
+
+        //todo: recognise already loaded instances instead of reloading (when entirely template driven)
+        //todo: finished form-side updates
+        optionsBoxController.setProblemConfiguration(OptionsBoxController.INCLUDED_PROBLEMS.get(0));
+
         //launch memetico with defaults
         launchMemetico();
     }
@@ -225,7 +264,7 @@ public class MemeticoContentController implements ContentController {
             //reset and re-draw predictions
             displayGraph.clearPredictions();
 
-            TSPLibInstance theInstance = baseInstances.get(state.get().instanceName);
+            TSPLibInstance theInstance = baseInstances.get(state.get().instanceName).tspLibInstance;
             if(optionsBoxController.getTargetDisplayToggle().get()) {
                 displayGraph.showTargets();
             } else {
@@ -284,7 +323,7 @@ public class MemeticoContentController implements ContentController {
         if(selectedFrameIndex.get() != lastDrawnFrameIndex && state.get() != null) {
             toursOutdated = true;
             lastDrawnFrameIndex = selectedFrameIndex.get();
-            TSPLibInstance baseInstance = baseInstances.get(currentValue.instanceName);
+            TSPLibInstance baseInstance = baseInstances.get(currentValue.instanceName).tspLibInstance;
             ObservableList<Node> agentNodes = agentsGrid.getChildren();
 
             try {
@@ -457,11 +496,12 @@ public class MemeticoContentController implements ContentController {
         final MemeticoConfiguration finalizedConfig = optionsBoxController.getMemeticoConfiguration();
         final ValidityFlag.ReadOnly finalizedContinuePermission = currentMemeticoContinuePermission.getReadOnly();
         try {
-            TSPLibInstance tspLibInstance = new TSPLibInstance(finalizedProblem.problemFile);
+            //todo: recognise existing instances if the cost is the same?
+            ProblemInstance problemInstance = new ProblemInstance(finalizedProblem);
+            baseInstances.put(problemInstance.tspLibInstance.getName(), problemInstance);
 
-            baseInstances.put(tspLibInstance.getName(), tspLibInstance);
-
-            Instance memeticoInstance;
+            TSPLibInstance tspLibInstance = problemInstance.tspLibInstance;
+            memetico.Instance memeticoInstance;
 
             switch (tspLibInstance.getDataType()) {
                 case ATSP:
@@ -490,19 +530,7 @@ public class MemeticoContentController implements ContentController {
             FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
             DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
 
-            long targetCost; //for letting the solver know when it's found the optimal (if known)
-            switch (finalizedProblem.solutionType) {
-                case TOUR:
-                    tspLibInstance.addTour(finalizedProblem.tourFile);
-                    targetCost = (long) tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
-                    break;
-                case COST:
-                    targetCost = finalizedProblem.targetCost;
-                    break;
-                default:
-                    targetCost = -1;
-
-            }
+            long targetCost = problemInstance.targetCost;
 
             //launch memetico
             memeticoThread = new Thread(() -> {

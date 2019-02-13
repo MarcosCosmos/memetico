@@ -31,9 +31,32 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class OptionsBoxController implements Initializable {
+    public static final List<ProblemConfiguration> INCLUDED_PROBLEMS;
+    
+    static {
+        Function<String, ProblemConfiguration> newToured = (filePrefix) -> new ProblemConfiguration(
+                new File(OptionsBoxController.class.getClassLoader().getResource(String.format("problems/tsp/%s.tsp", filePrefix)).getFile()),
+                new File(OptionsBoxController.class.getClassLoader().getResource(String.format("problems/tsp/%s.opt.tour", filePrefix)).getFile())
+        );
+        BiFunction<String, Long, ProblemConfiguration> newCosted = (filePrefix, cost) -> new ProblemConfiguration(
+                new File(OptionsBoxController.class.getClassLoader().getResource(String.format("problems/tsp/%s.tsp", filePrefix)).getFile()),
+                cost
+        );
+        INCLUDED_PROBLEMS = Arrays.asList(
+                newToured.apply("a280"),
+                newToured.apply("berlin52"),
+                newToured.apply("eil51"),
+                newToured.apply("eil76"),
+                newToured.apply("tsp225"),
+                newCosted.apply("att532", 27686L)
+        );
+    }
+
     private Stage theStage;
 
     @FXML
@@ -47,7 +70,7 @@ public class OptionsBoxController implements Initializable {
     @FXML
     private TextField fldMemeticoTourCost, fldMemeticoPopDepth, fldMemeticoMutRate,fldMemeticoMaxGen;
     @FXML
-    private ChoiceBox<String> choiceMemeticoSolutionType, choiceMemeticoLocalSearch, choiceMemeticoCrossover, choiceMemeticoRestart;
+    private ChoiceBox<String> choiceMemeticoProblemTemplate, choiceMemeticoSolutionType, choiceMemeticoLocalSearch, choiceMemeticoCrossover, choiceMemeticoRestart;
 
     @FXML
     private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget;
@@ -225,6 +248,9 @@ public class OptionsBoxController implements Initializable {
         theStage = new Stage();
         Scene newScane = new Scene(memeticoOptionsBoxRoot, 300, 200);
         theStage.setScene(newScane);
+
+        //setup template selection
+        choiceMemeticoProblemTemplate.getItems().add("Custom");
     }
 
     public MemeticoConfiguration getMemeticoConfiguration() {
@@ -272,6 +298,10 @@ public class OptionsBoxController implements Initializable {
 
     public void close() {
         theStage.close();
+    }
+
+    public ObservableList<String> templateNames() {
+        return choiceMemeticoProblemTemplate.getItems();
     }
 
     public void showAllPredictions() {
