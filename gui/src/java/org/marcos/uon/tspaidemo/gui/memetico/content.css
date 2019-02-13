@@ -38,8 +38,8 @@
 .agentDisplayTitle {
     -fx-font-weight:bold;
 
-    -fx-font-size: 1.17em;
-    -fx-padding: 0.25em 0 0.25em 0;
+    -fx-font-size: 1.15em;
+    -fx-padding: 0.15em 0 0.15em 0;
 }
 
 /*.lblAgentId, .txtAgentId {
@@ -52,8 +52,8 @@
 }
 
 #agentsGrid {
-    -fx-padding: 0.75em 0 0 0;
-    -fx-vgap: 0.75em;
+    -fx-padding: 5px 0 0 0;
+    -fx-vgap: 5px;
 }
 
 
