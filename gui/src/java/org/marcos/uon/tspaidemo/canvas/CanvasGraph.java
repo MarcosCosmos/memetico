@@ -81,7 +81,7 @@ public class CanvasGraph extends Pane {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.clearRect(0,0, canvas.getWidth(), canvas.getHeight());
             for (Vertex each : this) {
-                double radiusToUse = Math.max(1.5, each.getDotRadius()*scale);
+                double radiusToUse = Math.max(2, each.getDotRadius()*scale);
                 double halfRad = radiusToUse/2;
                 gc.setFill(each.getDotFill());
                 Point2D minCorner = each.getLocation().multiply(scale).subtract(new Point2D(halfRad, halfRad));
@@ -104,6 +104,28 @@ public class CanvasGraph extends Pane {
                 gc.setStroke(each.getLineStroke());
                 gc.setLineWidth(Math.max(0.5, scale*each.getLineWidth()));
                 Point2D aPos = each.getA().getLocation().multiply(scale), bPos = each.getB().getLocation().multiply(scale);
+                gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
+            }
+            requiresRedraw = false;
+        }
+    }
+
+    public class OutlineEdgeLayer extends LayerImpl<Edge> {
+        public OutlineEdgeLayer(int priority) {
+            super(priority);
+        }
+
+        @Override
+        public void redraw() {
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            gc.clearRect(0,0, getWidth(), getHeight());
+            for(Edge each : this) {
+                Point2D aPos = each.getA().getLocation().multiply(scale), bPos = each.getB().getLocation().multiply(scale);
+                gc.setLineWidth(Math.max(1, scale*each.getLineWidth()*2));
+                gc.setStroke(each.getLineStroke());
+                gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
+                gc.setStroke(backgroundColor);
+                gc.setLineWidth(Math.max(0.5, scale*each.getLineWidth()));
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
             }
             requiresRedraw = false;
@@ -204,6 +226,12 @@ public class CanvasGraph extends Pane {
 
     public EdgeLayer addEdgeLayer(int priority) {
         EdgeLayer result = new EdgeLayer(priority);
+        layers.add(result);
+        return result;
+    }
+
+    public OutlineEdgeLayer addOutlineEdgeLayer(int priority) {
+        OutlineEdgeLayer result = new OutlineEdgeLayer(priority);
         layers.add(result);
         return result;
     }

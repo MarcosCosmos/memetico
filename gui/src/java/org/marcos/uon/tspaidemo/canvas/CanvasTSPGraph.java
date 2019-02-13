@@ -15,12 +15,8 @@ import java.util.stream.Collectors;
 
 public class CanvasTSPGraph {
     private CanvasGraph internalGraphic;
-    private List<List<Edge>> targets;
-    private List<List<Edge>> predictions;
-
     private CanvasGraph.VertexLayer vertexLayer;
-    private CanvasGraph.EdgeLayer normalEdgeLayer;
-    private CanvasGraph.EdgeLayer targetLayer;
+    private CanvasGraph.OutlineEdgeLayer targetLayer;
     private CanvasGraph.EdgeLayer predictionLayer;
 
     public static final double DEFAULT_DOT_RADIUS = 3;
@@ -40,13 +36,10 @@ public class CanvasTSPGraph {
     public CanvasTSPGraph(TSPLibInstance instance) throws InvalidArgumentException {
         showTargets = true;
         internalGraphic = new CanvasGraph();
-        normalEdgeLayer = internalGraphic.addEdgeLayer(0);
-        targetLayer = internalGraphic.addEdgeLayer(10);
-        predictionLayer = internalGraphic.addEdgeLayer(20);
+        //layer showing edges explicitly listed for the intstance? ("fixed edges"?)
+        targetLayer = internalGraphic.addOutlineEdgeLayer(0);
+        predictionLayer = internalGraphic.addEdgeLayer(10);
         vertexLayer = internalGraphic.addVertexLayer(100);
-
-        targets = new ArrayList<>();
-        predictions = new ArrayList<>();
 
         NodeCoordinates nodeData;
         switch (instance.getDisplayDataType()) {
@@ -75,19 +68,6 @@ public class CanvasTSPGraph {
         }
         vertexLayer.requestRedraw();
 
-        if(instance.getFixedEdges() != null) {
-            for(org.jorlib.io.tspLibReader.graph.Edge each : instance.getFixedEdges().getEdges()) {
-                Vertex a = vertexLayer.get(each.getId1()),
-                        b = vertexLayer.get(each.getId2())
-                                ;
-                Edge coreEdge = new Edge(vertexLayer.get(each.getId1()), vertexLayer.get(each.getId2()), String.valueOf(a.getLocation().distance(b.getLocation())), internalGraphic.getBackgroundColor(), DEFAULT_LABEL_COLOR);
-                Edge outlineEdge = new Edge(coreEdge.getA(), coreEdge.getB(), coreEdge.getLabel(), DEFAULT_EDGE_COLOR, DEFAULT_LABEL_COLOR, 2*coreEdge.getLineWidth());
-                normalEdgeLayer.add(outlineEdge);
-                normalEdgeLayer.add(coreEdge);
-            }
-        }
-        normalEdgeLayer.requestRedraw();
-
         //add targets
         for(TSPLibTour eachTour : instance.getTours()) {
             List<int[]> edges = eachTour.toEdges()
@@ -110,62 +90,33 @@ public class CanvasTSPGraph {
         return vertexLayer.isEmpty();
     }
 
-    private void clearEdges(List<List<Edge>> edgeCategory) {
-        edgeCategory.clear();
-    }
-
     public void clearTargets() {
-        clearEdges(targets);
         targetLayer.clear();
         targetLayer.requestRedraw();
     }
 
     public void clearPredictions() {
-        clearEdges(predictions);
         predictionLayer.clear();
         predictionLayer.requestRedraw();
     }
 //
-//    private void addEdges(List<List<Edge>> edgeCategory, List<int[]> newEdges, Color strokeColour) {
-//        List<Edge> edgeList = new ArrayList<>();
-//        for(int[] eachEdge : newEdges) {
-//            Vertex a = vertexLayer.get(eachEdge[0]),
-//                    b = vertexLayer.get(eachEdge[1])
-//                            ;
-//            Edge eachResult = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), strokeColour, DEFAULT_LABEL_COLOR);
-//            edgeList.add(eachResult);
-//        }
-//        edgeCategory.add(Collections.unmodifiableList(edgeList));
-//    }
-
-    public void addTargetEdges(List<int[]> edges) {
-        List<Edge> edgeList = new ArrayList<>();
-        for(int[] eachEdge : edges) {
+    private void addEdges(CanvasGraph.Layer<Edge> edgeCategory, List<int[]> newEdges, Color strokeColour) {
+        for(int[] eachEdge : newEdges) {
             Vertex a = vertexLayer.get(eachEdge[0]),
                     b = vertexLayer.get(eachEdge[1])
                             ;
-            Edge coreEdge = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), internalGraphic.getBackgroundColor(), DEFAULT_LABEL_COLOR);
-            Edge outlineEdge = new Edge(coreEdge.getA(), coreEdge.getB(), coreEdge.getLabel(), DEFAULT_TARGET_EDGE_COLOR, DEFAULT_LABEL_COLOR, 2*coreEdge.getLineWidth());
-            edgeList.add(coreEdge);
-            targetLayer.add(outlineEdge);
-            targetLayer.add(coreEdge);
+            Edge eachResult = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), strokeColour, DEFAULT_LABEL_COLOR);
+            edgeCategory.add(eachResult);
         }
-        targets.add(edgeList);
-        targetLayer.requestRedraw();
+        edgeCategory.requestRedraw();
+    }
+
+    public void addTargetEdges(List<int[]> edges) {
+        addEdges(targetLayer, edges, DEFAULT_TARGET_EDGE_COLOR);
     }
 
     public void addPredictionEdges(List<int[]> edges, Color stroke) {
-        List<Edge> edgeList = new ArrayList<>();
-        for(int[] eachEdge : edges) {
-            Vertex a = vertexLayer.get(eachEdge[0]),
-                    b = vertexLayer.get(eachEdge[1])
-                            ;
-            Edge eachResult = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), stroke, DEFAULT_LABEL_COLOR);
-            edgeList.add(eachResult);
-            predictionLayer.add(eachResult);
-        }
-        predictions.add(edgeList);
-        predictionLayer.requestRedraw();
+        addEdges(predictionLayer, edges, stroke);
     }
 
     public void addPredictionEdges(List<int[]> edges) {
