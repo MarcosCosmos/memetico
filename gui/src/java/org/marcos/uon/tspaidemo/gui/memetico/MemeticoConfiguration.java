@@ -1,12 +1,5 @@
 package org.marcos.uon.tspaidemo.gui.memetico;
 
-import memetico.logging.IPCLogger;
-import memetico.util.CrossoverOpName;
-import memetico.util.LocalSearchOpName;
-import memetico.util.RestartOpName;
-
-import java.io.DataOutputStream;
-
 public class MemeticoConfiguration {
     //these two are unused in the current implementation; their usage may not even implemented or may not be working
     public final String solutionStructure = "DiCycle";
@@ -46,7 +39,4 @@ public class MemeticoConfiguration {
     public MemeticoConfiguration(int populationSize, int mutationRate, String localSearchOp, String crossoverOp, String restartOp) {
         this(populationSize, mutationRate, localSearchOp, crossoverOp, restartOp, 0, 1);
     }
-//    public MemeticoConfiguration(int populationSize, int mutationRate, LocalSearchOpName localSearchOp, CrossoverOpName crossoverOp, RestartOpName restartOp, long maxTime, long maxGenerations, long numReplications) {
-//        this(populationSize, mutationRate, localSearchOp.toString(), crossoverOp.toString(), restartOp.toString(), maxTime, maxGenerations, numReplications);
-//    }
 }

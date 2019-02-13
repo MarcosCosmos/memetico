@@ -3,8 +3,6 @@ package memetico.logging;
 import memetico.Population;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 
-import java.util.Collection;
-
 public class PCLogger extends BasicLogger<PCAlgorithmState> implements IPCLogger {
     private long startTime;
     protected double logFrequency;

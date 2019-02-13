@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.*?>
 <?import java.lang.String?>
-<?import javafx.scene.text.TextFlow?>
 <ScrollPane fx:id="memeticoOptionsBoxRoot" xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController">

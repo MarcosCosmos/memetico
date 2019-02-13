@@ -1,12 +1,8 @@
 package org.marcos.uon.tspaidemo.gui.main;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -14,7 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -46,7 +41,6 @@ public class PlaybackController implements Initializable {
     private double leftOverFrames = 0;
     private long lastUpdateTime;
 
-//    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
     private final DoubleProperty speedInterval = new SimpleDoubleProperty(100/1.0);
 
     /**
@@ -58,8 +52,6 @@ public class PlaybackController implements Initializable {
     private transient IntegerProperty frameCount = new SimpleIntegerProperty(0);
     private final transient BooleanProperty isPlaying = new SimpleBooleanProperty(true);
     private final transient ReadOnlyIntegerWrapper frameIndex = new ReadOnlyIntegerWrapper(0);
-
-//    private transient Timeline redrawTimeLine = new Timeline();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -125,7 +117,6 @@ public class PlaybackController implements Initializable {
      * Allows something else (i.e. the playback controller) to control which frame to show.
      */
     public void bindFrameCount(ObservableValue<Number> source) {
-//        unbindFrameCount();
         frameCount.bind(source);
     }
 

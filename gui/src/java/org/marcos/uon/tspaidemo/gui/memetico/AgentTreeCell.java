@@ -20,6 +20,5 @@ public class AgentTreeCell extends TreeCell<PCAlgorithmState.AgentState> {
     @Override
     public void requestFocus() {
         //do nothing
-//        super.requestFocus();
     }
 }

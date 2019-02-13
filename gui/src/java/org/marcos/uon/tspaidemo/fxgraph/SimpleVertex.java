@@ -14,7 +14,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
-import sun.security.provider.certpath.Vertex;
 
 /**
  * An fxgraph cell for a simple vertex in a tsp instance

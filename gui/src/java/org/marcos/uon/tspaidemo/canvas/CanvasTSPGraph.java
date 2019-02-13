@@ -8,8 +8,6 @@ import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.TSPLibTour;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 

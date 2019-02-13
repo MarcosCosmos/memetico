@@ -1,12 +1,15 @@
 package org.marcos.uon.tspaidemo.gui.memetico;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import memetico.logging.PCAlgorithmState;
@@ -15,14 +18,10 @@ import java.io.IOException;
 
 
 public class AgentDisplay extends Pane {
-//    private final transient Label lblAgentId;
-//    private final transient Label lblPocketCost;
-//private final transient Label lblCurrentCost;
     private final transient Text txtAgentId;
     private final transient Text txtPocketCost;
     private final transient Text txtCurrentCost;
     private final transient Label pocketColorSample, currentColorSample;
-//    private final transient CheckBox cbTogglePocket, cbToggleCurrent;
 
     private final ObjectProperty<PCAlgorithmState.AgentState> state = new SimpleObjectProperty<>();
     private final ObjectProperty<Color> pocketColor = new SimpleObjectProperty<>(), currentColor = new SimpleObjectProperty<>();

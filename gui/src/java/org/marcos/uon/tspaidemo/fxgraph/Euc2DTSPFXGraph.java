@@ -1,28 +1,26 @@
 package org.marcos.uon.tspaidemo.fxgraph;
 
-import com.fxgraph.graph.*;
+import com.fxgraph.graph.Graph;
+import com.fxgraph.graph.Model;
+import com.fxgraph.graph.PannableCanvas;
 import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
-import org.jorlib.io.tspLibReader.TSPLibTour;
-import org.jorlib.io.tspLibReader.graph.Edge;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Deprecated //(Too slow for displaying solution tours etc reliably
 /**
  * Generates JavaFX display of graphs (including tours) for Euclidean 2D TSP instances.
  * Todo: possibly make this modifiable; Possibly using observable lists, possibly using views and explicit add/remove helpers.
@@ -148,12 +146,6 @@ public class Euc2DTSPFXGraph {
 
         normalEdges.stream().forEach(model::addEdge);
 
-//        //scale the cells for visibility
-//        for(SimpleVertex each : cells) {
-//            each.locationX().set(each.locationX().get()*10);
-//            each.locationY().set(each.locationY().get()*10);
-//        }
-
         fxGraph.endUpdate();
 
         fxGraph.layout(new SelfLocatingLayout());
@@ -185,10 +177,6 @@ public class Euc2DTSPFXGraph {
     }
 
     private void clearEdges(List<List<SimpleEdge>> edgeCategory) {
-//        ObservableList<IEdge> toRemove = fxGraph.getModel().getRemovedEdges();
-//        for(List<SimpleEdge> eachTour : edgeCategory) {
-//            toRemove.addAll(eachTour);
-//        }
         edgeCategory.forEach(edgePool::discardAll);
         edgeCategory.clear();
     }
@@ -202,42 +190,16 @@ public class Euc2DTSPFXGraph {
     }
 
     private void addEdges(List<List<SimpleEdge>> edgeCategory, List<int[]> newEdges, BiFunction<SimpleVertex, SimpleVertex, SimpleEdge> constructor) {
-        //        graph.beginUpdate(); //only one of beginUpdate/endUpdate actually need to be called; begin update should probably never be called since it just wipes the canvas without changing other lists?
-//        Model model = fxGraph.getModel();
+
         List<SimpleEdge> edgeList = new ArrayList<>();
-//        long bigStart = System.nanoTime();
         for(int[] eachEdge : newEdges) {
-//            long start;
-//            long end;
-//            start = System.nanoTime();
             SimpleVertex a = cells.get(eachEdge[0]),
                     b = cells.get(eachEdge[1])
                             ;
-//            end = System.nanoTime();
-//            System.out.print(280*(end-start)/1E6);
-//            System.out.print(" ");
-//            start = System.nanoTime();
             SimpleEdge eachResult = constructor.apply(a,b);
-//            end = System.nanoTime();
-//            System.out.print(280*(end-start)/1E6);
-//            System.out.print(" ");
-
-//            start = System.nanoTime();
             eachResult.textProperty().set(String.valueOf(new Point2D(a.locationX().get(), b.locationY().get()).distance(b.locationX().get(), b.locationY().get())));
             edgeList.add(eachResult);
-//            end = System.nanoTime();
-//            System.out.print(280*(end-start)/1E6);
-//            System.out.println();
         }
-        long bigEnd = System.nanoTime();
-
-//        System.out.println(TimeUnit.NANOSECONDS.toMillis(bigEnd-bigStart));
-//
-//        System.out.println();
-//        System.out.println();
-//        System.out.println();
-        //add the return-to-start
-
         edgeCategory.add(Collections.unmodifiableList(edgeList));
     }
 
@@ -287,28 +249,11 @@ public class Euc2DTSPFXGraph {
     }
 
     public void beginUpdate() {
-//        fxGraph.getModel().getRemovedCells().addAll(cells);
-//        Stream.concat(
-//                Stream.of(normalEdges),
-//                Stream.of(
-//                        targets.stream(),
-//                        predictions.stream()
-//                ).flatMap(Function.identity())
-//        )
-//                .forEach(
-//                        fxGraph.getModel()
-//                                .getRemovedEdges()
-//                                ::addAll
-//                );
-//        predictions.forEach(
-//                fxGraph.getModel().getRemovedEdges()::addAll
-//        );
     }
 
     public void endUpdate() {
 
         fxGraph.beginUpdate();
-//        fxGraph.getModel().getRemovedCells().addAll(fxGraph.getModel().getAllCells()); //remove cells
         fxGraph.getModel().getAllCells().clear();
         fxGraph.getModel().getAllEdges().clear();
         fxGraph.getModel().getAddedEdges().setAll(

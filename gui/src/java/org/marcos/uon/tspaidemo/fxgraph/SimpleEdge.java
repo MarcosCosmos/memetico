@@ -6,15 +6,10 @@ import com.fxgraph.graph.IEdge;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SimpleEdge implements IEdge {
     private final transient StringProperty textProperty = new SimpleStringProperty();

@@ -10,19 +10,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import memetico.*;
+import memetico.ATSPInstance;
+import memetico.GraphInstance;
+import memetico.Instance;
+import memetico.Memetico;
 import memetico.logging.PCAlgorithmState;
 import memetico.logging.PCLogger;
 import memetico.util.CrossoverOpName;
 import memetico.util.LocalSearchOpName;
 import memetico.util.RestartOpName;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
-import org.jorlib.io.tspLibReader.TSPLibTour;
 import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
@@ -34,8 +35,6 @@ import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MemeticoContentController implements ContentController {
     //used during agent display arrangement
@@ -44,9 +43,6 @@ public class MemeticoContentController implements ContentController {
         public int row = -1;
         public int column = -1;
     }
-
-//    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
-
     public static final ProblemConfiguration DEFAULT_PROBLEM = new ProblemConfiguration(
             new File(MemeticoContentController.class.getClassLoader().getResource("a280.tsp").getFile()),
             new File(MemeticoContentController.class.getClassLoader().getResource("a280.opt.tour").getFile())
@@ -67,12 +63,7 @@ public class MemeticoContentController implements ContentController {
     @FXML
     private BorderPane titleBar, graphContainer;
 
-//    @FXML
-//    private TreeView<PCAlgorithmState.AgentState> agentsTree;
-
     private List<AgentDisplay> agentControllers = new ArrayList<>();
-
-//    private List<TreeItem<PCAlgorithmState.AgentState>> agentItems = new ArrayList<>();
 
     private OptionsBoxController optionsBoxController;
 
@@ -89,7 +80,6 @@ public class MemeticoContentController implements ContentController {
     private int lastDrawnFrameIndex = -1;
     private CanvasTSPGraph displayGraph;
 
-//    private double lastScale = 0;
     private boolean toursOutdated = false;
     private ValidityFlag.Synchronised currentMemeticoContinuePermission;
     private Thread memeticoThread = null;
@@ -113,7 +103,6 @@ public class MemeticoContentController implements ContentController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        agentsTree.setEditable(false);
         contentRoot.getStylesheets().add(getClass().getResource("content.css").toExternalForm());
         contentRoot.getStylesheets().add(getClass().getResource("../main/common.css").toExternalForm());
 
@@ -199,10 +188,6 @@ public class MemeticoContentController implements ContentController {
         optionsBoxController.setMemeticoConfiguration(DEFAULT_CONFIG);
         optionsBoxController.setProblemConfiguration(DEFAULT_PROBLEM);
 
-
-        //
-//        optionsBoxController.memeticoConfigurationProperty().addListener( (observable, oldValue, newValue) -> launchMemetico());
-//        optionsBoxController.problemConfigurationProperty().addListener( (observable, oldValue, newValue) -> launchMemetico());
         optionsBoxController.setApplyConfigFunc(this::launchMemetico);
         //launch memetico with defaults
         launchMemetico();
@@ -357,50 +342,6 @@ public class MemeticoContentController implements ContentController {
 
                     List<GridPositionData> arrangementInstructions = new ArrayList<>(currentValue.agents.length); //unordered list of instructions which can be used to assign grid positions
 
-//                    //the following implements a vertical-then-horizontal arrangement (root is at the center-top)
-//                    {
-//                        GridPositionData rootData = new GridPositionData();
-//
-//                        rootData.id = 0;
-//                        rootData.row = 0;
-//                        TreeNode<GridPositionData> root = new TreeNode<>(rootData);
-//                        //construct the tree by having each node create and attach their children.
-//                        Queue<TreeNode<GridPositionData>> creationQueue = new ArrayDeque<>();
-//                        creationQueue.add(root);
-//
-//                        Stack<TreeNode<GridPositionData>> arrangementStack = new Stack<>();
-//                        while (!creationQueue.isEmpty()) {
-//                            TreeNode<GridPositionData> eachNode = creationQueue.remove();
-//                            GridPositionData eachData = eachNode.getData();
-//                            int firstChildId = currentValue.nAry * eachData.id + 1;
-//                            int pastChildId = Math.min(firstChildId + currentValue.nAry, currentValue.agents.length); //value past the end of the to-create list.
-//                            for (int i = firstChildId; i < pastChildId; ++i) {
-//                                GridPositionData newData = new GridPositionData();
-//                                newData.id = i;
-//                                newData.row = eachData.row + 1;
-//                                TreeNode<GridPositionData> newNode = new TreeNode<>(newData);
-//                                eachNode.attach(newNode);
-//                                creationQueue.add(newNode);
-//                            }
-//                            //if it's not an orphan, add it to the stack to column-positioned later;
-//                            //if it is an orphan, we can position it now; (this ensures the left-most branch is full if the tree were to be unbalanced)
-//                            if (eachNode.isLeaf()) {
-//                                eachData.column = columnsAllocated++;
-//
-//                                //we want placeholders to leave empty columns between subpopulations visually
-//                                if (eachData.id != currentValue.agents.length - 1 && eachNode.parent().children().indexOf(eachNode) == eachNode.parent().children().size() - 1) {
-//                                    GridPositionData placeholderData = new GridPositionData();
-//                                    placeholderData.id = -1;
-//                                    placeholderData.row = eachData.row;
-//                                    placeholderData.column = columnsAllocated++;
-//                                    arrangementInstructions.add(placeholderData);
-//                                }
-//                                arrangementInstructions.add(eachData);
-//                            } else {
-//                                arrangementStack.push(eachNode);
-//                            }
-//                        }
-
                     //the following implements a horizontal-then-vertical arrangement (root is top-left)
                     {
                         GridPositionData rootData = new GridPositionData();
@@ -480,41 +421,9 @@ public class MemeticoContentController implements ContentController {
                         AgentDisplay eachAgent = agentControllers.get(i);
                         double eachHue = hueSegmentSize*GridPane.getRowIndex(eachAgent);
 
-                        //L_hsl = 0.25, 0.75; -> V_hsv = 0.5, 1.0
-                        //S_hsl = 1 -> 1, 0.5;
-
-//                        eachAgent.setPocketColor(Color.hsb(eachHue, 0.8, 0.6, 0.8));
-//                        eachAgent.setCurrentColor(Color.hsb(eachHue, 0.6, 0.8, 0.8));
-
                         eachAgent.setPocketColor(Color.hsb(eachHue, 1, 1, 0.75));
                         eachAgent.setCurrentColor(Color.hsb(eachHue, 1, 0.75, 0.75));
                     }
-
-//                    //the following populates the treeview
-//                    {
-//                        agentItems.clear();
-//                        agentItems.addAll(Stream.generate(() -> (TreeItem<PCAlgorithmState.AgentState>)null).limit(newCount).collect(Collectors.toList()));
-//                        TreeItem<PCAlgorithmState.AgentState> rootItem = new TreeItem<>();
-//                        agentItems.set(0, rootItem);
-//                        agentsTree.setRoot(rootItem);
-//                        Stack<Integer> creationStack = new Stack<>();
-//
-//                        creationStack.push(0);
-//                        while (!creationStack.isEmpty()) {
-//                            int eachNode = creationStack.pop();
-//                            TreeItem<PCAlgorithmState.AgentState> eachItem = agentItems.get(eachNode);
-//                            eachItem.setExpanded(true);
-//                            int firstChildId = currentValue.nAry * eachNode + 1;
-//                            int pastChildId = Math.min(firstChildId + currentValue.nAry, currentValue.agents.length); //value past the end of the to-create list.
-//                            for (int i = firstChildId; i < pastChildId; ++i) {
-//                                TreeItem<PCAlgorithmState.AgentState> newItem = new TreeItem<>();
-//                                eachItem.getChildren().add(newItem);
-//                                agentItems.set(i, newItem);
-//                                creationStack.push(i);
-//                            }
-//                        }
-//
-//                    }
                 }
             } catch (InvalidArgumentException e) {
                 e.printStackTrace();
@@ -523,41 +432,12 @@ public class MemeticoContentController implements ContentController {
             for(int i=0; i<agentControllers.size(); ++i) {
                 agentControllers.get(i).setState(state.get().agents[i]);
             }
-//            for(int i=0; i<agentItems.size(); ++i) {
-//                agentItems.get(i).setValue(state.get().agents[i]);
-//            }
-
         } else if(state.get() == null){
             toursOutdated = false;
         }
         if(toursOutdated) {
             updateTours();
         }
-//0
-//        1
-//                4
-//                5
-//                6
-//        2
-//                7
-//                8
-//                9
-//        3
-//                10
-//                11
-//                12
-
-//todo: try storing them like this. (that is, [0,1,4-6], [0,2,7-9])
-
-//
-//            1=0*3+1+0
-//            4=(
-//                    (
-//                            (0*3+1)+a
-//                    )*3+1+b
-//            )+c
-//            7=((((0*3+1)+1)*3)+1)+0
-//            10=((((0*3+1)+2)*3)+1)+0
     }
 
     private void launchMemetico() {
@@ -624,72 +504,8 @@ public class MemeticoContentController implements ContentController {
 
             }
 
-
-    //                File probFile = new File(getClass().getClassLoader().getResource("att532.tsp").getFile());
-    //
-    //                TSPLibInstance tspLibInstance = new TSPLibInstance(probFile);
-    //
-    //                baseInstances.put(tspLibInstance.getName(), tspLibInstance);
-    //
-    //                Instance memeticoInstance;
-    //
-    //                switch (tspLibInstance.getDataType()) {
-    ////                        case TSP:
-    ////                            memeticoInstance = new TSPInstance();
-    ////                            break;
-    //                    case ATSP:
-    //                    default:
-    //                        //atsp should be safe (ish) even if it is in fact tsp
-    //                        memeticoInstance = new ATSPInstance();
-    //                }
-    //
-    //                //give the memeticoInstance the required data
-    //                memeticoInstance.setDimension(tspLibInstance.getDimension());
-    //                {
-    //                    DistanceTable distanceTable = tspLibInstance.getDistanceTable();
-    //                    double[][] memeticoMat = ((GraphInstance) memeticoInstance).getMatDist();
-    //                    for (int i = 0; i < memeticoInstance.getDimension(); ++i) {
-    //                        for (int k = 0; k < memeticoInstance.getDimension(); ++k) {
-    //                            memeticoMat[i][k] = distanceTable.getDistanceBetween(i, k);
-    //                        }
-    //                    }
-    //                }
-    //
-    //                MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(((GraphInstance) memeticoInstance).getDimension()));
-    //
-    //                FileOutputStream dataOut = null;
-    //                dataOut = new FileOutputStream("result.txt");
-    //                DataOutputStream fileOut = new DataOutputStream(dataOut);
-    //
-    //                FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
-    //                DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
-    //
-    //                long targetCost; //for letting the solver know when it's found the optimal (if known)
-    //                //a280: this one has a tour
-    ////                    {
-    ////                        File tourFile = new File(getClass().getClassLoader().getResource("a280.opt.tour").getFile());
-    ////                        tspLibInstance.addTour(tourFile);
-    ////                        targetCost = (long) tspLibInstance.getTours().get(0).distance(tspLibInstance);
-    //////                        tspLibInstance.getTours().reset();
-    ////                    }
-    //                //att532: this one just has known cost
-    //                targetCost = 27686;
-
             //launch memetico
             memeticoThread = new Thread(() -> {
-    //            String MetodoConstrutivo = "Nearest Neighbour";
-    //            String BuscaLocal = "Recursive Arc Insertion";//Recursive base.Arc Insertion";
-    ////            String SingleorDouble = "Double";
-    //            String OPCrossover = "Strategic Arc Crossover - SAX",
-    //                    OPReStart = "RestartInsertion",
-    //                    OPMutacao = "MutationInsertion";
-    //            String structSol = "DiCycle";
-    //            String structPop = "Ternary Tree";
-    //            long MaxTime = 100, MaxGenNum;
-    //            int PopSize = 13, mutationRate = 5;
-    //            int numReplications = 1;
-
-
                 try {
                     Memetico meme = new Memetico(logger, finalizedContinuePermission, memeticoInstance, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
                             finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp,
@@ -712,18 +528,6 @@ public class MemeticoContentController implements ContentController {
     public void showOptionsBox() {
         optionsBoxController.open();
     }
-
-//    public Duration getFrameInterval() {
-//        return frameInterval.get();
-//    }
-//
-//    public ObjectProperty<Duration> frameIntervalProperty() {
-//        return frameInterval;
-//    }
-//
-//    public void setFrameInterval(Duration frameInterval) {
-//        this.frameInterval.set(frameInterval);
-//    }
 
     /**
      * {@inheritDoc}

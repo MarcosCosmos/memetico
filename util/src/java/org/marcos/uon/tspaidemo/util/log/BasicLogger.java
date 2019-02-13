@@ -1,6 +1,9 @@
 package org.marcos.uon.tspaidemo.util.log;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class BasicLogger<T> implements ILogger<T> {
     //todo: maybe add non-locking version methods to this as well?

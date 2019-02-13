@@ -1,7 +1,6 @@
 package memetico.logging;
 
 import memetico.Population;
-import org.marcos.uon.tspaidemo.util.log.ILogger;
 import org.marcos.uon.tspaidemo.util.log.NullLogger;
 
 import java.util.Collection;

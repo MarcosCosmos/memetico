@@ -1,10 +1,9 @@
 package memetico.logging;
 
-import memetico.*;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import memetico.Arc;
+import memetico.DiCycle;
+import memetico.PocCurAgent;
+import memetico.Population;
 
 /**
  * Takes log-safe information from data provided by memetico;

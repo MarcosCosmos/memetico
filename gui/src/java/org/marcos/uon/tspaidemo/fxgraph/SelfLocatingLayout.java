@@ -6,7 +6,6 @@ import com.fxgraph.layout.Layout;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 public class SelfLocatingLayout implements Layout {
     public SelfLocatingLayout() {

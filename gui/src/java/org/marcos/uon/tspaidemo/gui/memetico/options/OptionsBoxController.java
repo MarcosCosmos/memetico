@@ -1,6 +1,9 @@
 package org.marcos.uon.tspaidemo.gui.memetico.options;
 
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,7 +11,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -28,12 +30,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class OptionsBoxController implements Initializable {
-
-
     private Stage theStage;
 
     @FXML
@@ -52,7 +51,6 @@ public class OptionsBoxController implements Initializable {
     @FXML
     private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget;
 
-//    private IntegerProperty agentCount = new SimpleIntegerProperty(0);
     private ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final ObjectProperty<ProblemConfiguration> problemConfiguration = new SimpleObjectProperty<>();
@@ -62,14 +60,6 @@ public class OptionsBoxController implements Initializable {
 
     //called when the user wants to apply their selected configuration
     private Runnable applyConfigFunc = () -> {};
-
-//    public int getAgentCount() {
-//        return agentCount.get();
-//    }
-//
-//    public IntegerProperty agentCountProperty() {
-//        return agentCount;
-//    }
 
     public void openProblemSelectionDialog() {
         FileChooser fileChooser = new FileChooser();
@@ -112,9 +102,6 @@ public class OptionsBoxController implements Initializable {
                     };
                     children.add(eachSubBox);
                     solutionDisplayToggles.add(toggles);
-//                    if (oldValue == 0 && newValue != 0 && i == 0) {
-//                        toggles[0].setValue(true);
-//                    }
                 }
             }
         } catch (IOException e) {

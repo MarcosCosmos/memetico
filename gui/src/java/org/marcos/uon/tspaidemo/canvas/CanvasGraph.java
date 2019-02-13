@@ -8,11 +8,15 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Internally contains one or more canvases
@@ -184,7 +188,9 @@ public class CanvasGraph extends Pane {
         this.backgroundColor = backgroundColor;
     }
 
-    //draws/redraws the canvas on an as-needed basis
+    /**
+     * Draws/redraws the canvas on an as-needed basis
+     */
     public void draw() {
         if(requiresReordering) {
             layers.sorted(Comparator.comparing(Layer::getPriority)).forEach(each -> each.getCanvas().toFront());

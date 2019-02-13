@@ -1,10 +1,7 @@
 package memetico.logging;
 
 import memetico.Population;
-import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 import org.marcos.uon.tspaidemo.util.log.ILogger;
-
-import java.util.Collection;
 
 public interface IPCLogger extends ILogger<PCAlgorithmState> {
     interface View extends ILogger.View<PCAlgorithmState> {
