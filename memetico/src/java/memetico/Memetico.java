@@ -39,7 +39,7 @@ public class Memetico {
      * @param structPop: struct of the Population
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
-    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, String name, long OptimalSol, DataOutputStream fileOut, DataOutputStream compact_fileOut) throws Exception {
+    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, String name, long OptimalSol/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
         this.logger = logger;
         int GenNum = 0, i;
         double TotalTime = 0, bestTime = 0, auxTime, recombineTime;
@@ -214,16 +214,16 @@ public class Memetico {
                 cont_OptimalSol++;
 
             Quality += memePop.bestAgent.bestCost;
-
-            try {
-                fileOut.writeBytes(String.valueOf(name + '\t'));                /*nome do arquivo*/
-                fileOut.writeBytes(String.valueOf(prec.format((double) (TotalTime / 1000))) + '\t');    /*tempo total da execucao*/
-                fileOut.writeBytes(String.valueOf((long) memePop.bestAgent.bestCost) + '\t');    /*melhor solucao encontrada*/
-                fileOut.writeBytes(String.valueOf(prec.format((double) bestTime)) + '\t');            /*ultima atualizacao da melhor solucao*/
-                fileOut.writeBytes(String.valueOf((int) GenNum) + '\n');            /*numero total de solucoes*/
-            } catch (IOException e) {
-                throw new Exception("File not properly opened" + e.toString());
-            }
+//
+//            try {
+//                fileOut.writeBytes(String.valueOf(name + '\t'));                /*nome do arquivo*/
+//                fileOut.writeBytes(String.valueOf(prec.format((double) (TotalTime / 1000))) + '\t');    /*tempo total da execucao*/
+//                fileOut.writeBytes(String.valueOf((long) memePop.bestAgent.bestCost) + '\t');    /*melhor solucao encontrada*/
+//                fileOut.writeBytes(String.valueOf(prec.format((double) bestTime)) + '\t');            /*ultima atualizacao da melhor solucao*/
+//                fileOut.writeBytes(String.valueOf((int) GenNum) + '\n');            /*numero total de solucoes*/
+//            } catch (IOException e) {
+//                throw new Exception("File not properly opened" + e.toString());
+//            }
             //System.out.println("Tempo total de execucao: " + (TotalTime / 1000) + '\t');        /*Tempo total de execucao*/
             //System.out.println("Melhor solucao encontrada: " + memePop.bestAgent.bestCost + '\t');    /*Melhor solucao encontrada*/
             //System.out.println("Numero total de Geracoes: " + GenNum + '\n');            /*Numero total de Geracoes*/
@@ -236,17 +236,17 @@ public class Memetico {
         Quality = (100 * (Quality - OptimalSol) / OptimalSol);
         AverQuality += Quality;
 
-        try {
-            compact_fileOut.writeBytes(name + '\t');                                    /*arquivo*/
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (initialSolution))) + '\t');                /*solucao inicial*/
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (100 * (initialSolution - OptimalSol) / OptimalSol))) + '\t');    /*qualidade de solucao inicial*/
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Quality))) + '\t');                    /*qualidade da solucao final*/
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_time / numReplications))) + '\t');            /*tempo total medio*/
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_Gen / numReplications))) + '\t');            /*numero de geracoes*/
-            compact_fileOut.writeBytes(String.valueOf((int) (cont_OptimalSol)) + " (" + String.valueOf((int) (numReplications)) + ")" + '\n');/*numero de solucoes otimas*/
-        } catch (IOException e) {
-            throw new Exception("File not properly opened" + e.toString());
-        }
+//        try {
+//            compact_fileOut.writeBytes(name + '\t');                                    /*arquivo*/
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (initialSolution))) + '\t');                /*solucao inicial*/
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (100 * (initialSolution - OptimalSol) / OptimalSol))) + '\t');    /*qualidade de solucao inicial*/
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Quality))) + '\t');                    /*qualidade da solucao final*/
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_time / numReplications))) + '\t');            /*tempo total medio*/
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (Aver_Gen / numReplications))) + '\t');            /*numero de geracoes*/
+//            compact_fileOut.writeBytes(String.valueOf((int) (cont_OptimalSol)) + " (" + String.valueOf((int) (numReplications)) + ")" + '\n');/*numero de solucoes otimas*/
+//        } catch (IOException e) {
+//            throw new Exception("File not properly opened" + e.toString());
+//        }
 
         AverTotalTime += (Aver_time / numReplications);
         AverPopInit += initialSolution;
@@ -327,16 +327,16 @@ public class Memetico {
 
 
         try {
-            FileOutputStream dataOut = new FileOutputStream("result.txt");
-            DataOutputStream fileOut = new DataOutputStream(dataOut);
-
-            FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
-            DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
-            try {
-                compact_fileOut.writeBytes("file" + '\t' + "ini" + '\t' + "qual_ini" + '\t' + "qual" + '\t' + "time" + '\t' + "lsTime" + '\t' + "gen" + '\t' + "opt" + '\n');
-            } catch (IOException e) {
-                throw new Exception("File not properly opened" + e.toString());
-            }
+//            FileOutputStream dataOut = new FileOutputStream("result.txt");
+//            DataOutputStream fileOut = new DataOutputStream(dataOut);
+//
+//            FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
+//            DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
+//            try {
+//                compact_fileOut.writeBytes("file" + '\t' + "ini" + '\t' + "qual_ini" + '\t' + "qual" + '\t' + "time" + '\t' + "lsTime" + '\t' + "gen" + '\t' + "opt" + '\n');
+//            } catch (IOException e) {
+//                throw new Exception("File not properly opened" + e.toString());
+//            }
 
 //      compact_fileOut.writeBytes("HCP com SAX - 10/11.");
 
@@ -418,18 +418,17 @@ public class Memetico {
 
                 Memetico meme = new Memetico(logger, () -> true, inst, structSol, structPop, MetodoConstrutivo,
                         PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao,
-                        MaxTime, MaxGenNum, numReplications, Names[count], OptimalSol[count], fileOut,
-                        compact_fileOut);
+                        MaxTime, MaxGenNum, numReplications, Names[count], OptimalSol[count]);
             }//for
 
-            compact_fileOut.writeBytes('\t' + String.valueOf(prec.format((double) (AverPopInit / countNames))) + '\t' + '\t');
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverQuality / countNames))) + '\t');
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverTotalTime / countNames))) + '\t');
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverGen / countNames))) + '\t');
-            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverSolOpt / countNames))) + "/" + String.valueOf((int) (numReplications)) + '\n');
-
-            compact_fileOut.close();
-            fileOut.close();
+//            compact_fileOut.writeBytes('\t' + String.valueOf(prec.format((double) (AverPopInit / countNames))) + '\t' + '\t');
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverQuality / countNames))) + '\t');
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverTotalTime / countNames))) + '\t');
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverGen / countNames))) + '\t');
+//            compact_fileOut.writeBytes(String.valueOf(prec.format((double) (AverSolOpt / countNames))) + "/" + String.valueOf((int) (numReplications)) + '\n');
+//
+//            compact_fileOut.close();
+//            fileOut.close();
         } catch (IOException e) {
             System.err.println("File not opened properly" + e.toString());
 //      System.exit(1);
