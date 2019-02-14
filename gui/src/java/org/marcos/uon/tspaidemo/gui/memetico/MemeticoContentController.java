@@ -185,6 +185,7 @@ public class MemeticoContentController implements ContentController {
      */
     public void bindSelectedFrameIndex(ObservableValue<Number> source) {
 //        unbindSelectedFrameIndex();
+        //TODO: MAKE THIS BIDIRECTIONAL ON ACCOUNT OF VIEW INVALIDATION?
         selectedFrameIndex.bind(source);
     }
 
