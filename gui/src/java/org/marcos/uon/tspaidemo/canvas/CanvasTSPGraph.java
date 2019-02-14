@@ -8,6 +8,7 @@ import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.TSPLibTour;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,60 +25,12 @@ public class CanvasTSPGraph {
     public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
     public static final Color DEFAULT_LABEL_COLOR = null;
 
-    private boolean showTargets;
-
-    /**
-     *
-     * @param instance A tsp instance,with main data already loaded from file;
-     * @throws InvalidArgumentException if the instance is not Euclidean 2D
-     */
-    public CanvasTSPGraph(TSPLibInstance instance) throws InvalidArgumentException {
-        showTargets = true;
+    public CanvasTSPGraph() {
         internalGraphic = new CanvasGraph();
         //layer showing edges explicitly listed for the intstance? ("fixed edges"?)
         targetLayer = internalGraphic.addOutlineEdgeLayer(0);
         predictionLayer = internalGraphic.addEdgeLayer(10);
         vertexLayer = internalGraphic.addVertexLayer(100);
-
-        NodeCoordinates nodeData;
-        switch (instance.getDisplayDataType()) {
-            case TWOD_DISPLAY:
-                nodeData = instance.getDisplayData();
-            case COORD_DISPLAY:
-                nodeData = (NodeCoordinates) instance.getDistanceTable();
-                //only try to display 2d nodes for now; maybe use jgrapht for more?
-                if(nodeData.get(nodeData.listNodes()[0]).getPosition().length == 2) {
-                    break;
-                }
-            default:
-                return;
-        }
-
-        for(int eachIndex : nodeData.listNodes()) {
-            org.jorlib.io.tspLibReader.graph.Node eachNode = nodeData.get(eachIndex);
-            double[] eachPos = eachNode.getPosition();
-            vertexLayer.add(new Vertex(eachPos[0], eachPos[1], DEFAULT_DOT_RADIUS, "C"+String.valueOf(eachIndex), DEFAULT_DOT_COLOR, DEFAULT_LABEL_COLOR));
-        }
-
-        //clip the logical bounds to remove excess min x/y
-        BoundingBox logicalBounds = getLogicalBounds();
-        for (Vertex each: vertexLayer) {
-            each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
-        }
-        vertexLayer.requestRedraw();
-
-        //add targets
-        for(TSPLibTour eachTour : instance.getTours()) {
-            List<int[]> edges = eachTour.toEdges()
-                    .stream()
-                    .map(each -> new int[]{each.getId1(), each.getId2()})
-                    .collect(Collectors.toList());
-            addTargetEdges(
-                    edges
-            );
-        }
-
-
     }
 
     /**
@@ -86,6 +39,19 @@ public class CanvasTSPGraph {
      */
     public boolean isEmpty() {
         return vertexLayer.isEmpty();
+    }
+
+    /**
+     * Replaces the set of vertices
+     * @param newVertices
+     */
+    public void setVertices(List<double[]> newVertices) {
+        vertexLayer.clear();
+        for (int i = 0; i < newVertices.size(); i++) {
+            double[] eachCoords = newVertices.get(i);
+            vertexLayer.add(new Vertex(eachCoords[0], eachCoords[1], DEFAULT_DOT_RADIUS, "C"+String.valueOf(i), DEFAULT_DOT_COLOR, DEFAULT_LABEL_COLOR));
+        }
+        vertexLayer.requestRedraw();
     }
 
     public void clearTargets() {
@@ -176,5 +142,49 @@ public class CanvasTSPGraph {
     }
     public void hideTargets() {
         targetLayer.getCanvas().setVisible(false);
+    }
+
+    /**
+     * Reconfigures to the new solution (forgetting any existing predictions); If the instance isn't 2d, this will be empty
+     * @param instance A tsp instance,with main data already loaded from file
+     */
+    public void applyInstance(TSPLibInstance instance) {
+        clearTargets();
+        clearPredictions();
+        final NodeCoordinates nodeData;
+        switch (instance.getDisplayDataType()) {
+            case TWOD_DISPLAY:
+                nodeData = instance.getDisplayData();
+                break;
+            case COORD_DISPLAY:
+                nodeData = (NodeCoordinates) instance.getDistanceTable();
+                //only try to display 2d nodes for now; maybe use jgrapht for more?
+                if(nodeData.get(nodeData.listNodes()[0]).getPosition().length == 2) {
+                    break;
+                }
+            default:
+                return;
+        }
+
+        setVertices(Arrays.stream(nodeData.listNodes()).mapToObj(i -> nodeData.get(i).getPosition()).collect(Collectors.toList()));
+
+        //clip the logical bounds to remove excess min x/y
+        BoundingBox logicalBounds = getLogicalBounds();
+        for (Vertex each: vertexLayer) {
+            each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
+        }
+        vertexLayer.requestRedraw();
+
+        //add targets
+        addTargetEdges(
+                instance.getTours()
+                        .stream()
+                        .flatMap(
+                            eachTour -> eachTour.toEdges()
+                                .stream()
+                                .map(eachEdge -> new int[]{eachEdge.getId1(), eachEdge.getId2()})
+                        )
+                        .collect(Collectors.toList())
+        );
     }
 }

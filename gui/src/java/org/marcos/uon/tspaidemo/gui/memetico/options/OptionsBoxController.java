@@ -1,10 +1,8 @@
 package org.marcos.uon.tspaidemo.gui.memetico.options;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,27 +15,36 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import memetico.ATSPInstance;
+import memetico.GraphInstance;
+import memetico.Memetico;
 import memetico.Population;
+import memetico.logging.IPCLogger;
+import memetico.logging.NullPCLogger;
+import memetico.logging.PCLogger;
 import memetico.util.CrossoverOpName;
 import memetico.util.LocalSearchOpName;
 import memetico.util.RestartOpName;
+import org.jorlib.io.tspLibReader.TSPLibInstance;
+import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.gui.memetico.MemeticoConfiguration;
 import org.marcos.uon.tspaidemo.gui.memetico.ProblemConfiguration;
+import org.marcos.uon.tspaidemo.gui.memetico.ProblemInstance;
+import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+//TODO: possiblt separate the problem/evolutionary param config from the display options and possibly create a seperate box for them (which isn't subsiduary to the content controller)
 public class OptionsBoxController implements Initializable {
     public static final List<ProblemConfiguration> INCLUDED_PROBLEMS;
-    
+    public static final MemeticoConfiguration DEFAULT_CONFIG = new MemeticoConfiguration(13, 5, LocalSearchOpName.RAI.toString(), CrossoverOpName.SAX.toString(), RestartOpName.INSERTION.toString());
+
+
     static {
         Function<String, ProblemConfiguration> newToured = (filePrefix) -> new ProblemConfiguration(
                 new File(OptionsBoxController.class.getClassLoader().getResource(String.format("problems/tsp/%s.tsp", filePrefix)).getFile()),
@@ -55,6 +62,24 @@ public class OptionsBoxController implements Initializable {
                 newToured.apply("tsp225"),
                 newCosted.apply("att532", 27686L)
         );
+    }
+
+    /**
+     * Detects a change to a field and sets the selected template to custom - with trip-switch awareness
+     */
+    private class TemplateSelectionListener<T> implements ChangeListener<T> {
+        private ValidityFlag templateTripSwitch = masterTemplateTripSwitch;
+        @Override
+        public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
+            if(templateTripSwitch.isValid()) {
+                if(!newValue.equals(oldValue)) {
+                    choiceMemeticoProblemTemplate.setValue("Custom");
+                    templateTripSwitch.invalidate(); //prevent any other attempts at changing the template since it's pointless until the user does
+                }
+            } else {
+                templateTripSwitch = masterTemplateTripSwitch;
+            }
+        }
     }
 
     private Stage theStage;
@@ -75,12 +100,29 @@ public class OptionsBoxController implements Initializable {
     @FXML
     private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget;
 
-    private ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private transient final ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
 
-    private final ObjectProperty<ProblemConfiguration> problemConfiguration = new SimpleObjectProperty<>();
+    private transient final ReadOnlyObjectWrapper<ProblemInstance> chosenProblemInstance = new ReadOnlyObjectWrapper<>();
 
-    private final ObjectProperty<MemeticoConfiguration> memeticoConfiguration = new SimpleObjectProperty<>();
+    private transient final ReadOnlyObjectWrapper<MemeticoConfiguration> chosenMemeticoConfiguration = new ReadOnlyObjectWrapper<>();
 
+    /**
+     * Acts in combination with {@code TemplateSelectionListener}, synonymously to a circuit breaker
+     * Used to allow user changes to update the chosen template to custom - but never as a result of changing the template to something other than custom
+     * Note that the current master switch could be invalid
+     * @see TemplateSelectionListener
+     */
+    private ValidityFlag masterTemplateTripSwitch = new ValidityFlag();
+
+    private ValidityFlag.Synchronised currentMemeticoContinuePermission;
+    private Thread memeticoThread = null;
+
+
+    //todo: possibly make a static map of the base instances which the non-static map does an addAll() from on init; this would facilitate multiple simultaneous runs/tabs/viewpanes, whatever
+    private Map<String, ProblemInstance> instances = new HashMap<>();
+
+
+    private PCLogger logger = new PCLogger(1);
 
     //called when the user wants to apply their selected configuration
     private Runnable applyConfigFunc = () -> {};
@@ -141,17 +183,30 @@ public class OptionsBoxController implements Initializable {
         return solutionDisplayToggles;
     }
 
-    public ProblemConfiguration getProblemConfiguration() {
-        return problemConfiguration.get();
+    public ProblemInstance getChosenProblemInstance() {
+        return chosenProblemInstance.get();
     }
 
-    public ObjectProperty<ProblemConfiguration> problemConfigurationProperty() {
-        return problemConfiguration;
+    public ReadOnlyObjectProperty<ProblemInstance> chosenProblemInstanceProperty() {
+        return chosenProblemInstance.getReadOnlyProperty();
     }
 
-    public void setProblemConfiguration(ProblemConfiguration problemConfiguration) {
-        this.problemConfiguration.set(problemConfiguration);
+//    public void setChosenProblemInstance(ProblemInstance chosenProblemInstance) {
+//        this.chosenProblemInstance.set(chosenProblemInstance);
+//    }
+
+    public MemeticoConfiguration getChosenMemeticoConfiguration() {
+        return chosenMemeticoConfiguration.get();
     }
+
+    public ReadOnlyObjectProperty<MemeticoConfiguration> chosenMemeticoConfigurationProperty() {
+        return chosenMemeticoConfiguration;
+    }
+
+//    public void setChosenMemeticoConfiguration(MemeticoConfiguration config) {
+//        this.chosenMemeticoConfiguration.set(config);
+//    }
+
 
     private static ChangeListener<String> generateIntFieldFixer(TextField target) {
         return (observable, oldValue, newValue) -> {
@@ -165,6 +220,34 @@ public class OptionsBoxController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         memeticoOptionsBoxRoot.getStylesheets().add(getClass().getResource("options_box.css").toExternalForm());
         memeticoOptionsBoxRoot.getStylesheets().add(getClass().getResource("../../main/common.css").toExternalForm());
+
+        //update the content of all fields to match the template if one is selected
+        choiceMemeticoProblemTemplate.valueProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    masterTemplateTripSwitch.invalidate(); //trip the current switch so that no attempts to change
+                    switch (newValue) {
+                        case "Custom":
+                            break;
+                        default:
+                            masterTemplateTripSwitch = new ValidityFlag();
+
+                            //now populate the fields
+                            ProblemInstance targetInstance = instances.get(newValue);
+                            lblMemeticoProblemFile.textProperty().set(targetInstance.getConfiguration().problemFile.getPath());
+                            choiceMemeticoSolutionType.valueProperty().set(targetInstance.getConfiguration().solutionType.toString());
+                            switch (targetInstance.getConfiguration().solutionType) {
+                                case TOUR:
+                                    lblMemeticoTourFile.textProperty().set(targetInstance.getConfiguration().tourFile.getPath());
+                                    break;
+                                case COST:
+                                    lblMemeticoTourFile.textProperty().set("");
+                                    break;
+                            }
+                            fldMemeticoTourCost.setText(String.valueOf(targetInstance.getTargetCost()));
+                    }
+                }
+        );
+
         choiceMemeticoSolutionType.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     switch (newValue){
@@ -185,6 +268,11 @@ public class OptionsBoxController implements Initializable {
                     }
                 }
         );
+
+        //add the template selection listeners
+        lblMemeticoProblemFile.textProperty().addListener(new TemplateSelectionListener<>());
+        lblMemeticoTourFile.textProperty().addListener(new TemplateSelectionListener<>());
+        fldMemeticoTourCost.textProperty().addListener(new TemplateSelectionListener<>());
 
         fldMemeticoTourCost.textProperty().addListener(generateIntFieldFixer(fldMemeticoTourCost));
         fldMemeticoPopDepth.textProperty().addListener(generateIntFieldFixer(fldMemeticoPopDepth));
@@ -211,39 +299,57 @@ public class OptionsBoxController implements Initializable {
                     .collect(Collectors.toList())
         );
 
-        //bind the displayed fields etc to the actual problem via listeners
-        problemConfiguration.addListener(
-                (observable, oldValue, newValue) -> {
-                    lblMemeticoProblemFile.setText(newValue.problemFile.getPath());
-                    choiceMemeticoSolutionType.setValue(newValue.solutionType.toString());
-                    switch (newValue.solutionType) {
-                        case TOUR:
-                            lblMemeticoTourFile.setText(newValue.tourFile.getPath());
-                            lblMemeticoToggleTarget.setVisible(true);
-                            cbMemeticoToggleTarget.setVisible(true);
-                            break;
-                        case COST:
-                            fldMemeticoTourCost.setText(String.valueOf(newValue.targetCost));
-                            lblMemeticoToggleTarget.setVisible(false);
-                            cbMemeticoToggleTarget.setVisible(false);
-                            break;
-                    }
-                }
-        );
-        memeticoConfiguration.addListener((observable, oldValue, newValue) -> {
-            int popSize = newValue.populationSize;
-            int popDepth = (int)Math.ceil(
-                    (Math.log(
+        //this is unneeded since external changes are not currently permitted
+//        //bind the displayed fields etc to the actual problem via listeners
+//        chosenProblemInstance.addListener(
+//                (observable, oldValue, newValue) -> {
+//                    lblMemeticoProblemFile.setText(newValue.getConfiguration().problemFile.getPath());
+//                    choiceMemeticoSolutionType.setValue(newValue.getConfiguration().solutionType.toString());
+//                    switch (newValue.getConfiguration().solutionType) {
+//                        case TOUR:
+//                            lblMemeticoTourFile.setText(newValue.getConfiguration().tourFile.getPath());
+//                            lblMemeticoToggleTarget.setVisible(true);
+//                            cbMemeticoToggleTarget.setVisible(true);
+//                            break;
+//                        case COST:
+//                            fldMemeticoTourCost.setText(String.valueOf(newValue.getTargetCost()));
+//                            lblMemeticoToggleTarget.setVisible(false);
+//                            cbMemeticoToggleTarget.setVisible(false);
+//                            break;
+//                    }
+//                }
+//        );
+//
+//        chosenMemeticoConfiguration.addListener((observable, oldValue, newValue) -> {
+//            int popSize = newValue.populationSize;
+//            int popDepth = (int)Math.ceil(
+//                    (Math.log(
+//                        ( (Population.DEFAULT_N_ARY-1) * popSize ) + 1
+//                    ) / Math.log(Population.DEFAULT_N_ARY)) - 1
+//            );
+//            fldMemeticoPopDepth.setText(String.valueOf(popDepth));
+//            fldMemeticoMutRate.setText(String.valueOf(newValue.mutationRate));
+//            fldMemeticoMaxGen.setText(String.valueOf(newValue.maxGenerations));
+//            choiceMemeticoLocalSearch.setValue(newValue.localSearchOp);
+//            choiceMemeticoCrossover.setValue(newValue.crossoverOp);
+//            choiceMemeticoRestart.setValue(newValue.restartOp);
+//        });
+
+
+        //apply the default configuration and display it on screen
+        chosenMemeticoConfiguration.set(DEFAULT_CONFIG);
+        int popSize = DEFAULT_CONFIG.populationSize;
+        int popDepth = (int)Math.ceil(
+                (Math.log(
                         ( (Population.DEFAULT_N_ARY-1) * popSize ) + 1
-                    ) / Math.log(Population.DEFAULT_N_ARY)) - 1
-            );
-            fldMemeticoPopDepth.setText(String.valueOf(popDepth));
-            fldMemeticoMutRate.setText(String.valueOf(newValue.mutationRate));
-            fldMemeticoMaxGen.setText(String.valueOf(newValue.maxGenerations));
-            choiceMemeticoLocalSearch.setValue(newValue.localSearchOp);
-            choiceMemeticoCrossover.setValue(newValue.crossoverOp);
-            choiceMemeticoRestart.setValue(newValue.restartOp);
-        });
+                ) / Math.log(Population.DEFAULT_N_ARY)) - 1
+        );
+        fldMemeticoPopDepth.setText(String.valueOf(popDepth));
+        fldMemeticoMutRate.setText(String.valueOf(DEFAULT_CONFIG.mutationRate));
+        fldMemeticoMaxGen.setText(String.valueOf(DEFAULT_CONFIG.maxGenerations));
+        choiceMemeticoLocalSearch.setValue(DEFAULT_CONFIG.localSearchOp);
+        choiceMemeticoCrossover.setValue(DEFAULT_CONFIG.crossoverOp);
+        choiceMemeticoRestart.setValue(DEFAULT_CONFIG.restartOp);
 
         theStage = new Stage();
         Scene newScane = new Scene(memeticoOptionsBoxRoot, 300, 200);
@@ -251,45 +357,134 @@ public class OptionsBoxController implements Initializable {
 
         //setup template selection
         choiceMemeticoProblemTemplate.getItems().add("Custom");
+        //load all the base instances into the map and template list for the options boz
+        try {
+            for (ProblemConfiguration eachProblem : OptionsBoxController.INCLUDED_PROBLEMS) {
+                ProblemInstance theInstance = new ProblemInstance(eachProblem);
+                instances.put(theInstance.getName(), theInstance);
+                choiceMemeticoProblemTemplate.getItems().add(theInstance.getName());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //now select the first of our included instances and memetico will be ready to run whenever it may be needed
+        choiceMemeticoProblemTemplate.getSelectionModel().select(1);//since "Custom" is first,  we'll want to select the second entry
     }
 
-    public MemeticoConfiguration getMemeticoConfiguration() {
-        return memeticoConfiguration.get();
-    }
-
-    public ObjectProperty<MemeticoConfiguration> memeticoConfigurationProperty() {
-        return memeticoConfiguration;
-    }
-
-    public void setMemeticoConfiguration(MemeticoConfiguration config) {
-        this.memeticoConfiguration.set(config);
+    public PCLogger getLogger() {
+        return logger;
     }
 
     public void applyConfiguration() {
-        File problemFile = new File(lblMemeticoProblemFile.getText());
-        switch(choiceMemeticoSolutionType.getValue()) {
-            case "Tour":
-                File tourFile = new File(lblMemeticoTourFile.getText());
-                problemConfiguration.set(new ProblemConfiguration(problemFile, tourFile));
-                break;
-            case "Cost":
-                int targetCost = Integer.parseInt(fldMemeticoTourCost.getText());
-                problemConfiguration.set(new ProblemConfiguration(problemFile, targetCost));
+        try {
+            ProblemInstance targetInstance;
+            switch (choiceMemeticoProblemTemplate.getValue()) {
+                case "Custom":
+                    File problemFile = new File(lblMemeticoProblemFile.getText());
+                    ProblemConfiguration configuration;
+                    switch (choiceMemeticoSolutionType.getValue()) {
+                        case "Tour":
+                            File tourFile = new File(lblMemeticoTourFile.getText());
+                            configuration = new ProblemConfiguration(problemFile, tourFile);
+                            break;
+                        case "Cost":
+                            int targetCost = Integer.parseInt(fldMemeticoTourCost.getText());
+                            configuration = new ProblemConfiguration(problemFile, targetCost);
+                            break;
+                        default:
+                            configuration = new ProblemConfiguration(problemFile, 0);
+                    }
+
+                    targetInstance = new ProblemInstance(configuration);
+                    //if the raw from-file name is taken - add custom to it
+                    if(instances.containsKey(targetInstance.getName())) {
+                        targetInstance.setName(targetInstance.getName() + " (Custom)");
+                    }
+                    instances.put(targetInstance.getName(), targetInstance);
+                    break;
+                default:
+                    targetInstance = new ProblemInstance(instances.get(choiceMemeticoProblemTemplate.getValue())); //create a clone to prevent external modification of the original
+            }
+            chosenProblemInstance.set(targetInstance);
+            int populationHeight = Integer.parseInt(fldMemeticoPopDepth.textProperty().get());
+            int populationSize = (int) ((Math.pow(3, populationHeight + 1) - 1) / 2.0);
+            int mutationRate = Integer.parseInt(fldMemeticoMutRate.textProperty().get());
+            int maxGenerations = Integer.parseInt(fldMemeticoMaxGen.textProperty().get());
+            chosenMemeticoConfiguration.set(new MemeticoConfiguration(populationSize, mutationRate, choiceMemeticoLocalSearch.getValue(), choiceMemeticoCrossover.getValue(), choiceMemeticoRestart.getValue(), maxGenerations));
+            launchMemetico();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        int populationHeight = Integer.parseInt(fldMemeticoPopDepth.textProperty().get());
-        int populationSize = (int)((Math.pow(3, populationHeight+1)-1)/2.0);
-        int mutationRate = Integer.parseInt(fldMemeticoMutRate.textProperty().get());
-        int maxGenerations = Integer.parseInt(fldMemeticoMaxGen.textProperty().get());
-        memeticoConfiguration.set(new MemeticoConfiguration(populationSize, mutationRate, choiceMemeticoLocalSearch.getValue(), choiceMemeticoCrossover.getValue(), choiceMemeticoRestart.getValue(), maxGenerations));
-        applyConfigFunc.run();
     }
 
-    /**
-     * Set an external function to be called when the user wants to apply their selected configuration
-     * @param applyConfigFunc
-     */
-    public void setApplyConfigFunc(Runnable applyConfigFunc) {
-        this.applyConfigFunc = applyConfigFunc;
+    private void launchMemetico() {
+        if(memeticoThread != null && memeticoThread.isAlive()) {
+            //tell memetico to stop, then wait for that to happen safely
+            currentMemeticoContinuePermission.invalidate();
+            try {
+                memeticoThread.join();
+                logger.reset();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        currentMemeticoContinuePermission = new ValidityFlag.Synchronised();
+        final ProblemInstance finalizedProblem = chosenProblemInstance.get();
+        final MemeticoConfiguration finalizedConfig = chosenMemeticoConfiguration.get();
+        final ValidityFlag.ReadOnly finalizedContinuePermission = currentMemeticoContinuePermission.getReadOnly();
+        try {
+            TSPLibInstance tspLibInstance = finalizedProblem.getTspLibInstance();
+            memetico.Instance memeticoInstance;
+
+            switch (tspLibInstance.getDataType()) {
+                case ATSP:
+                default:
+                    //atsp should be safe (ish) even if it is in fact tsp
+                    memeticoInstance = new ATSPInstance();
+            }
+
+            //give the memeticoInstance the required data
+            memeticoInstance.setDimension(tspLibInstance.getDimension());
+            {
+                DistanceTable distanceTable = tspLibInstance.getDistanceTable();
+                double[][] memeticoMat = ((GraphInstance) memeticoInstance).getMatDist();
+                for (int i = 0; i < memeticoInstance.getDimension(); ++i) {
+                    for (int k = 0; k < memeticoInstance.getDimension(); ++k) {
+                        memeticoMat[i][k] = distanceTable.getDistanceBetween(i, k);
+                    }
+                }
+            }
+
+            long maxGenerations = finalizedConfig.maxGenerations != 0 ? finalizedConfig.maxGenerations : (int) (5 * 13 * Math.log(13) * Math.sqrt(memeticoInstance.getDimension()));
+            FileOutputStream dataOut = null;
+            dataOut = new FileOutputStream("result.txt");
+            DataOutputStream fileOut = new DataOutputStream(dataOut);
+
+            FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
+            DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
+
+            long targetCost = finalizedProblem.getTargetCost();
+
+            //launch memetico
+            memeticoThread = new Thread(() -> {
+                try {
+                    Memetico meme = new Memetico(logger, finalizedContinuePermission, memeticoInstance, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
+                            finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp,
+                            finalizedConfig.maxTime, maxGenerations, finalizedConfig.numReplications, tspLibInstance.getName(), targetCost);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            memeticoThread.start();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void open() {
@@ -298,10 +493,6 @@ public class OptionsBoxController implements Initializable {
 
     public void close() {
         theStage.close();
-    }
-
-    public ObservableList<String> templateNames() {
-        return choiceMemeticoProblemTemplate.getItems();
     }
 
     public void showAllPredictions() {
@@ -342,5 +533,9 @@ public class OptionsBoxController implements Initializable {
         for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
             eachToggles[1].set(false);
         }
+    }
+
+    public Map<String, ProblemInstance> getInstances() {
+        return instances;
     }
 }

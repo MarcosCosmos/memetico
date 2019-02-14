@@ -17,9 +17,7 @@
                 <Text fx:id="memeticoProblemOptionsTitle">Problem Instance</Text>
             </TextFlow>
             <Label GridPane.rowIndex="1" GridPane.columnIndex="0" >Template:</Label>
-            <ChoiceBox fx:id="choiceMemeticoProblemTemplate" GridPane.rowIndex="1" GridPane.columnIndex="1">
-                <String fx:value="Custom"/>
-            </ChoiceBox>
+            <ChoiceBox fx:id="choiceMemeticoProblemTemplate" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
             <Label GridPane.rowIndex="2" GridPane.columnIndex="0" labelFor="$btnMemeticoSelectProblem">Problem Instance:</Label>
             <HBox GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
                 <Label fx:id="lblMemeticoProblemFile" styleClass="fileNameDisplay" HBox.hgrow="ALWAYS" labelFor="$btnMemeticoSelectProblem"/>

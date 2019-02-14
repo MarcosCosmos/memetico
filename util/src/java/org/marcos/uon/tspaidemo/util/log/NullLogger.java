@@ -10,7 +10,6 @@ import java.util.Collection;
  */
 public class NullLogger<T> implements ILogger<T> {
     public static class NullView<T> extends AbstractList<T> implements ILogger.View<T> {
-
         @Override
         public T get(int index) throws IndexOutOfBoundsException {
             throw new IndexOutOfBoundsException("This is a null view, there are no contents");
@@ -35,11 +34,16 @@ public class NullLogger<T> implements ILogger<T> {
         public boolean isValid() throws InterruptedException {
             return false;
         }
-
     }
+
+    public static <T> NullView<T> nullView() {
+        return new NullView<>();
+    }
+
+
     @Override
     public View<T> newView() throws InterruptedException {
-        return new NullView<>();
+        return nullView();
     }
 
     @Override

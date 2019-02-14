@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class BasicLogger<T> implements ILogger<T> {
-    //todo: maybe add non-locking version methods to this as well?
+    //todo: use a synchronised validity flag (with it's own read-write-lock) instead of potentially locking on isvalid checks on already dead views?
     public class View extends AbstractList<T> implements ILogger.View<T> {
         private final List<T> internalStates;
         private ValidityFlag.ReadOnly internalValidity;
@@ -22,7 +22,7 @@ public class BasicLogger<T> implements ILogger<T> {
         protected void _update() {
             if (!internalValidity.isValid()) {
                 internalStates.clear();
-                internalValidity = currentValidity::isValid;
+                internalValidity = currentValidity.getReadOnly();
             }
             //only add what we need to
             if (size() < states.size()) {
@@ -59,7 +59,7 @@ public class BasicLogger<T> implements ILogger<T> {
         }
 
         /**
-         * Non-locking reset, for internal use by extending classes that already took the lock in the caller
+         * Non-locking check, for internal use by extending classes that already took the lock in the caller
          */
         protected boolean _isValid() {
             return internalValidity.isValid();
@@ -74,7 +74,6 @@ public class BasicLogger<T> implements ILogger<T> {
             lock.releaseReadLock();
             return wasValid;
         }
-
 
         @Override
         public int size() {
@@ -92,7 +91,7 @@ public class BasicLogger<T> implements ILogger<T> {
 
     public BasicLogger() {
         states = new ArrayList<>();
-        currentValidity = new ValidityFlag();
+        currentValidity = new ValidityFlag.Synchronised();
     }
 
     /**

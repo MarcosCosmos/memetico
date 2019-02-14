@@ -176,6 +176,10 @@ public class CanvasGraph extends Pane {
 
         setBackgroundColor(Color.WHITE);
         requiresReordering = false;
+
+        //automatically redraw when resized
+        widthProperty().addListener((x,y,z) -> requestAllRedraw());
+        heightProperty().addListener((x,y,z) -> requestAllRedraw());
     }
 
 
@@ -201,7 +205,6 @@ public class CanvasGraph extends Pane {
                 each.redraw();
             }
         }
-        int done = 0;
     }
 
     public void requestReorder() {
