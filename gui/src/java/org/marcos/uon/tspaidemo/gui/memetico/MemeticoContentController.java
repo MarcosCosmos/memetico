@@ -20,7 +20,6 @@ import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
-import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 
 import java.io.*;
@@ -58,11 +57,9 @@ public class MemeticoContentController implements ContentController {
     private transient IPCLogger.View theView = NullPCLogger.NULL_VIEW;
     private transient ReadOnlyIntegerWrapper numberOfFrames = new ReadOnlyIntegerWrapper(0);
     private transient IntegerProperty selectedFrameIndex = new SimpleIntegerProperty(0);
-    private transient ObjectProperty<ValidityFlag> stateValidity = new SimpleObjectProperty<>(new ValidityFlag());
     private IntegerProperty generationValue = new SimpleIntegerProperty();
 
     private String lastDrawnGraphName = null;
-    private int lastDrawnFrameIndex = -1;
     private CanvasTSPGraph displayGraph;
 
 
@@ -71,7 +68,6 @@ public class MemeticoContentController implements ContentController {
 
     private void autoSizeListener(ObservableValue<? extends Number> observable12, Number oldValue12, Number newValue12){
         BoundingBox canvasBounds = displayGraph.getLogicalBounds();
-
         double availableHeight = graphContainer.getHeight();
         double padding = Math.max(canvasBounds.getMinX() * 2, canvasBounds.getMinY() * 2);
         double scaleHeight = availableHeight / (canvasBounds.getHeight() + padding);
@@ -96,10 +92,11 @@ public class MemeticoContentController implements ContentController {
         //enable auto sizing
         graphContainer.widthProperty().addListener(this::autoSizeListener);
         graphContainer.heightProperty().addListener(this::autoSizeListener);
-
         infoPane.prefViewportHeightProperty().bind(infoBox.heightProperty());
         infoPane.prefViewportWidthProperty().bind(infoBox.widthProperty());
-        try {
+
+
+            try {
 
                 //set up the content display with an observable reference to the current state to display.
                 FXMLLoader loader = new FXMLLoader(
@@ -130,13 +127,9 @@ public class MemeticoContentController implements ContentController {
                 )
         );
 
-        selectedFrameIndex.addListener((observable, oldValue, newValue) -> stateValidity.get().invalidate());
 
         txtGeneration.textProperty()
                 .bind(generationValue.asString());
-//        ObjectProperty<MemeticoConfiguration> configProp = optionsBoxController.chosenMemeticoConfigurationProperty();
-//        ObjectProperty<ProblemConfiguration> problemProp = optionsBoxController.problemConfigurationProperty();
-
         currentInstance.bind(Bindings.createObjectBinding(
                 () -> state.get() == null ? null : optionsBoxController.getInstances().get(state.get().instanceName),
                 state
@@ -245,12 +238,13 @@ public class MemeticoContentController implements ContentController {
         try {
             if(!theView.isValid()) {
                 state.set(null);
+                numberOfFrames.set(0); //set it to zero at least once so that the frame index moves to zero
             }
             theView.update();
+            numberOfFrames.set(theView.size());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        numberOfFrames.set(theView.size());
     }
 
     public void contentUpdate() {
@@ -263,7 +257,6 @@ public class MemeticoContentController implements ContentController {
         //only check the complex logic if we can draw a state
         if(contentOutdated && state.get() != null) {
             toursOutdated = true;
-            lastDrawnFrameIndex = selectedFrameIndex.get();
             TSPLibInstance tspLibInstance = currentInstance.get().getTspLibInstance();
             ObservableList<Node> agentNodes = agentsGrid.getChildren();
 

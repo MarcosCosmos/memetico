@@ -98,6 +98,13 @@ public class PlaybackController implements Initializable {
                 () -> 100/cbSpeed.getValue(),
                 cbSpeed.valueProperty()
         ));
+
+        //reset to frame 0 if the framecount ever drops (since this indicates some kind of reset)
+        frameCount.addListener((observable, oldValue, newValue) -> {
+            if(newValue.intValue() < oldValue.intValue()) {
+
+            }
+        });
     }
 
     public ReadOnlyIntegerProperty frameIndexProperty() {
