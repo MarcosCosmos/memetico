@@ -12,11 +12,11 @@ public class ProblemInstance {
 
     public ProblemInstance(ProblemConfiguration config) throws IOException {
         configuration = config;
-        tspLibInstance = new TSPLibInstance(configuration.problemFile);
+        tspLibInstance = new TSPLibInstance(configuration.problemFile.openStream());
         name = tspLibInstance.getName();
         switch (configuration.solutionType) {
             case TOUR:
-                tspLibInstance.addTour(configuration.tourFile);
+                tspLibInstance.addTour(configuration.tourFile.openStream());
                 targetCost = (long)tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
                 break;
             case COST:
@@ -29,7 +29,7 @@ public class ProblemInstance {
 
     public ProblemInstance(ProblemConfiguration config, TSPLibInstance tspLibInstance, String name) throws IOException {
         configuration = config;
-        tspLibInstance = new TSPLibInstance(configuration.problemFile);
+        tspLibInstance = new TSPLibInstance(configuration.problemFile.openStream());
         this.name = name;
         switch (configuration.solutionType) {
             case TOUR:

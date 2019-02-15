@@ -1,7 +1,0 @@
-#playbackControls, #sliderWrapper {
-    -fx-padding: 5px;
-}
-
-Text, Label {
-    padding: 0 5px 0 10px;
-}

@@ -19,8 +19,6 @@ import memetico.ATSPInstance;
 import memetico.GraphInstance;
 import memetico.Memetico;
 import memetico.Population;
-import memetico.logging.IPCLogger;
-import memetico.logging.NullPCLogger;
 import memetico.logging.PCLogger;
 import memetico.util.CrossoverOpName;
 import memetico.util.LocalSearchOpName;
@@ -47,11 +45,11 @@ public class OptionsBoxController implements Initializable {
 
     static {
         Function<String, ProblemConfiguration> newToured = (filePrefix) -> new ProblemConfiguration(
-                new File(OptionsBoxController.class.getClassLoader().getResource(String.format("problems/tsp/%s.tsp", filePrefix)).getFile()),
-                new File(OptionsBoxController.class.getClassLoader().getResource(String.format("problems/tsp/%s.opt.tour", filePrefix)).getFile())
+                OptionsBoxController.class.getResource(String.format("/problems/tsp/%s.tsp", filePrefix)),
+                OptionsBoxController.class.getResource(String.format("/problems/tsp/%s.opt.tour", filePrefix))
         );
         BiFunction<String, Long, ProblemConfiguration> newCosted = (filePrefix, cost) -> new ProblemConfiguration(
-                new File(OptionsBoxController.class.getClassLoader().getResource(String.format("problems/tsp/%s.tsp", filePrefix)).getFile()),
+                OptionsBoxController.class.getResource(String.format("/problems/tsp/%s.tsp", filePrefix)),
                 cost
         );
         INCLUDED_PROBLEMS = Arrays.asList(
@@ -157,9 +155,9 @@ public class OptionsBoxController implements Initializable {
                 solutionDisplayToggles.subList(newCount, oldCount).clear();
             } else if (newCount > oldCount) {
                 for (int i = oldCount; i < newCount; ++i) {
-                    Node eachSubBox = null;
+                    Node eachSubBox;
 
-                    eachSubBox = FXMLLoader.load(getClass().getResource("agent_solution_toggles.fxml"));
+                    eachSubBox = FXMLLoader.load(getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/agent_solution_toggles.fxml"));
 
                     ((Text)eachSubBox.lookup(".txtAgentId")).setText(String.valueOf(i));
                     BooleanProperty[] toggles = new BooleanProperty[]{
@@ -218,8 +216,10 @@ public class OptionsBoxController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        memeticoOptionsBoxRoot.getStylesheets().add(getClass().getResource("options_box.css").toExternalForm());
-        memeticoOptionsBoxRoot.getStylesheets().add(getClass().getResource("../../main/common.css").toExternalForm());
+        memeticoOptionsBoxRoot.getStylesheets().addAll(
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.css").toExternalForm(),
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()
+        );
 
         //update the content of all fields to match the template if one is selected
         choiceMemeticoProblemTemplate.valueProperty().addListener(
@@ -381,11 +381,11 @@ public class OptionsBoxController implements Initializable {
             ProblemInstance targetInstance;
             switch (choiceMemeticoProblemTemplate.getValue()) {
                 case "Custom":
-                    File problemFile = new File(lblMemeticoProblemFile.getText());
+                    URL problemFile = new File(lblMemeticoProblemFile.getText()).toURI().toURL();
                     ProblemConfiguration configuration;
                     switch (choiceMemeticoSolutionType.getValue()) {
                         case "Tour":
-                            File tourFile = new File(lblMemeticoTourFile.getText());
+                            URL tourFile = new File(lblMemeticoTourFile.getText()).toURI().toURL();
                             configuration = new ProblemConfiguration(problemFile, tourFile);
                             break;
                         case "Cost":
@@ -478,10 +478,6 @@ public class OptionsBoxController implements Initializable {
                 }
             });
             memeticoThread.start();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

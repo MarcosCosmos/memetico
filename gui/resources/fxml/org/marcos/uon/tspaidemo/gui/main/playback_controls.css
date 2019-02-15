@@ -1,0 +1,8 @@
+#playbackControlsRoot, #sliderWrapper {
+    -fx-padding: 5px;
+}
+
+.controlBox {
+    -fx-spacing: 5;
+    -fx-alignment: center;
+}

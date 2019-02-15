@@ -3,13 +3,13 @@ package org.marcos.uon.tspaidemo.gui.main;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -28,39 +28,71 @@ public class VisualisationController implements Initializable {
 
     private ContentController contentController;
 
+    public static final ContentController PLACEHOLDER_CONTENT = new ContentController() {
+        ReadOnlyIntegerProperty numberOfFrames = new ReadOnlyIntegerWrapper(0);
+        Parent emptyBox = new Pane();
+        @Override
+        public ReadOnlyIntegerProperty numberOfFramesProperty() {
+            return numberOfFrames;
+        }
+
+        @Override
+        public void bindSelectedFrameIndex(ObservableValue<Number> source) {
+        }
+
+        @Override
+        public Parent getRoot() {
+            return emptyBox;
+        }
+
+        @Override
+        public void frameCountUpdate() {
+
+        }
+
+        @Override
+        public void contentUpdate() {
+
+        }
+
+        @Override
+        public void initialize(URL location, ResourceBundle resources) {
+        }
+    };
+
     private PlaybackController playbackController;
-    private transient IntegerProperty selectedFrameIndex;
 
     private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
     private final transient Timeline redrawTimeline = new Timeline();
 
+    /**
+     * Assign the content to display and link the frame count and interval between the content controller and the playback controller
+     * @param contentController
+     *
+     */
+    public void setup(ContentController contentController) {
+        this.contentController = contentController;
+        Parent contentRoot = contentController.getRoot();
+        root.getChildren().add(0, contentRoot);
+        VBox.setVgrow(contentRoot, Priority.ALWAYS);
+        contentController.bindSelectedFrameIndex(playbackController.frameIndexProperty());
+        playbackController.bindFrameCount(contentController.numberOfFramesProperty());
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        root.getStylesheets().add(getClass().getResource("visualisation.css").toExternalForm());
-        root.getStylesheets().add(getClass().getResource("common.css").toExternalForm());
-        //todo: perhaps make the type of the logger and frame content to use generic/parameters given to this controller.?
-        //set the frame content controller to a new
+//        root.getStylesheets().add(getClass().getResource("visualisation.css").toExternalForm());
+        root.getStylesheets().add(getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm());
         try {
-            //set up the content display with an observable reference to the current state to display.
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource(
-                            "../memetico/content.fxml"
-                    )
-            );
-            Pane content = loader.load();
-            root.getChildren().add(0, content);
-            VBox.setVgrow(content, Priority.ALWAYS);
-            contentController = loader.getController();
-
             //setup the playback controls, giving them an observable reference to the total frame count.
-            loader = new FXMLLoader(getClass().getResource("playback_controls.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/playback_controls.fxml"));
             Pane playbackControls = loader.load();
             root.getChildren().add(playbackControls);
             playbackController = loader.getController();
 
-            contentController.bindSelectedFrameIndex(playbackController.frameIndexProperty());
-            playbackController.bindFrameCount(contentController.numberOfFramesProperty());
+            //initially set it up to the placeholder
+            setup(PLACEHOLDER_CONTENT);
 
             //trigger subpanes to update at our target framerate
             //todo: possibly collect this into common base class or leave frameupdate to only be called externally by a containing controller?
@@ -74,10 +106,13 @@ public class VisualisationController implements Initializable {
                     }
             );
 
+
+
             //setup a timeline to poll for log updates, and update the number of frames accordingly
 
             redrawTimeline.getKeyFrames().add(new KeyFrame(frameInterval.get(), (e) -> frameUpdate()));
             redrawTimeline.setCycleCount(Animation.INDEFINITE);
+            //make sure the timeline is playing now
             redrawTimeline.play();
 
         } catch (IOException e) {

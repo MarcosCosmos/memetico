@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.gui.memetico;
+package org.marcos.uon.tspaidemo.gui.memetico.agent;
 
 import javafx.scene.control.TreeCell;
 import memetico.logging.PCAlgorithmState;

@@ -1,6 +1,7 @@
 package org.marcos.uon.tspaidemo.gui.memetico;
 
 import java.io.File;
+import java.net.URL;
 
 public class ProblemConfiguration {
     public enum SolutionType {
@@ -17,18 +18,18 @@ public class ProblemConfiguration {
             return asString;
         }
     }
-    public final File problemFile;
+    public final URL problemFile;
     public final SolutionType solutionType;
-    public final File tourFile; //only if solution-type is tour
+    public final URL tourFile; //only if solution-type is tour
     public final long targetCost; //only if solution-type is cost.
 
-    public ProblemConfiguration(File instanceFile, File tourFile) {
+    public ProblemConfiguration(URL instanceFile, URL tourFile) {
         this.problemFile = instanceFile;
         this.solutionType = SolutionType.TOUR;
         this.tourFile = tourFile;
         this.targetCost = -1;
     }
-    public ProblemConfiguration(File instanceFile, long targetCost) {
+    public ProblemConfiguration(URL instanceFile, long targetCost) {
         this.problemFile = instanceFile;
         this.solutionType = SolutionType.COST;
         this.tourFile = null;

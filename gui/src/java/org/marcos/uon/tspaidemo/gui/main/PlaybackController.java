@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -25,7 +26,7 @@ public class PlaybackController implements Initializable {
     private static final String PLAY_TEXT = "▶";
 
     @FXML
-    private BorderPane playbackControlsRoot;
+    private HBox playbackControlsRoot;
 
     @FXML
     private Slider sldrFrameIndex;
@@ -55,6 +56,11 @@ public class PlaybackController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        playbackControlsRoot.getStylesheets().addAll(
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm(),
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/playback_controls.css").toExternalForm()
+        );
         sldrFrameIndex.setMin(0);
         sldrFrameIndex.maxProperty().bind(Bindings.max(0, frameCount.subtract(1)));
 

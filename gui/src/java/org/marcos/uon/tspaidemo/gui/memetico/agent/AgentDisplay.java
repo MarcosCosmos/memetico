@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.gui.memetico;
+package org.marcos.uon.tspaidemo.gui.memetico.agent;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -30,7 +30,7 @@ public class AgentDisplay extends Pane {
     public AgentDisplay() {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
-                "agent_display.fxml"));
+                "/fxml/org/marcos/uon/tspaidemo/gui/memetico/agent/agent_display.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

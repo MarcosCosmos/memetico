@@ -19,6 +19,7 @@ import memetico.logging.PCAlgorithmState;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
+import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 
@@ -84,8 +85,10 @@ public class MemeticoContentController implements ContentController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        contentRoot.getStylesheets().add(getClass().getResource("content.css").toExternalForm());
-        contentRoot.getStylesheets().add(getClass().getResource("../main/common.css").toExternalForm());
+        contentRoot.getStylesheets().addAll(
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/content.css").toExternalForm(),
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()
+        );
 
         displayGraph = new CanvasTSPGraph();
         graphContainer.setCenter(displayGraph.getGraphic());
@@ -101,7 +104,7 @@ public class MemeticoContentController implements ContentController {
                 //set up the content display with an observable reference to the current state to display.
                 FXMLLoader loader = new FXMLLoader(
                         getClass().getResource(
-                                "options/options_box.fxml"
+                                "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.fxml"
                         )
                 );
                 loader.load();
