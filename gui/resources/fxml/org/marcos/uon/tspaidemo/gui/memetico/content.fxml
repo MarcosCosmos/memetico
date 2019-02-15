@@ -6,31 +6,29 @@
 <HBox fx:id="contentRoot" fx:controller="org.marcos.uon.tspaidemo.gui.memetico.MemeticoContentController"
       xmlns:fx="http://javafx.com/fxml">
     <ScrollPane fx:id="infoPane">
-
-                <VBox fx:id="infoBox" alignment="CENTER">
-                    <BorderPane fx:id="titleBar">
-                        <left>
-                            <TextFlow styleClass="h1" fx:id="tfProblemName">
-                                <Text fx:id="lblProblemName">Problem:&#160;</Text>
-                                <Text fx:id="txtProblemName"/>
-                            </TextFlow>
-
-                        </left>
-                        <right>
-                            <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
-                        </right>
-                    </BorderPane>
-                    <GridPane styleClass="dataGrid">
-                        <Text fx:id="lblTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="0">Target cost:</Text>
-                        <Text fx:id="txtTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <Text fx:id="lblTeneration" GridPane.rowIndex="1" GridPane.columnIndex="0">Generation:</Text>
-                        <Text fx:id="txtGeneration" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                    </GridPane>
-                    <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
-                        <GridPane fx:id="agentsGrid" styleClass="dataGrid"/>
-                        <!--<TreeView fx:id="agentsTree"/>-->
-                    </HBox>
-                </VBox>
+        <VBox fx:id="infoBox" alignment="CENTER">
+            <BorderPane fx:id="titleBar">
+                <left>
+                    <TextFlow styleClass="h1" fx:id="tfProblemName">
+                        <Text fx:id="lblProblemName">Problem:&#160;</Text>
+                        <Text fx:id="txtProblemName"/>
+                    </TextFlow>
+                </left>
+                <right>
+                    <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
+                </right>
+            </BorderPane>
+            <GridPane styleClass="dataGrid">
+                <Text fx:id="lblTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="0">Target cost:</Text>
+                <Text fx:id="txtTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Text fx:id="lblTeneration" GridPane.rowIndex="1" GridPane.columnIndex="0">Generation:</Text>
+                <Text fx:id="txtGeneration" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            </GridPane>
+            <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
+                <GridPane fx:id="agentsGrid" styleClass="dataGrid"/>
+                <!--<TreeView fx:id="agentsTree"/>-->
+            </HBox>
+        </VBox>
     </ScrollPane>
     <BorderPane fx:id="graphWrapper" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
         <center>

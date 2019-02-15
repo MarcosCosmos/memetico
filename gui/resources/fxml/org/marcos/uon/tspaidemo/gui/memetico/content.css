@@ -6,8 +6,8 @@
 }
 
 #tfProblemName {
-    -fx-text-alignment: center;
     -fx-alignment: center;
+    -fx-padding: 0 0 0.5em 0;
 }
 
 .line {

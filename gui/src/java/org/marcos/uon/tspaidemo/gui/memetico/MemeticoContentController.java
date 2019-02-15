@@ -98,7 +98,6 @@ public class MemeticoContentController implements ContentController {
         infoPane.prefViewportHeightProperty().bind(infoBox.heightProperty());
         infoPane.prefViewportWidthProperty().bind(infoBox.widthProperty());
 
-
             try {
 
                 //set up the content display with an observable reference to the current state to display.

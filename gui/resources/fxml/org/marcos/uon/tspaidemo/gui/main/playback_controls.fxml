@@ -3,7 +3,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import java.lang.*?>
-<HBox fx:id="playbackControlsRoot" fx:controller="org.marcos.uon.tspaidemo.gui.main.PlaybackController"
+<HBox fx:id="playbackControlsRoot" styleClass="controlBox" fx:controller="org.marcos.uon.tspaidemo.gui.main.PlaybackController"
             xmlns:fx="http://javafx.com/fxml">
     <BorderPane fx:id="sliderWrapper" HBox.hgrow="ALWAYS">
         <left>
