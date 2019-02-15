@@ -49,7 +49,8 @@ public class CanvasTSPGraph {
         vertexLayer.clear();
         for (int i = 0; i < newVertices.size(); i++) {
             double[] eachCoords = newVertices.get(i);
-            vertexLayer.add(new Vertex(eachCoords[0], eachCoords[1], DEFAULT_DOT_RADIUS, "C"+String.valueOf(i), DEFAULT_DOT_COLOR, DEFAULT_LABEL_COLOR));
+            //invert the y-axis
+            vertexLayer.add(new Vertex(eachCoords[0], -eachCoords[1], DEFAULT_DOT_RADIUS, "C"+String.valueOf(i), DEFAULT_DOT_COLOR, DEFAULT_LABEL_COLOR));
         }
         vertexLayer.requestRedraw();
     }

@@ -55,11 +55,11 @@ public class OptionsBoxController implements Initializable {
                 cost
         );
         INCLUDED_PROBLEMS = Arrays.asList(
+                newToured.apply("tsp225"),
                 newToured.apply("a280"),
                 newToured.apply("berlin52"),
                 newToured.apply("eil51"),
                 newToured.apply("eil76"),
-                newToured.apply("tsp225"),
                 newCosted.apply("att532", 27686L)
         );
     }
