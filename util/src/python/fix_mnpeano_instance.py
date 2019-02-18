@@ -3,12 +3,15 @@ import sys
 import os
 try: 
     os.mkdir("fixed")
-except e: 
+except: 
     pass
 with open(sys.argv[1], 'r') as src, open('fixed/' + sys.argv[1], 'w') as dst:
     on_coords = False
     for line in src.readlines():
-        if line == "NODE_COORD_SECTION\n":
+        #remove some bad :s
+        if line in ['NODE_COORD_SECTION:\n', 'EOF:\n', 'EOF:']:
+            line = line.replace(':','')
+        if line == 'NODE_COORD_SECTION\n':
             on_coords = True
         elif on_coords:
             if line[0] in '0123456789':

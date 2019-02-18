@@ -3,11 +3,11 @@ package memetico.logging;
 import memetico.Population;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
 
-public class PCLogger extends BasicLogger<PCAlgorithmState> implements IPCLogger {
+public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger {
     private long startTime;
     protected double logFrequency;
 
-    public class View extends BasicLogger<PCAlgorithmState>.View implements IPCLogger.View {
+    public class View extends BasicLogger<MemeticoSnapshot>.View implements IPCLogger.View {
         protected double internalStartTime;
 
         protected View() throws InterruptedException {
@@ -51,12 +51,12 @@ public class PCLogger extends BasicLogger<PCAlgorithmState> implements IPCLogger
      * force log regardless of interval (e.g. because it's the end state)
      */
     protected void _log(String instanceName, Population population, int generation) throws InterruptedException {
-        _log(new PCAlgorithmState(instanceName, population, generation, System.currentTimeMillis()));
+        _log(new MemeticoSnapshot(instanceName, population, generation, System.currentTimeMillis()));
     }
 
 
     public void log(String instanceName, Population population, int generation) throws InterruptedException {
-        log(new PCAlgorithmState(instanceName, population, generation, System.currentTimeMillis())); //we only need the lock after creating the new object;
+        log(new MemeticoSnapshot(instanceName, population, generation, System.currentTimeMillis())); //we only need the lock after creating the new object;
     }
 
     /**

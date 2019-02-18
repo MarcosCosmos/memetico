@@ -1,17 +1,17 @@
 package org.marcos.uon.tspaidemo.gui.memetico.agent;
 
 import javafx.scene.control.TreeCell;
-import memetico.logging.PCAlgorithmState;
+import memetico.logging.MemeticoSnapshot;
 
-public class AgentTreeCell extends TreeCell<PCAlgorithmState.AgentState> {
+public class AgentTreeCell extends TreeCell<MemeticoSnapshot.AgentSnapshot> {
     private AgentDisplay internalGraphic = new AgentDisplay();
     @Override
-    protected void updateItem(PCAlgorithmState.AgentState item, boolean empty) {
+    protected void updateItem(MemeticoSnapshot.AgentSnapshot item, boolean empty) {
         super.updateItem(item, empty);
         if(item == null) {
             setGraphic(null);
         } else {
-            internalGraphic.setState(item);
+            internalGraphic.setSnapShot(item);
             setGraphic(internalGraphic);
             setText(null);
         }

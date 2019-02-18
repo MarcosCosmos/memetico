@@ -12,7 +12,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import memetico.logging.PCAlgorithmState;
+import memetico.logging.MemeticoSnapshot;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public class AgentDisplay extends Pane {
     private final transient Text txtCurrentCost;
     private final transient Label pocketColorSample, currentColorSample;
 
-    private final ObjectProperty<PCAlgorithmState.AgentState> state = new SimpleObjectProperty<>();
+    private final ObjectProperty<MemeticoSnapshot.AgentSnapshot> snapShot = new SimpleObjectProperty<>();
     private final ObjectProperty<Color> pocketColor = new SimpleObjectProperty<>(), currentColor = new SimpleObjectProperty<>();
 
 
@@ -45,14 +45,14 @@ public class AgentDisplay extends Pane {
         pocketColorSample = (Label) lookup(".pocketColorSample");
         currentColorSample = (Label) lookup(".currentColorSample");
 
-        txtAgentId.textProperty().bind(Bindings.createStringBinding(() -> state.get() == null ? "?" : String.valueOf(state.get().id), state));
+        txtAgentId.textProperty().bind(Bindings.createStringBinding(() -> snapShot.get() == null ? "?" : String.valueOf(snapShot.get().id), snapShot));
         txtPocketCost.textProperty().bind(Bindings.createStringBinding(
-                () -> String.valueOf(state.get() == null ? "Uknown" : state.get().pocket.cost),
-                state
+                () -> String.valueOf(snapShot.get() == null ? "Uknown" : snapShot.get().pocket.cost),
+                snapShot
         ));
         txtCurrentCost.textProperty().bind(Bindings.createStringBinding(
-                () -> String.valueOf(state.get() == null ? "Uknown" : state.get().current.cost),
-                state
+                () -> String.valueOf(snapShot.get() == null ? "Uknown" : snapShot.get().current.cost),
+                snapShot
         ));
 
         pocketColorSample.backgroundProperty().bind(
@@ -70,16 +70,16 @@ public class AgentDisplay extends Pane {
         );
     }
 
-    public PCAlgorithmState.AgentState getState() {
-        return state.get();
+    public MemeticoSnapshot.AgentSnapshot getSnapShot() {
+        return snapShot.get();
     }
 
-    public ObjectProperty<PCAlgorithmState.AgentState> stateProperty() {
-        return state;
+    public ObjectProperty<MemeticoSnapshot.AgentSnapshot> snapShotProperty() {
+        return snapShot;
     }
 
-    public void setState(PCAlgorithmState.AgentState state) {
-        this.state.set(state);
+    public void setSnapShot(MemeticoSnapshot.AgentSnapshot snapShot) {
+        this.snapShot.set(snapShot);
     }
 
     public Color getPocketColor() {

@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class NullPCLogger extends NullLogger<PCAlgorithmState> implements IPCLogger {
+public class NullPCLogger extends NullLogger<MemeticoSnapshot> implements IPCLogger {
     @Override
     public IPCLogger.View newView() {
         return NULL_VIEW;
@@ -50,7 +50,7 @@ public class NullPCLogger extends NullLogger<PCAlgorithmState> implements IPCLog
         }
 
         @Override
-        public Iterator<PCAlgorithmState> iterator() {
+        public Iterator<MemeticoSnapshot> iterator() {
             return null;
         }
 
@@ -65,7 +65,7 @@ public class NullPCLogger extends NullLogger<PCAlgorithmState> implements IPCLog
         }
 
         @Override
-        public boolean add(PCAlgorithmState pcAlgorithmState) {
+        public boolean add(MemeticoSnapshot memeticoSnapshot) {
             return false;
         }
 
@@ -80,12 +80,12 @@ public class NullPCLogger extends NullLogger<PCAlgorithmState> implements IPCLog
         }
 
         @Override
-        public boolean addAll(Collection<? extends PCAlgorithmState> c) {
+        public boolean addAll(Collection<? extends MemeticoSnapshot> c) {
             return false;
         }
 
         @Override
-        public boolean addAll(int index, Collection<? extends PCAlgorithmState> c) {
+        public boolean addAll(int index, Collection<? extends MemeticoSnapshot> c) {
             return false;
         }
 
@@ -104,22 +104,22 @@ public class NullPCLogger extends NullLogger<PCAlgorithmState> implements IPCLog
         }
 
         @Override
-        public PCAlgorithmState get(int index) {
+        public MemeticoSnapshot get(int index) {
             return null;
         }
 
         @Override
-        public PCAlgorithmState set(int index, PCAlgorithmState element) {
+        public MemeticoSnapshot set(int index, MemeticoSnapshot element) {
             return null;
         }
 
         @Override
-        public void add(int index, PCAlgorithmState element) {
+        public void add(int index, MemeticoSnapshot element) {
 
         }
 
         @Override
-        public PCAlgorithmState remove(int index) {
+        public MemeticoSnapshot remove(int index) {
             return null;
         }
 
@@ -134,17 +134,17 @@ public class NullPCLogger extends NullLogger<PCAlgorithmState> implements IPCLog
         }
 
         @Override
-        public ListIterator<PCAlgorithmState> listIterator() {
+        public ListIterator<MemeticoSnapshot> listIterator() {
             return null;
         }
 
         @Override
-        public ListIterator<PCAlgorithmState> listIterator(int index) {
+        public ListIterator<MemeticoSnapshot> listIterator(int index) {
             return null;
         }
 
         @Override
-        public List<PCAlgorithmState> subList(int fromIndex, int toIndex) {
+        public List<MemeticoSnapshot> subList(int fromIndex, int toIndex) {
             return null;
         }
     };

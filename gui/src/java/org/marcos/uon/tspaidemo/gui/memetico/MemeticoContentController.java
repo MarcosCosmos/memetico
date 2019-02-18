@@ -15,7 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
-import memetico.logging.PCAlgorithmState;
+import memetico.logging.MemeticoSnapshot;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
@@ -53,7 +53,7 @@ public class MemeticoContentController implements ContentController {
 
     private OptionsBoxController optionsBoxController;
 
-    private transient ObjectProperty<PCAlgorithmState> state = new SimpleObjectProperty<>();
+    private transient ObjectProperty<MemeticoSnapshot> currentSnapshot = new SimpleObjectProperty<>();
     private transient ObjectProperty<ProblemInstance> currentInstance = new SimpleObjectProperty<>();
     private transient IPCLogger.View theView = NullPCLogger.NULL_VIEW;
     private transient ReadOnlyIntegerWrapper numberOfFrames = new ReadOnlyIntegerWrapper(0);
@@ -100,7 +100,7 @@ public class MemeticoContentController implements ContentController {
 
             try {
 
-                //set up the content display with an observable reference to the current state to display.
+                //set up the content display with an observable reference to the current currentSnapshot to display.
                 FXMLLoader loader = new FXMLLoader(
                         getClass().getResource(
                                 "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.fxml"
@@ -122,10 +122,10 @@ public class MemeticoContentController implements ContentController {
         generationValue.bind(
                 Bindings.createIntegerBinding(
                         () -> {
-                            PCAlgorithmState curState = state.get();
+                            MemeticoSnapshot curState = currentSnapshot.get();
                             return curState == null ? 0 : curState.generation;
                         },
-                        state
+                        currentSnapshot
                 )
         );
 
@@ -133,8 +133,8 @@ public class MemeticoContentController implements ContentController {
         txtGeneration.textProperty()
                 .bind(generationValue.asString());
         currentInstance.bind(Bindings.createObjectBinding(
-                () -> state.get() == null ? null : optionsBoxController.getInstances().get(state.get().instanceName),
-                state
+                () -> currentSnapshot.get() == null ? null : optionsBoxController.getInstances().get(currentSnapshot.get().instanceName),
+                currentSnapshot
         ));
 
         txtProblemName.textProperty().bind(
@@ -201,14 +201,14 @@ public class MemeticoContentController implements ContentController {
                 displayGraph.hideTargets();
             }
 
-            PCAlgorithmState theState = state.get();
+            MemeticoSnapshot theState = currentSnapshot.get();
             List<BooleanProperty[]> toggles = optionsBoxController.getSolutionDisplayToggles();
             for (int i = 0; i < toggles.size(); ++i) {
                 BooleanProperty[] eachToggles = toggles.get(i);
                 AgentDisplay eachAgentController = agentControllers.get(i);
                 for (int k = 0; k < eachToggles.length; ++k) {
                     if (eachToggles[k].get()) {
-                        PCAlgorithmState.LightDiCycle eachSolution = (
+                        MemeticoSnapshot.LightDiCycle eachSolution = (
                                 k == 0 ?
                                         theState
                                                 .agents[i]
@@ -239,7 +239,7 @@ public class MemeticoContentController implements ContentController {
     public void frameCountUpdate() {
         try {
             if(!theView.isValid()) {
-                state.set(null);
+                currentSnapshot.set(null);
                 numberOfFrames.set(0); //set it to zero at least once so that the frame index moves to zero
             }
             theView.update();
@@ -251,13 +251,13 @@ public class MemeticoContentController implements ContentController {
 
     public void contentUpdate() {
         if(!theView.isEmpty()) {
-            state.set(theView.get(selectedFrameIndex.get()));
+            currentSnapshot.set(theView.get(selectedFrameIndex.get()));
             contentOutdated = true;
         }
-        PCAlgorithmState currentValue = state.get();
+        MemeticoSnapshot currentValue = currentSnapshot.get();
 //        agentsTree.setCellFactory(p -> new AgentTreeCell());
-        //only check the complex logic if we can draw a state
-        if(contentOutdated && state.get() != null) {
+        //only check the complex logic if we can draw a currentSnapshot
+        if(contentOutdated && currentSnapshot.get() != null) {
             toursOutdated = true;
             TSPLibInstance tspLibInstance = currentInstance.get().getTspLibInstance();
             ObservableList<Node> agentNodes = agentsGrid.getChildren();
@@ -285,7 +285,7 @@ public class MemeticoContentController implements ContentController {
             } else if (newCount > oldCount) {
                 //add needed agent displays
                 for (int i = oldCount; i < newCount; ++i) {
-                    //give the state to the controller
+                    //give the currentSnapshot to the controller
                     AgentDisplay newNode = new AgentDisplay();
 
                     agentControllers.add(newNode);
@@ -396,9 +396,9 @@ public class MemeticoContentController implements ContentController {
             }
 
             for(int i=0; i<agentControllers.size(); ++i) {
-                agentControllers.get(i).setState(state.get().agents[i]);
+                agentControllers.get(i).setSnapShot(currentSnapshot.get().agents[i]);
             }
-        } else if(state.get() == null){
+        } else if(currentSnapshot.get() == null){
             toursOutdated = false;
             lastDrawnGraphName = null;
         }
