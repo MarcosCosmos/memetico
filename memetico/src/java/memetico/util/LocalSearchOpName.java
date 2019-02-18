@@ -5,7 +5,8 @@ package memetico.util;
  */
 public enum LocalSearchOpName {
     RAI("Recursive Arc Insertion"),
-    THREE_OPT("3Opt")
+    THREE_OPT("3Opt"),
+    LKH("Lin–Kernighan Heuristic")
     ;
     private String asString;
     LocalSearchOpName(String asString) {

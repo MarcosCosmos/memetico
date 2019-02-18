@@ -26,8 +26,8 @@ import memetico.util.RestartOpName;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.gui.memetico.MemeticoConfiguration;
-import org.marcos.uon.tspaidemo.gui.memetico.ProblemConfiguration;
-import org.marcos.uon.tspaidemo.gui.memetico.ProblemInstance;
+import org.marcos.uon.tspaidemo.util.tsp.ProblemConfiguration;
+import org.marcos.uon.tspaidemo.util.tsp.ProblemInstance;
 import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 
 import java.io.*;

@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.gui.memetico;
+package org.marcos.uon.tspaidemo.util.tsp;
 
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 

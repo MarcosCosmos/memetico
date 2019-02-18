@@ -1,14 +1,16 @@
 package memetico;
 
+import memetico.lkh.LocalSearchLKH;
 import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
-import memetico.logging.PCAlgorithmState;
+import memetico.logging.MemeticoSnapshot;
+import memetico.util.LocalSearchOpName;
 import org.marcos.uon.tspaidemo.util.log.ILogger;
 import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
+import org.marcos.uon.tspaidemo.util.tsp.ProblemInstance;
 
 import java.text.*;
 
-import java.io.*;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -39,7 +41,7 @@ public class Memetico {
      * @param structPop: struct of the Population
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
-    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, String name, long OptimalSol/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
+    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, ProblemInstance instanceInfo, long OptimalSol/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
         this.logger = logger;
         int GenNum = 0, i;
         double TotalTime = 0, bestTime = 0, auxTime, recombineTime;
@@ -83,7 +85,7 @@ public class Memetico {
             // and we evalutate all the agents and return the best
             memePop.evaluatePop(inst);
             /*log the initial generation too*/
-            logger.log(name, memePop, GenNum);
+            logger.log(instanceInfo.getName(), memePop, GenNum);
 
             initialSolution += memePop.bestAgent.bestCost;
 //      //System.out.println("Otima: " +OptimalSol);
@@ -525,6 +527,8 @@ public class Memetico {
         } else if (OPLocalSearch.equals("3opt")) {
             LocalSearch3opt opt3 = new LocalSearch3opt();
             refLocalSearch = opt3;
+        } else if(OPLocalSearch.equals(LocalSearchOpName.LKH.toString())) {
+            refLocalSearch = new LocalSearchLKH();
         } else /*if (OPLocalSearch.equals("3opt"))*/ {
             LocalSearchJohnson lsj = new LocalSearchJohnson(inst);
             refLocalSearch = lsj;
@@ -737,7 +741,7 @@ public class Memetico {
     }
 
 
-    public ILogger<PCAlgorithmState> getLogger() {
+    public ILogger<MemeticoSnapshot> getLogger() {
         return logger;
     }
 }//fim da classe

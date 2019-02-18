@@ -7,7 +7,7 @@ public abstract class Instance {
     int problemType = NONE;
     int dimension;
 
-    abstract void readInstance(String fileName) throws Exception;
+    public abstract void readInstance(String fileName) throws Exception;
 
     public abstract void setDimension(int dim);
 

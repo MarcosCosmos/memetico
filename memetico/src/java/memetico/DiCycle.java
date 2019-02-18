@@ -11,7 +11,9 @@ public class DiCycle extends SolutionStructure {
     public Arc arcArray[];
     boolean dontlook[];
     double startTime[];
-    int startingCity = 0;
+
+    //may as well be final until we might need to change it, since it's public
+    public final int startingCity = 0;
 
 
     public DiCycle() {

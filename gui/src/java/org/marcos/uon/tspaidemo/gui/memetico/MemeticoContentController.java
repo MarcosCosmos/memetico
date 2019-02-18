@@ -22,6 +22,7 @@ import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
+import org.marcos.uon.tspaidemo.util.tsp.ProblemInstance;
 
 import java.io.*;
 import java.net.URL;
