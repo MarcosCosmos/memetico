@@ -10,11 +10,17 @@ import memetico.Population;
  * It is important to note that it is only truely safe in so far as no attempts are made to interiorly modify pocket/current.
  */
 public class MemeticoSnapshot {
-    public static class LightDiCycle {
-        public Arc arcArray[];
+    public static class LightTour {
+        public int[] tour;
         public double cost;
-        public LightDiCycle(DiCycle src) {
-            this.arcArray = src.arcArray;
+        public LightTour(DiCycle src) {
+            this.tour = new int[src.arcArray.length];
+            int city = 0;
+            int i=0;
+            do {
+                tour[i++] = city;
+                city = src.arcArray[city].tip;
+            } while (city != 0);
             this.cost = src.cost;
         }
     }
@@ -22,13 +28,13 @@ public class MemeticoSnapshot {
     public static class AgentSnapshot {
         public final int id;
         //todo: consider possibly using a thin solutionstructure here like for agent and algorithm?
-        public final LightDiCycle pocket;          /* The "Pocket"  SolutionStructure    */
-        public final LightDiCycle current;         /* The "Current" SolutionStructure    */
+        public final LightTour pocket;          /* The "Pocket"  SolutionStructure    */
+        public final LightTour current;         /* The "Current" SolutionStructure    */
         //todo: possibly consider
         public AgentSnapshot(int id, DiCycle pocket, DiCycle current) {
             this.id = id;
-            this.pocket = new LightDiCycle(pocket);
-            this.current = new LightDiCycle(current);
+            this.pocket = new LightTour(pocket);
+            this.current = new LightTour(current);
         }
     }
 

@@ -16,6 +16,7 @@ import java.text.*;
 
 import java.io.IOException;
 import java.util.Vector;
+import java.util.function.Supplier;
 
 public class Memetico {
 
@@ -52,6 +53,7 @@ public class Memetico {
         TSPLibInstance tspLibInstance = problem.getTspLibInstance();
         Instance inst;
 
+        //todo: allow for more problem types??
         switch (tspLibInstance.getDataType()) {
             case ATSP:
             default:
@@ -149,12 +151,9 @@ public class Memetico {
 
                 best_aux = memePop.bestAgent.bestCost;
 
-                //decide whether or not to continue (if not, break out of this loop and do the final logging)
-                if (!continuePermission.isValid()) {
-                    break;
-                }
-
-
+//                double originalCost = ((PocCurAgent) memePop.pop[0]).pocket.cost;
+//                double newCost = ((PocCurAgent)memePop.pop[0]).pocket.calculateCost(inst);
+//                assert newCost == originalCost;
 
                 // if (memePop.bestAgent.bestCost <= OptimalSol)  break;
                 if (pocCurPop[0].pocket.cost <= problem.getTargetCost()) {
@@ -166,6 +165,10 @@ public class Memetico {
                     logger.tryLog(problem.getName(), memePop, GenNum);
                 }
 
+                //decide whether or not to continue (if not, break out of this loop and do the final logging)
+                if (!continuePermission.isValid()) {
+                    break;
+                }
 //	  memePop.orderChildren();
 
                 recombinePocketsWithCurrents(memePop, refCrossover, inst, refLocalSearch);
@@ -176,8 +179,11 @@ public class Memetico {
                 if (pocCurPop[0].noChangeCounter % 30 == 0) {
                     int aux_rand = (int) (Math.random() * 3 + 1);
                     //System.out.println("aux_rand: " + aux_rand);
+//                    NNInicializePop(refConstr, aux_rand, (int) (Math.random() * ((GraphInstance) inst).dimension),
+//                            (int) (Math.random() * ((GraphInstance) inst).dimension), inst);
                     NNInicializePop(refConstr, aux_rand, (int) (Math.random() * ((GraphInstance) inst).dimension),
                             (int) (Math.random() * ((GraphInstance) inst).dimension), inst);
+
 
 
                     memePop.evaluatePop(inst);

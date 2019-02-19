@@ -3,12 +3,17 @@ package memetico.lkh;
 import com.google.common.io.ByteStreams;
 import com.sun.istack.internal.NotNull;
 import memetico.*;
+import org.apache.commons.lang3.SystemUtils;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.TSPLibTour;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Requires that an LHK executable is available via the PATH env var
@@ -60,5 +65,17 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Identifies whether or not the LKH executable is available in the PATH (and therefore whether or not this heuristic can be used)
+     * Curtesy of https://stackoverflow.com/a/23539220
+     * @return
+     */
+    public static boolean isAvailable() {
+        String exec = SystemUtils.IS_OS_WINDOWS ? "LKH.exe" : "LKH";
+        return Stream.of(System.getenv("PATH").split(Pattern.quote(File.pathSeparator)))
+                .map(Paths::get)
+                .anyMatch(path -> Files.exists(path.resolve(exec)));
     }
 }

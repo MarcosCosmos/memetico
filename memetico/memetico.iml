@@ -12,5 +12,6 @@
     <orderEntry type="module" module-name="util" />
     <orderEntry type="library" name="jorlib-core-1.1.1" level="project" />
     <orderEntry type="library" name="com.google.guava:guava:27.0.1-jre" level="project" />
+    <orderEntry type="library" name="org.apache.commons:commons-lang3:3.8.1" level="project" />
   </component>
 </module>

@@ -15,10 +15,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import memetico.ATSPInstance;
-import memetico.GraphInstance;
-import memetico.Memetico;
-import memetico.Population;
+import memetico.*;
+import memetico.lkh.LocalSearchLKH;
 import memetico.logging.PCLogger;
 import memetico.util.CrossoverOpName;
 import memetico.util.LocalSearchOpName;
@@ -281,11 +279,19 @@ public class OptionsBoxController implements Initializable {
 
 
 
-        choiceMemeticoLocalSearch.getItems().addAll(
-                Arrays.stream(LocalSearchOpName.values())
-                        .map(Object::toString)
-                        .collect(Collectors.toList())
-        );
+//        choiceMemeticoLocalSearch.getItems().addAll(
+//                Arrays.stream(LocalSearchOpName.values())
+//                        .map(Object::toString)
+//                        .collect(Collectors.toList())
+//        );
+        List<String> localSearchOptions = choiceMemeticoLocalSearch.getItems();
+        localSearchOptions.add(LocalSearchOpName.RAI.toString());
+        localSearchOptions.add(LocalSearchOpName.THREE_OPT.toString());
+        if(LocalSearchLKH.isAvailable()) {
+            localSearchOptions.add(LocalSearchOpName.LKH.toString());
+        } else {
+            System.err.println("Warning: LKH Executable not found, the option will be hidden");
+        }
 
         choiceMemeticoCrossover.getItems().addAll(
                 Arrays.stream(CrossoverOpName.values())

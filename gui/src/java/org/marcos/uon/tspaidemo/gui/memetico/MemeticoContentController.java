@@ -17,6 +17,7 @@ import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
+import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
@@ -219,7 +220,7 @@ public class MemeticoContentController implements ContentController {
                 AgentDisplay eachAgentController = agentControllers.get(i);
                 for (int k = 0; k < eachToggles.length; ++k) {
                     if (eachToggles[k].get()) {
-                        MemeticoSnapshot.LightDiCycle eachSolution = (
+                        MemeticoSnapshot.LightTour eachSolution = (
                                 k == 0 ?
                                         theState
                                                 .agents[i]
@@ -229,13 +230,16 @@ public class MemeticoContentController implements ContentController {
                                                 .agents[i]
                                                 .current
                         );
-                        int nextCity, city = 0;
                         int[][] edgesToAdd = new int[theInstance.getDimension()][];
-                        for(int j = 0; j<theInstance.getDimension(); ++j) {
-                            nextCity = eachSolution.arcArray[city].tip;
-                            edgesToAdd[j] = new int[]{city, nextCity};
-                            city = nextCity;
+                        for(int j = 0; j<eachSolution.tour.length; ++j) {
+                            edgesToAdd[j] = new int[]{eachSolution.tour[j], eachSolution.tour[(j+1)%eachSolution.tour.length]};
                         }
+//                        double tmpCost = 0;
+//                        DistanceTable tblDistance = theInstance.getDistanceTable();
+//                        for (int[] ints : edgesToAdd) {
+//                            tmpCost += tblDistance.getDistanceBetween(ints[0], ints[1]);
+//                        }
+//                        System.out.println(tmpCost);
                         displayGraph.addPredictionEdges(
                                 Arrays.asList(edgesToAdd),
                                 (k == 0 ? eachAgentController.getPocketColor() : eachAgentController.getCurrentColor())
@@ -263,7 +267,6 @@ public class MemeticoContentController implements ContentController {
     public void contentUpdate() {
         if(!theView.isEmpty()) {
             currentSnapshot.set(theView.get(selectedFrameIndex.get()));
-            contentOutdated = true;
         }
         MemeticoSnapshot currentValue = currentSnapshot.get();
 //        agentsTree.setCellFactory(p -> new AgentTreeCell());

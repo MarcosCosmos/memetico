@@ -13,5 +13,6 @@
     <orderEntry type="library" name="jorlib-core-1.1.1" level="project" />
     <orderEntry type="module" module-name="memetico" />
     <orderEntry type="module" module-name="util" />
+    <orderEntry type="library" name="org.apache.commons:commons-lang3:3.8.1" level="project" />
   </component>
 </module>
