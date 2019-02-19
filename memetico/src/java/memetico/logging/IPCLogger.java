@@ -5,7 +5,7 @@ import org.marcos.uon.tspaidemo.util.log.ILogger;
 
 public interface IPCLogger extends ILogger<MemeticoSnapshot> {
     interface View extends ILogger.View<MemeticoSnapshot> {
-        double getStartTime();
+        long getStartTime();
     }
 
     /**

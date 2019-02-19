@@ -1,9 +1,6 @@
 # Instructions
 
-When using this with LHK you may need to modify/configure the makefile in the src/cpp directory (of the Memetico module), build your own library to link/point memetico towards it.
-
-Since the library needs to be dumped to disk to be loaded, you'll need to configure the relevant part of memetico [specify] for this as well)
-If on Windows, you will also need to configure the TMP dir;
+If using the LKH you will need to ensure that an LKH executable (http://www.akira.ruc.dk/~keld/research/LKH/) is available via the PATH environment
 
 # TODO:
 Add acknowledgements for Memetico etc

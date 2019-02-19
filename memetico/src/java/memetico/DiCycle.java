@@ -55,17 +55,16 @@ public class DiCycle extends SolutionStructure {
     }
 
     /* ------------------------------------ saveInOptTour ------------------------------------*/
-    public void saveInOptTour(String FileName) throws Exception {
+    public void saveInOptTour(File destination) throws Exception {
         int city = 0;
-        String OptTourFileName = new String(FileName.substring(0, (FileName.length()) - 3) + "opt.tour");
 
         try {
-            FileOutputStream dataOut = new FileOutputStream(OptTourFileName);
+            FileOutputStream dataOut = new FileOutputStream(destination);
             DataOutputStream fileOut = new DataOutputStream(dataOut);
 
-            fileOut.writeBytes(String.valueOf("NAME: " + OptTourFileName + '\n'));
+            fileOut.writeBytes(String.valueOf("NAME: " + destination.getName() + '\n'));
             fileOut.writeBytes("TYPE: TOUR" + '\n');
-            fileOut.writeBytes("COMMENT: Optimal solution for " + FileName.substring(0, (FileName.length()) - 4) + '\n');
+            fileOut.writeBytes("COMMENT: Optimal solution for " + destination.getName() + '\n');
             fileOut.writeBytes("DIMENSION: " + String.valueOf(size) + '\n');
             fileOut.writeBytes("TOUR_SECTION" + '\n');
 

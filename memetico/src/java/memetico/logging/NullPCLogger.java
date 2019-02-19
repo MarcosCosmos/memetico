@@ -15,7 +15,7 @@ public class NullPCLogger extends NullLogger<MemeticoSnapshot> implements IPCLog
     }
     public static final IPCLogger.View NULL_VIEW = new IPCLogger.View() {
         @Override
-        public double getStartTime() {
+        public long getStartTime() {
             return 0;
         }
 

@@ -27,6 +27,7 @@ import org.marcos.uon.tspaidemo.util.tsp.ProblemInstance;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class MemeticoContentController implements ContentController {
 
@@ -44,7 +45,7 @@ public class MemeticoContentController implements ContentController {
     @FXML
     private HBox contentRoot;
     @FXML
-    private Text txtGeneration, txtProblemName, txtTargetCost;
+    private Text txtGeneration, txtProblemName, txtTargetCost, txtTimeGeneration, txtTimeTotal;
     @FXML
     private GridPane agentsGrid;
     @FXML
@@ -123,8 +124,8 @@ public class MemeticoContentController implements ContentController {
         generationValue.bind(
                 Bindings.createIntegerBinding(
                         () -> {
-                            MemeticoSnapshot curState = currentSnapshot.get();
-                            return curState == null ? 0 : curState.generation;
+                            MemeticoSnapshot curSnapshot = currentSnapshot.get();
+                            return curSnapshot == null ? 0 : curSnapshot.generation;
                         },
                         currentSnapshot
                 )
@@ -135,6 +136,15 @@ public class MemeticoContentController implements ContentController {
                 .bind(generationValue.asString());
         currentInstance.bind(Bindings.createObjectBinding(
                 () -> currentSnapshot.get() == null ? null : optionsBoxController.getInstances().get(currentSnapshot.get().instanceName),
+                currentSnapshot
+        ));
+
+        txtTimeGeneration.textProperty().bind(Bindings.createStringBinding(
+                () -> currentSnapshot.get() == null ? "Unknown" : String.valueOf(TimeUnit.NANOSECONDS.toSeconds(currentSnapshot.get().logTime - (selectedFrameIndex.get() == 0 ? theView.getStartTime() : theView.get(selectedFrameIndex.get()-1).logTime))),
+                currentSnapshot
+        ));
+        txtTimeTotal.textProperty().bind(Bindings.createStringBinding(
+                () -> currentSnapshot.get() == null ? "Unknown" : String.valueOf(TimeUnit.NANOSECONDS.toSeconds(currentSnapshot.get().logTime - theView.getStartTime())),
                 currentSnapshot
         ));
 

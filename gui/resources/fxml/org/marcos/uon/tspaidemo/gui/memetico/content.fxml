@@ -18,12 +18,24 @@
                     <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
                 </right>
             </BorderPane>
-            <GridPane styleClass="dataGrid">
-                <Text fx:id="lblTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="0">Target cost:</Text>
-                <Text fx:id="txtTargetCost" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                <Text fx:id="lblTeneration" GridPane.rowIndex="1" GridPane.columnIndex="0">Generation:</Text>
-                <Text fx:id="txtGeneration" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-            </GridPane>
+            <VBox styleClass="dataGrid">
+                <TextFlow>
+                    <Text fx:id="lblTargetCost">Target cost:&#160;</Text>
+                    <Text fx:id="txtTargetCost"/>
+                </TextFlow>
+                <TextFlow>
+                    <Text fx:id="lblTeneration">Generation:</Text>
+                    <Text fx:id="txtGeneration"/>
+                </TextFlow>
+                <TextFlow>
+                    <Text fx:id="lblTimeGeneration">Time (Generation):&#160;</Text>
+                    <Text fx:id="txtTimeGeneration"/>
+                </TextFlow>
+                <TextFlow>
+                    <Text fx:id="lblTimeTotal">Time (Total):&#160;</Text>
+                    <Text fx:id="txtTimeTotal"/>
+                </TextFlow>
+            </VBox>
             <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
                 <GridPane fx:id="agentsGrid" styleClass="dataGrid"/>
                 <!--<TreeView fx:id="agentsTree"/>-->

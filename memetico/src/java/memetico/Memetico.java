@@ -5,8 +5,11 @@ import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import memetico.util.LocalSearchOpName;
+import org.jorlib.io.tspLibReader.TSPLibInstance;
+import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.util.log.ILogger;
 import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
+import org.marcos.uon.tspaidemo.util.tsp.ProblemConfiguration;
 import org.marcos.uon.tspaidemo.util.tsp.ProblemInstance;
 
 import java.text.*;
@@ -27,6 +30,7 @@ public class Memetico {
 //    static int numReplications = 30;
 
     private IPCLogger logger;
+    private ProblemInstance problem;
     private static double AverTotalTime = 0, AverPopInit = 0,
             AverSolOpt = 0, AverGen = 0, AverQuality = 0;
     private static double initialSolution = 0;
@@ -41,12 +45,37 @@ public class Memetico {
      * @param structPop: struct of the Population
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
-    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, Instance inst, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications, ProblemInstance instanceInfo, long OptimalSol/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
+    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, ProblemInstance problem, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, long MaxTime, long MaxGenNum, long numReplications/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
+        //todo: compute the memetico Instance here instead of passing it as a parameter
+
+        this.problem = problem;
+        TSPLibInstance tspLibInstance = problem.getTspLibInstance();
+        Instance inst;
+
+        switch (tspLibInstance.getDataType()) {
+            case ATSP:
+            default:
+                //atsp should be safe (ish) even if it is in fact tsp
+                inst = new ATSPInstance();
+        }
+
+        //give the memeticoInstance the required data
+        inst.setDimension(tspLibInstance.getDimension());
+        {
+            DistanceTable distanceTable = tspLibInstance.getDistanceTable();
+            double[][] memeticoMat = ((GraphInstance) inst).getMatDist();
+            for (int i = 0; i < inst.getDimension(); ++i) {
+                for (int k = 0; k < inst.getDimension(); ++k) {
+                    memeticoMat[i][k] = distanceTable.getDistanceBetween(i, k);
+                }
+            }
+        }
+
         this.logger = logger;
         int GenNum = 0, i;
-        double TotalTime = 0, bestTime = 0, auxTime, recombineTime;
-        double Aver_time = 0, Aver_Gen = 0,
-                time_vmp, time_init, Quality = 0;
+//        double TotalTime = 0, bestTime = 0, auxTime, recombineTime;
+//        double Aver_time = 0, Aver_Gen = 0,
+//                time_vmp, time_init, Quality = 0;
         int cont_OptimalSol = 0, count;
         PocCurAgent pocCurPop[];
 //   FileOutputStream dataOut = new FileOutputStream("debug.txt");
@@ -60,7 +89,7 @@ public class Memetico {
 
         //System.out.println('\n' + "Opening file " + name);
         for (count = 0; count < numReplications; count++) {
-            recombineTime = time_vmp = time_init = 0;
+//            recombineTime = time_vmp = time_init = 0;
             GenNum = 0;
 
 //      refAgent 		= selectAgentStruct(refAgent);
@@ -75,7 +104,7 @@ public class Memetico {
             refLocalSearch = selectLocalSearchOperator(refLocalSearch, BuscaLocal, inst);
 
 
-            TotalTime = System.currentTimeMillis();
+//            TotalTime = System.currentTimeMillis();
             logger.reset();
             // we initialize the population of agents
             // with a method based on the nearest neighbour heuristic for the TSP
@@ -85,7 +114,7 @@ public class Memetico {
             // and we evalutate all the agents and return the best
             memePop.evaluatePop(inst);
             /*log the initial generation too*/
-            logger.log(instanceInfo.getName(), memePop, GenNum);
+            logger.log(problem.getName(), memePop, GenNum);
 
             initialSolution += memePop.bestAgent.bestCost;
 //      //System.out.println("Otima: " +OptimalSol);
@@ -110,7 +139,7 @@ public class Memetico {
                 memePop.updateAgents(inst);
                 memePop.agentPropagation();
                 if (memePop.bestAgent.bestCost < best_aux) {
-                    bestTime = (System.currentTimeMillis() - TotalTime) / 1000;
+//                    bestTime = (System.currentTimeMillis() - TotalTime) / 1000;
 //                    System.out.println("Solution: " + memePop.pop[0].cost +
 //                            " GenNum: " + GenNum + " Tempo: " +
 //                            bestTime);
@@ -125,11 +154,17 @@ public class Memetico {
                     break;
                 }
 
-                /* This seems to be the correct point at which to log since it's above the break? */
-                logger.tryLog(name, memePop, GenNum);
+
 
                 // if (memePop.bestAgent.bestCost <= OptimalSol)  break;
-                if (pocCurPop[0].pocket.cost <= OptimalSol) break;
+                if (pocCurPop[0].pocket.cost <= problem.getTargetCost()) {
+                    //prevent a double log; but force the log if this is the end of the run
+                    logger.log(problem.getName(), memePop, GenNum);
+                    break;
+                } else {
+                    /* This seems to be the correct point at which to log since it's above the break? */
+                    logger.tryLog(problem.getName(), memePop, GenNum);
+                }
 
 //	  memePop.orderChildren();
 
@@ -173,14 +208,14 @@ public class Memetico {
                     memePop.evaluatePop(inst);
                     memePop.updateAgents(inst);
                     memePop.agentPropagation();
-                    String str = new String();
+//                    String str = new String();
            /* for(i=0; i < 4; i++) {str += pocCurPop[i].current.cost; str += " ";}
            System.out.println("Currents: "+str);
            str = ""; */
-                    for (i = 0; i < 4; i++) {
-                        str += pocCurPop[i].pocket.cost;
-                        str += " ";
-                    }
+//                    for (i = 0; i < 4; i++) {
+//                        str += pocCurPop[i].pocket.cost;
+//                        str += " ";
+//                    }
                     //System.out.println("Pockets: " + str);
 
 	   /* System.out.println("getting out of Restart... incumbent cost is:" + pocCurPop[0].pocket.cost +
@@ -202,20 +237,17 @@ public class Memetico {
         }*/
             } // end of while, exiting the generations loop.
 
-
-            logger.log(name, memePop, ++GenNum);
-
-            TotalTime = (System.currentTimeMillis() - TotalTime);
+//            TotalTime = (System.currentTimeMillis() - TotalTime);
 
 //      if (count==0)                                 //?
 //         pocCurPop[0].pocket.saveInOptTour(name);
-            Aver_time += TotalTime / 1000;
-            Aver_Gen += GenNum;
+//            Aver_time += TotalTime / 1000;
+//            Aver_Gen += GenNum;
 
-            if (OptimalSol == memePop.bestAgent.bestCost)
-                cont_OptimalSol++;
+//            if (problem.getTargetCost() == memePop.bestAgent.bestCost)
+//                cont_OptimalSol++;
 
-            Quality += memePop.bestAgent.bestCost;
+//            Quality += memePop.bestAgent.bestCost;
 //
 //            try {
 //                fileOut.writeBytes(String.valueOf(name + '\t'));                /*nome do arquivo*/
@@ -233,10 +265,10 @@ public class Memetico {
 
 //   afileOut.close();
 
-        initialSolution = initialSolution / numReplications;
-        Quality = Quality / numReplications;
-        Quality = (100 * (Quality - OptimalSol) / OptimalSol);
-        AverQuality += Quality;
+//        initialSolution = initialSolution / numReplications;
+//        Quality = Quality / numReplications;
+//        Quality = (100 * (Quality - problem.getTargetCost()) / problem.getTargetCost());
+//        AverQuality += Quality;
 
 //        try {
 //            compact_fileOut.writeBytes(name + '\t');                                    /*arquivo*/
@@ -250,10 +282,10 @@ public class Memetico {
 //            throw new Exception("File not properly opened" + e.toString());
 //        }
 
-        AverTotalTime += (Aver_time / numReplications);
-        AverPopInit += initialSolution;
-        AverSolOpt += cont_OptimalSol;
-        AverGen += (Aver_Gen / numReplications);
+//        AverTotalTime += (Aver_time / numReplications);
+//        AverPopInit += initialSolution;
+//        AverSolOpt += cont_OptimalSol;
+//        AverGen += (Aver_Gen / numReplications);
     }
 
 
@@ -317,7 +349,7 @@ public class Memetico {
 //        };
 
         String Names[] = {
-                "berlin52.tsp"
+                "tsp225.tsp"
         };
         long OptimalSol[] = {
                 7542
@@ -343,84 +375,83 @@ public class Memetico {
 //      compact_fileOut.writeBytes("HCP com SAX - 10/11.");
 
             for (count = 0; count < countNames; count++) {
-                switch (Instance.GRAPH_TYPE) {
-                    case Instance.GRAPH_TYPE:
-                        switch (GraphInstance.ATSP_TYPE) {
-                            case GraphInstance.ATSP_TYPE:
-                                switch (ATSPInstance.NONE) {
-                                    case ATSPInstance.NONE:
-                                        ATSPInstance instATSP = new ATSPInstance();
-                                        inst = instATSP;
-                                        break;
-                                    case ATSPInstance.ATSP_RT_TYPE:
-                                        ATSPRTInstance instATSPRT = new ATSPRTInstance();
-                                        inst = instATSPRT;
-                                        break;
-                                }
-                                break;
+//                switch (Instance.GRAPH_TYPE) {
+//                    case Instance.GRAPH_TYPE:
+//                        switch (GraphInstance.ATSP_TYPE) {
+//                            case GraphInstance.ATSP_TYPE:
+//                                switch (ATSPInstance.NONE) {
+//                                    case ATSPInstance.NONE:
+//                                        ATSPInstance instATSP = new ATSPInstance();
+//                                        inst = instATSP;
+//                                        break;
+//                                    case ATSPInstance.ATSP_RT_TYPE:
+//                                        ATSPRTInstance instATSPRT = new ATSPRTInstance();
+//                                        inst = instATSPRT;
+//                                        break;
+//                                }
+//                                break;
+//
+//                            case GraphInstance.TSP_TYPE: {
+//                                TSPInstance instTSP = new TSPInstance();
+//                                inst = instTSP;
+//                                break;
+//                            }
+//                            case GraphInstance.HCP_TYPE: {
+//                                HCPInstance instHCP = new HCPInstance();
+//                                inst = instHCP;
+//                                break;
+//                            }
+//                            case GraphInstance.DHCP_TYPE: {
+//                                DHCPInstance instDHCP = new DHCPInstance();
+//                                inst = instDHCP;
+//                                break;
+//                            }
+//                            default: {
+//                                System.err.println("Invalid Graph Type");
+//                                System.exit(1);
+//                                break;
+//                            }
+//                        }
+//                        break;
+//
+//                    default: {
+//                        System.err.println("Invalid Graph Type");
+//                        System.exit(1);
+//                        break;
+//                    }
+//
+//                }
 
-                            case GraphInstance.TSP_TYPE: {
-                                TSPInstance instTSP = new TSPInstance();
-                                inst = instTSP;
-                                break;
-                            }
-                            case GraphInstance.HCP_TYPE: {
-                                HCPInstance instHCP = new HCPInstance();
-                                inst = instHCP;
-                                break;
-                            }
-                            case GraphInstance.DHCP_TYPE: {
-                                DHCPInstance instDHCP = new DHCPInstance();
-                                inst = instDHCP;
-                                break;
-                            }
-                            default: {
-                                System.err.println("Invalid Graph Type");
-                                System.exit(1);
-                                break;
-                            }
-                        }
-                        break;
 
-                    default: {
-                        System.err.println("Invalid Graph Type");
-                        System.exit(1);
-                        break;
-                    }
+//                switch (Reduction.NONE) {
+//                    case (Reduction.NONE):
+//                        break;
+//                    case (Reduction.HCP_To_ATSP): {
+//                        ReductionHCPtoATSP redHCPtoATSP = new ReductionHCPtoATSP();
+//                        reduction = redHCPtoATSP;
+//                        break;
+//                    }
+//                    case (Reduction.DHCP_TO_ATSP): {
+//                        ReductionDHCPtoATSP redDHCPtoATSP = new ReductionDHCPtoATSP();
+//                        reduction = redDHCPtoATSP;
+//                        break;
+//                    }
+//                    default: {
+//                        System.err.println("Invalid Graph Type");
+//                        System.exit(1);
+//                        break;
+//                    }
+//                }
+//                if (Reduction.NONE != Reduction.NONE)
+//                    inst = reduction.runReduction(inst);
 
-                }
-
-//          inst.readInstance("e:\\development\\atsp\\"+Names[count]);
-                inst.readInstance(Names[count]);
-
-                switch (Reduction.NONE) {
-                    case (Reduction.NONE):
-                        break;
-                    case (Reduction.HCP_To_ATSP): {
-                        ReductionHCPtoATSP redHCPtoATSP = new ReductionHCPtoATSP();
-                        reduction = redHCPtoATSP;
-                        break;
-                    }
-                    case (Reduction.DHCP_TO_ATSP): {
-                        ReductionDHCPtoATSP redDHCPtoATSP = new ReductionDHCPtoATSP();
-                        reduction = redDHCPtoATSP;
-                        break;
-                    }
-                    default: {
-                        System.err.println("Invalid Graph Type");
-                        System.exit(1);
-                        break;
-                    }
-                }
-                if (Reduction.NONE != Reduction.NONE)
-                    inst = reduction.runReduction(inst);
-
-                MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(((GraphInstance) inst).dimension));
+                ProblemInstance problem = new ProblemInstance(new ProblemConfiguration(Memetico.class.getResource("/problems/tsp/tsp225.tsp"), Memetico.class.getResource("/problems/tsp/tsp225.opt.tour")));
+                MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(problem.getTspLibInstance().getDimension()));
 //          if(MaxGenNum < 200) MaxGenNum = 200;
 
-                Memetico meme = new Memetico(logger, () -> true, inst, structSol, structPop, MetodoConstrutivo,
+                Memetico meme = new Memetico(logger, () -> true, problem, structSol, structPop, MetodoConstrutivo,
                         PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao,
-                        MaxTime, MaxGenNum, numReplications, Names[count], OptimalSol[count]);
+                        MaxTime, MaxGenNum, numReplications);
             }//for
 
 //            compact_fileOut.writeBytes('\t' + String.valueOf(prec.format((double) (AverPopInit / countNames))) + '\t' + '\t');
@@ -520,7 +551,7 @@ public class Memetico {
 
 
     /* ------------------------------------ selectCrossoverOperator ------------------------------------*/
-    public LocalSearchOperators selectLocalSearchOperator(LocalSearchOperators refLocalSearch, String OPLocalSearch, Instance inst) {
+    public LocalSearchOperators selectLocalSearchOperator(LocalSearchOperators refLocalSearch, String OPLocalSearch, Instance inst) throws IOException {
         if (OPLocalSearch.equals("Recursive Arc Insertion")) {
             LocalSearchRAI rai = new LocalSearchRAI(inst);
             refLocalSearch = rai;
@@ -528,7 +559,7 @@ public class Memetico {
             LocalSearch3opt opt3 = new LocalSearch3opt();
             refLocalSearch = opt3;
         } else if(OPLocalSearch.equals(LocalSearchOpName.LKH.toString())) {
-            refLocalSearch = new LocalSearchLKH();
+            refLocalSearch = new LocalSearchLKH(problem.getConfiguration().problemFile);
         } else /*if (OPLocalSearch.equals("3opt"))*/ {
             LocalSearchJohnson lsj = new LocalSearchJohnson(inst);
             refLocalSearch = lsj;

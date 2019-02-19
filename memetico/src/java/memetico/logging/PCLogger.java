@@ -8,7 +8,7 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
     protected double logFrequency;
 
     public class View extends BasicLogger<MemeticoSnapshot>.View implements IPCLogger.View {
-        protected double internalStartTime;
+        protected long internalStartTime;
 
         protected View() throws InterruptedException {
             super();
@@ -28,7 +28,7 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
         }
 
         @Override
-        public double getStartTime() {
+        public long getStartTime() {
             return internalStartTime;
         }
     }
@@ -51,12 +51,12 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
      * force log regardless of interval (e.g. because it's the end state)
      */
     protected void _log(String instanceName, Population population, int generation) throws InterruptedException {
-        _log(new MemeticoSnapshot(instanceName, population, generation, System.currentTimeMillis()));
+        _log(new MemeticoSnapshot(instanceName, population, generation, System.nanoTime()));
     }
 
 
     public void log(String instanceName, Population population, int generation) throws InterruptedException {
-        log(new MemeticoSnapshot(instanceName, population, generation, System.currentTimeMillis())); //we only need the lock after creating the new object;
+        log(new MemeticoSnapshot(instanceName, population, generation, System.nanoTime())); //we only need the lock after creating the new object;
     }
 
     /**
@@ -81,7 +81,7 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
     @Override
     protected void _reset() {
         super._reset();
-        startTime=System.currentTimeMillis();
+        startTime=System.nanoTime();
     }
 
     /**

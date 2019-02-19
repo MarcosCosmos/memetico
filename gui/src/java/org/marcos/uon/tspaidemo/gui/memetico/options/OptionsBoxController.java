@@ -436,28 +436,7 @@ public class OptionsBoxController implements Initializable {
         final ValidityFlag.ReadOnly finalizedContinuePermission = currentMemeticoContinuePermission.getReadOnly();
         try {
             TSPLibInstance tspLibInstance = finalizedProblem.getTspLibInstance();
-            memetico.Instance memeticoInstance;
-
-            switch (tspLibInstance.getDataType()) {
-                case ATSP:
-                default:
-                    //atsp should be safe (ish) even if it is in fact tsp
-                    memeticoInstance = new ATSPInstance();
-            }
-
-            //give the memeticoInstance the required data
-            memeticoInstance.setDimension(tspLibInstance.getDimension());
-            {
-                DistanceTable distanceTable = tspLibInstance.getDistanceTable();
-                double[][] memeticoMat = ((GraphInstance) memeticoInstance).getMatDist();
-                for (int i = 0; i < memeticoInstance.getDimension(); ++i) {
-                    for (int k = 0; k < memeticoInstance.getDimension(); ++k) {
-                        memeticoMat[i][k] = distanceTable.getDistanceBetween(i, k);
-                    }
-                }
-            }
-
-            long maxGenerations = finalizedConfig.maxGenerations != 0 ? finalizedConfig.maxGenerations : (int) (5 * 13 * Math.log(13) * Math.sqrt(memeticoInstance.getDimension()));
+            long maxGenerations = finalizedConfig.maxGenerations != 0 ? finalizedConfig.maxGenerations : (int) (5 * 13 * Math.log(13) * Math.sqrt(tspLibInstance.getDimension()));
             FileOutputStream dataOut = null;
             dataOut = new FileOutputStream("result.txt");
             DataOutputStream fileOut = new DataOutputStream(dataOut);
@@ -470,9 +449,9 @@ public class OptionsBoxController implements Initializable {
             //launch memetico
             memeticoThread = new Thread(() -> {
                 try {
-                    Memetico meme = new Memetico(logger, finalizedContinuePermission, memeticoInstance, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
+                    Memetico meme = new Memetico(logger, finalizedContinuePermission, finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
                             finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp,
-                            finalizedConfig.maxTime, maxGenerations, finalizedConfig.numReplications, tspLibInstance.getName(), targetCost);
+                            finalizedConfig.maxTime, maxGenerations, finalizedConfig.numReplications);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
