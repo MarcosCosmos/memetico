@@ -92,6 +92,13 @@ public class DiCycle extends SolutionStructure {
         return true;
     }
 
+    @Override
+    public DiCycle deepCopy() {
+        DiCycle result = new DiCycle(this);
+        result.cost = cost;
+        return result;
+    }
+
 
     /* ------------------------------------ CalculateCost ------------------------------------*/
     public double calculateCost(Instance inst) {

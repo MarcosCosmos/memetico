@@ -179,10 +179,10 @@ public class Memetico {
                 if (pocCurPop[0].noChangeCounter % 30 == 0) {
                     int aux_rand = (int) (Math.random() * 3 + 1);
                     //System.out.println("aux_rand: " + aux_rand);
-//                    NNInicializePop(refConstr, aux_rand, (int) (Math.random() * ((GraphInstance) inst).dimension),
-//                            (int) (Math.random() * ((GraphInstance) inst).dimension), inst);
                     NNInicializePop(refConstr, aux_rand, (int) (Math.random() * ((GraphInstance) inst).dimension),
                             (int) (Math.random() * ((GraphInstance) inst).dimension), inst);
+//                    NNInicializePop(refConstr, 0, (int) (Math.random() * ((GraphInstance) inst).dimension),
+//                            (int) (Math.random() * ((GraphInstance) inst).dimension), inst, false);
 
 
 
@@ -723,7 +723,7 @@ public class Memetico {
 
 
     /* ------------------------------------ NNInicializaPop --------------------*/
-    private void NNInicializePop(ConstructionAlgorithms refConstr, int ind, int startcity1, int startcity2, Instance inst) {
+    private void NNInicializePop(ConstructionAlgorithms refConstr, int ind, int startcity1, int startcity2, Instance inst, boolean includeSubPop) {
         int last3Poc[], last3Cur[];       //?
         GraphInstance graphInst = (GraphInstance) inst;
 
@@ -743,38 +743,43 @@ public class Memetico {
         // the starting city
 //   for (i=0; i<3; i++) last3[i][1] = last3[i][0];
         last3Cur = refConstr.runConstrAlg(((PocCurAgent) memePop.pop[ind]).current, startcity2, inst);
+        if(includeSubPop) {
+            if (last3Poc[0] == last3Cur[0] || last3Poc[0] == last3Cur[1] || last3Poc[0] == last3Cur[2] ||
+                    last3Poc[0] == last3Poc[1] || last3Poc[0] == last3Poc[2])
+                last3Poc[0] = (int) (Math.random() * ((GraphInstance) inst).dimension);
 
-        if (last3Poc[0] == last3Cur[0] || last3Poc[0] == last3Cur[1] || last3Poc[0] == last3Cur[2] ||
-                last3Poc[0] == last3Poc[1] || last3Poc[0] == last3Poc[2])
-            last3Poc[0] = (int) (Math.random() * ((GraphInstance) inst).dimension);
+            if (last3Poc[1] == last3Cur[0] || last3Poc[1] == last3Cur[1] || last3Poc[1] == last3Cur[2] ||
+                    last3Poc[1] == last3Poc[0] || last3Poc[1] == last3Poc[2])
+                last3Poc[1] = (int) (Math.random() * ((GraphInstance) inst).dimension);
 
-        if (last3Poc[1] == last3Cur[0] || last3Poc[1] == last3Cur[1] || last3Poc[1] == last3Cur[2] ||
-                last3Poc[1] == last3Poc[0] || last3Poc[1] == last3Poc[2])
-            last3Poc[1] = (int) (Math.random() * ((GraphInstance) inst).dimension);
+            if (last3Poc[2] == last3Cur[0] || last3Poc[2] == last3Cur[1] || last3Poc[2] == last3Cur[2] ||
+                    last3Poc[2] == last3Poc[0] || last3Poc[2] == last3Poc[1])
+                last3Poc[2] = (int) (Math.random() * ((GraphInstance) inst).dimension);
 
-        if (last3Poc[2] == last3Cur[0] || last3Poc[2] == last3Cur[1] || last3Poc[2] == last3Cur[2] ||
-                last3Poc[2] == last3Poc[0] || last3Poc[2] == last3Poc[1])
-            last3Poc[2] = (int) (Math.random() * ((GraphInstance) inst).dimension);
+            if (last3Cur[0] == last3Cur[1] || last3Cur[0] == last3Cur[2] || last3Cur[0] == last3Poc[0] ||
+                    last3Cur[0] == last3Poc[1] || last3Cur[0] == last3Poc[2])
+                last3Cur[0] = (int) (Math.random() * ((GraphInstance) inst).dimension);
 
-        if (last3Cur[0] == last3Cur[1] || last3Cur[0] == last3Cur[2] || last3Cur[0] == last3Poc[0] ||
-                last3Cur[0] == last3Poc[1] || last3Cur[0] == last3Poc[2])
-            last3Cur[0] = (int) (Math.random() * ((GraphInstance) inst).dimension);
+            if (last3Cur[1] == last3Cur[0] || last3Cur[1] == last3Cur[2] || last3Cur[1] == last3Poc[0] ||
+                    last3Cur[1] == last3Poc[1] || last3Cur[1] == last3Poc[2])
+                last3Cur[1] = (int) (Math.random() * ((GraphInstance) inst).dimension);
 
-        if (last3Cur[1] == last3Cur[0] || last3Cur[1] == last3Cur[2] || last3Cur[1] == last3Poc[0] ||
-                last3Cur[1] == last3Poc[1] || last3Cur[1] == last3Poc[2])
-            last3Cur[1] = (int) (Math.random() * ((GraphInstance) inst).dimension);
+            if (last3Cur[2] == last3Cur[0] || last3Cur[2] == last3Cur[1] || last3Cur[2] == last3Poc[0] ||
+                    last3Cur[2] == last3Poc[1] || last3Cur[2] == last3Poc[2])
+                last3Cur[2] = (int) (Math.random() * ((GraphInstance) inst).dimension);
 
-        if (last3Cur[2] == last3Cur[0] || last3Cur[2] == last3Cur[1] || last3Cur[2] == last3Poc[0] ||
-                last3Cur[2] == last3Poc[1] || last3Cur[2] == last3Poc[2])
-            last3Cur[2] = (int) (Math.random() * ((GraphInstance) inst).dimension);
-
-        if (ind < memePop.nrParents) {
-            // we recursively initialze the solutions using the NNAlgorithm
-            // seeding it with the last visited cities of the leader agent
-            NNInicializePop(refConstr, ind * 3 + 1, last3Poc[0], last3Cur[0], inst);
-            NNInicializePop(refConstr, ind * 3 + 2, last3Poc[1], last3Cur[1], inst);
-            NNInicializePop(refConstr, ind * 3 + 3, last3Poc[2], last3Cur[2], inst);
+            if (ind < memePop.nrParents) {
+                // we recursively initialze the solutions using the NNAlgorithm
+                // seeding it with the last visited cities of the leader agent
+                NNInicializePop(refConstr, ind * 3 + 1, last3Poc[0], last3Cur[0], inst);
+                NNInicializePop(refConstr, ind * 3 + 2, last3Poc[1], last3Cur[1], inst);
+                NNInicializePop(refConstr, ind * 3 + 3, last3Poc[2], last3Cur[2], inst);
+            }
         }
+    }
+
+    private void NNInicializePop(ConstructionAlgorithms refConstr, int ind, int startcity1, int startcity2, Instance inst) {
+        NNInicializePop(refConstr, ind, startcity1, startcity2, inst, true);
     }
 
 

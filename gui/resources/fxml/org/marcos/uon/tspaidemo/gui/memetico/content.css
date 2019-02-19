@@ -51,6 +51,10 @@
     -fx-vgap: 5px;
 }
 
+.statisticsBox > * {
+    -fx-padding: 5px 0 5px 0;
+}
+
 #agentsGrid {
     -fx-padding: 5px 0 0 0;
     -fx-vgap: 5px;

@@ -46,7 +46,7 @@ public class MemeticoContentController implements ContentController {
     @FXML
     private HBox contentRoot;
     @FXML
-    private Text txtGeneration, txtProblemName, txtTargetCost, txtTimeGeneration, txtTimeTotal;
+    private Text txtGeneration, txtProblemName, txtTargetCost, txtBestCost, txtTimeGeneration, txtTimeTotal;
     @FXML
     private GridPane agentsGrid;
     @FXML
@@ -149,6 +149,13 @@ public class MemeticoContentController implements ContentController {
                 currentSnapshot
         ));
 
+        txtBestCost.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> currentSnapshot.get() == null ? "Unknown" : String.valueOf(currentSnapshot.get().bestSolution.cost),
+                        currentSnapshot
+                )
+        );
+
         txtProblemName.textProperty().bind(
                 Bindings.createStringBinding(
                         () -> currentInstance.get() == null ? "Unknown" : currentInstance.get().getName(),
@@ -163,8 +170,12 @@ public class MemeticoContentController implements ContentController {
                 )
         );
 
+
+
         optionsBoxController.getTargetDisplayToggle().addListener((e,o,n) -> toursOutdated = true);
         optionsBoxController.getTargetDisplayToggle().set(true);
+        optionsBoxController.getBestDisplayToggle().addListener((e,o,n) -> toursOutdated = true);
+        optionsBoxController.getBestDisplayToggle().set(true);
 
         //tell the options box we are ready to go
         optionsBoxController.applyConfiguration();
@@ -212,8 +223,19 @@ public class MemeticoContentController implements ContentController {
             } else {
                 displayGraph.hideTargets();
             }
+            MemeticoSnapshot theSnapshot = currentSnapshot.get();
+            if (optionsBoxController.getBestDisplayToggle().get()) {
+                int[][] edgesToAdd = new int[theInstance.getDimension()][];
+                int[] bestTour = theSnapshot.bestSolution.tour;
+                for(int j = 0; j<bestTour.length; ++j) {
+                    edgesToAdd[j] = new int[]{bestTour[j], bestTour[(j+1)%bestTour.length]};
+                }
+                displayGraph.addPredictionEdges(
+                        Arrays.asList(edgesToAdd),
+                        CanvasTSPGraph.DEFAULT_PREDICTION_COLOR
+                );
+            }
 
-            MemeticoSnapshot theState = currentSnapshot.get();
             List<BooleanProperty[]> toggles = optionsBoxController.getSolutionDisplayToggles();
             for (int i = 0; i < toggles.size(); ++i) {
                 BooleanProperty[] eachToggles = toggles.get(i);
@@ -222,11 +244,11 @@ public class MemeticoContentController implements ContentController {
                     if (eachToggles[k].get()) {
                         MemeticoSnapshot.LightTour eachSolution = (
                                 k == 0 ?
-                                        theState
+                                        theSnapshot
                                                 .agents[i]
                                                 .pocket
                                         :
-                                        theState
+                                        theSnapshot
                                                 .agents[i]
                                                 .current
                         );
@@ -313,11 +335,6 @@ public class MemeticoContentController implements ContentController {
                         eachToggle.addListener((e, o, n) -> toursOutdated = true);
                     }
                 });
-
-                if(oldCount == 0 && newCount != 0) {
-                    //pre-highlight the best found so far
-                    displayToggles.get(0)[0].set(true);
-                }
             }
             //if the list was updated, the re-arrange the cells in the grid
             if (listUpdated) {

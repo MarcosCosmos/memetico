@@ -18,10 +18,14 @@
                     <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
                 </right>
             </BorderPane>
-            <VBox styleClass="dataGrid">
+            <VBox styleClass="statisticsBox">
                 <TextFlow>
                     <Text fx:id="lblTargetCost">Target cost:&#160;</Text>
                     <Text fx:id="txtTargetCost"/>
+                </TextFlow>
+                <TextFlow>
+                    <Text fx:id="lblBestCost">Best found cost:&#160;</Text>
+                    <Text fx:id="txtBestCost"/>
                 </TextFlow>
                 <TextFlow>
                     <Text fx:id="lblTeneration">Generation:</Text>

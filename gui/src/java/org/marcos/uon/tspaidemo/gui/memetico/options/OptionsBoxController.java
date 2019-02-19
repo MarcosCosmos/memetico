@@ -85,7 +85,7 @@ public class OptionsBoxController implements Initializable {
     @FXML
     private Button btnMemeticoSelectProblem, btnMemeticoSelectTour;
     @FXML
-    private CheckBox cbMemeticoToggleTarget;
+    private CheckBox cbMemeticoToggleTarget, cbMemeticoToggleBest;
     @FXML
     private VBox memeticoAgentOptionsWrapper;
     @FXML
@@ -175,6 +175,9 @@ public class OptionsBoxController implements Initializable {
         return cbMemeticoToggleTarget.selectedProperty();
     }
 
+    public BooleanProperty getBestDisplayToggle() {
+        return cbMemeticoToggleBest.selectedProperty();
+    }
     public ObservableList<BooleanProperty[]> getSolutionDisplayToggles() {
         return solutionDisplayToggles;
     }

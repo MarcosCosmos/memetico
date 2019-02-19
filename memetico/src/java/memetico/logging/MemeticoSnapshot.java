@@ -45,6 +45,7 @@ public class MemeticoSnapshot {
      * Measured in nanoseconds
      */
     public final long logTime;
+    public final LightTour bestSolution;
     public final AgentSnapshot[] agents;
 
     /**
@@ -56,6 +57,7 @@ public class MemeticoSnapshot {
         this.generation = generation;
         this.nAry = src.n_ary;
         this.logTime = logTime;
+        bestSolution = new LightTour((DiCycle)src.bestSolution);
         this.agents = new AgentSnapshot[src.pop.length];
         for(int i=0; i<agents.length; ++i) {
             PocCurAgent each = (PocCurAgent)src.pop[i];

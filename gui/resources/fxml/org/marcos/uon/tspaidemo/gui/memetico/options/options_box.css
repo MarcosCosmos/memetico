@@ -16,6 +16,8 @@
     -fx-hgap: 5px;
 }
 
+
+
 .h1, .h2, .h3 {
     -fx-text-alignment: left;
     -fx-alignment: center-left;

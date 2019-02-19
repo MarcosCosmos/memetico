@@ -16,4 +16,6 @@ public abstract class SolutionStructure {
     public abstract double calculateCost(Instance inst);
 
     public abstract boolean isSameValues(int values[][]);
+
+    public abstract SolutionStructure deepCopy();
 }

@@ -14,6 +14,9 @@ public class Population {
     public static final int DEFAULT_N_ARY = 3;
 
     public Agent pop[]; /* The population is declared as an array of agents */
+    int agentType;
+
+    public SolutionStructure bestSolution;
 
 
     /* -------------------------------- Construtor -----------------------------*/
@@ -23,6 +26,7 @@ public class Population {
         // this it totally instance and problem dependent and should not be here...
         popSize = size;
         nrParents = (int) Math.floor(popSize / n_ary);
+        this.agentType = agentType;
         //Get the type of the agent to be used in this population
         switch (agentType) {
             case Agent.POKET_CURRENT:
@@ -69,6 +73,18 @@ public class Population {
             }
         }
         newBestSol++;
+
+        if (bestSolution == null || bestAgent.bestCost < bestSolution.cost) {
+            switch (agentType) {
+                case Agent.POKET_CURRENT:
+                    bestSolution = ((PocCurAgent)bestAgent).pocket.deepCopy();
+                    break;
+                default:
+                    System.out.println("Invalid Agent Type");
+                    System.exit(1);
+                    break;
+            }
+        }
     }
 
 
@@ -156,6 +172,17 @@ public class Population {
         //Update population best Agent
         bestAgent = pop[0];
 
+        if (bestAgent.bestCost < bestSolution.cost) {
+            switch (agentType) {
+                case Agent.POKET_CURRENT:
+                    bestSolution = ((PocCurAgent)bestAgent).pocket.deepCopy();
+                    break;
+                default:
+                    System.out.println("Invalid Agent Type");
+                    System.exit(1);
+                    break;
+            }
+        }
     }
 
     /* ------------------------------------ atualiza_pockets -----------------*/
