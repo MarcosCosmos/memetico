@@ -174,7 +174,7 @@ public class CanvasGraph extends Pane {
             }
         );
 
-        setBackgroundColor(Color.WHITE);
+        setBackgroundColor(Color.BLACK);
         requiresReordering = false;
 
         //automatically redraw when resized

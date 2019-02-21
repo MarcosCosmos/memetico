@@ -52,6 +52,8 @@
             <ChoiceBox fx:id="choiceMemeticoCrossover" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
             <Label GridPane.rowIndex="11" GridPane.columnIndex="0" fx:id="lblMemeticoRestart" labelFor="$choiceMemeticoRestart">Restart operation:</Label>
             <ChoiceBox fx:id="choiceMemeticoRestart" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
+            <Label fx:id="lblMemeticoIncludeLKH" GridPane.rowIndex="12" GridPane.columnIndex="0" labelFor="$cbMemeticoIncludeLKH">Use Lin-Kernighan heuristic?</Label>
+            <CheckBox GridPane.rowIndex="12" GridPane.columnIndex="1" fx:id="cbMemeticoIncludeLKH"/>
         </GridPane>
         <Button fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
         <TextFlow styleClass="h1">
@@ -65,7 +67,7 @@
             <Label fx:id="lblMemeticoToggleTarget" GridPane.rowIndex="1" GridPane.columnIndex="0" labelFor="$cbMemeticoToggleTarget">Show Target?</Label>
             <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="cbMemeticoToggleTarget"/>
             <Label fx:id="lblMemeticoToggleBest" GridPane.rowIndex="2" GridPane.columnIndex="0" labelFor="$cbMemeticoToggleTarget">Show Best Found?</Label>
-            <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="2" fx:id="cbMemeticoToggleBest"/>
+            <CheckBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="cbMemeticoToggleBest"/>
             <TextFlow styleClass="h2" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2">
                 <Text fx:id="memeticoAgentDisplayOptionsTitle">Agents</Text>
             </TextFlow>

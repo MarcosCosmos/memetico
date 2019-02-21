@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.util.tsp;
+package memetico.util;
 
 import java.io.File;
 import java.net.URL;

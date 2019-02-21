@@ -23,7 +23,7 @@
 }
 
 .graph, #graphWrapper {
-    -fx-background-color:white;
+    -fx-background-color:black;
 }
 
 #graphWrapper {

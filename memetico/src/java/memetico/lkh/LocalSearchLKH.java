@@ -24,19 +24,26 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
     private File paramFile;
     private File initialTourFile;
     private File resultTourFile;
-
+//    private String baseParams;
+//
     public LocalSearchLKH(@NotNull URL problemResource) throws IOException {
         problemFile = File.createTempFile("currentProblem", ".tsp");
         ByteStreams.copy(problemResource.openStream(), new FileOutputStream(problemFile));
         paramFile = File.createTempFile("lhkConfig", ".par");
         initialTourFile = File.createTempFile("initialSolution", ".tsp");
         resultTourFile = File.createTempFile("resultSolution", ".tsp");
-        PrintWriter paramOutlet = new PrintWriter(new FileOutputStream(paramFile));
+
+//        StringWriter tmpWriter = new StringWriter();
+        PrintWriter paramOutlet = new PrintWriter(new FileWriter(paramFile));
         paramOutlet.printf("PROBLEM_FILE = %s%n", problemFile.getPath());
         paramOutlet.printf("INITIAL_TOUR_FILE = %s%n", initialTourFile.getPath());
         paramOutlet.printf("OUTPUT_TOUR_FILE = %s%n", resultTourFile.getPath());
+        paramOutlet.printf("MAX_TRIALS = %s%n", 1);
         paramOutlet.println("RUNS = 1");
+//        paramOutlet.println("STOP_AT_OPTIMUM = YES");
+//        paramOutlet.print("OPTIMUM = ");
         paramOutlet.close();
+//        baseParams = tmpWriter.toString();
 
         //make sure they are deleted when the jvm closes
         problemFile.deleteOnExit();

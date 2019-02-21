@@ -30,14 +30,13 @@ public class MemeticoVisualisationApp extends Application {
         setUserAgentStylesheet(Application.STYLESHEET_MODENA);
         Parent root = loader.load();
         visualisationController = loader.getController();
-
-        visualisationController.setup(contentController);
-
         Scene scene = new Scene(root, 1280, 720);
-
         primaryStage.setTitle("AI Process Visualisation");
         primaryStage.setScene(scene);
         primaryStage.show();
+        visualisationController.setup(contentController);
+
+
 
     }
 }

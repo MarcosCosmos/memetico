@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.util.tsp;
+package memetico.util;
 
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 

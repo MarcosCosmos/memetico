@@ -19,8 +19,13 @@ public class CanvasTSPGraph {
     private CanvasGraph.EdgeLayer predictionLayer;
 
     public static final double DEFAULT_DOT_RADIUS = 3;
-    public static final Color DEFAULT_DOT_COLOR = Color.BLACK;
-    public static final Color DEFAULT_EDGE_COLOR = Color.BLACK;
+//    public static final Color DEFAULT_DOT_COLOR = Color.BLACK;
+//    public static final Color DEFAULT_EDGE_COLOR = Color.BLACK;
+//    public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
+//    public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
+//    public static final Color DEFAULT_LABEL_COLOR = null;
+    public static final Color DEFAULT_DOT_COLOR = Color.WHITE;
+    public static final Color DEFAULT_EDGE_COLOR = Color.YELLOW;
     public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
     public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
     public static final Color DEFAULT_LABEL_COLOR = null;

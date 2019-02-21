@@ -17,13 +17,12 @@ import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
-import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
-import org.marcos.uon.tspaidemo.util.tsp.ProblemInstance;
+import memetico.util.ProblemInstance;
 
 import java.io.*;
 import java.net.URL;

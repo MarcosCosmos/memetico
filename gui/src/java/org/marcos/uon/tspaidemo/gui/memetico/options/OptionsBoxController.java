@@ -22,10 +22,9 @@ import memetico.util.CrossoverOpName;
 import memetico.util.LocalSearchOpName;
 import memetico.util.RestartOpName;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
-import org.jorlib.io.tspLibReader.graph.DistanceTable;
 import org.marcos.uon.tspaidemo.gui.memetico.MemeticoConfiguration;
-import org.marcos.uon.tspaidemo.util.tsp.ProblemConfiguration;
-import org.marcos.uon.tspaidemo.util.tsp.ProblemInstance;
+import memetico.util.ProblemConfiguration;
+import memetico.util.ProblemInstance;
 import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 
 import java.io.*;
@@ -85,7 +84,7 @@ public class OptionsBoxController implements Initializable {
     @FXML
     private Button btnMemeticoSelectProblem, btnMemeticoSelectTour;
     @FXML
-    private CheckBox cbMemeticoToggleTarget, cbMemeticoToggleBest;
+    private CheckBox cbMemeticoToggleTarget, cbMemeticoToggleBest, cbMemeticoIncludeLKH;
     @FXML
     private VBox memeticoAgentOptionsWrapper;
     @FXML
@@ -94,7 +93,7 @@ public class OptionsBoxController implements Initializable {
     private ChoiceBox<String> choiceMemeticoProblemTemplate, choiceMemeticoSolutionType, choiceMemeticoLocalSearch, choiceMemeticoCrossover, choiceMemeticoRestart;
 
     @FXML
-    private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget;
+    private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget, lblMemeticoIncludeLKH;
 
     private transient final ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
 
@@ -291,8 +290,11 @@ public class OptionsBoxController implements Initializable {
         localSearchOptions.add(LocalSearchOpName.RAI.toString());
         localSearchOptions.add(LocalSearchOpName.THREE_OPT.toString());
         if(LocalSearchLKH.isAvailable()) {
-            localSearchOptions.add(LocalSearchOpName.LKH.toString());
+            lblMemeticoIncludeLKH.setVisible(true);
+            cbMemeticoIncludeLKH.setVisible(true);
         } else {
+            lblMemeticoIncludeLKH.setVisible(false);
+            cbMemeticoIncludeLKH.setVisible(false);
             System.err.println("Warning: LKH Executable not found, the option will be hidden");
         }
 
@@ -360,6 +362,8 @@ public class OptionsBoxController implements Initializable {
         choiceMemeticoCrossover.setValue(DEFAULT_CONFIG.crossoverOp);
         choiceMemeticoRestart.setValue(DEFAULT_CONFIG.restartOp);
 
+
+
         theStage = new Stage();
         Scene newScane = new Scene(memeticoOptionsBoxRoot, 300, 200);
         theStage.setScene(newScane);
@@ -376,6 +380,7 @@ public class OptionsBoxController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
         //now select the first of our included instances and memetico will be ready to run whenever it may be needed
         choiceMemeticoProblemTemplate.getSelectionModel().select(1);//since "Custom" is first,  we'll want to select the second entry
@@ -455,11 +460,13 @@ public class OptionsBoxController implements Initializable {
 
             long targetCost = finalizedProblem.getTargetCost();
 
+            boolean finalizedLKHInclusion = cbMemeticoIncludeLKH.isSelected();
+
             //launch memetico
             memeticoThread = new Thread(() -> {
                 try {
                     Memetico meme = new Memetico(logger, finalizedContinuePermission, finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
-                            finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp,
+                            finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp, finalizedLKHInclusion,
                             finalizedConfig.maxTime, maxGenerations, finalizedConfig.numReplications);
                 } catch (Exception e) {
                     e.printStackTrace();
