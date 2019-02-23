@@ -28,7 +28,11 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
 //
     public LocalSearchLKH(@NotNull URL problemResource) throws IOException {
         problemFile = File.createTempFile("currentProblem", ".tsp");
-        ByteStreams.copy(problemResource.openStream(), new FileOutputStream(problemFile));
+        InputStream tmpInput = problemResource.openStream();
+        OutputStream tmpOutput = new FileOutputStream(problemFile);
+        ByteStreams.copy(tmpInput, tmpOutput);
+        tmpInput.close();
+        tmpOutput.close();
         paramFile = File.createTempFile("lhkConfig", ".par");
         initialTourFile = File.createTempFile("initialSolution", ".tsp");
         resultTourFile = File.createTempFile("resultSolution", ".tsp");

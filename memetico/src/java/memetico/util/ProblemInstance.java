@@ -3,6 +3,7 @@ package memetico.util;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ProblemInstance {
     private ProblemConfiguration configuration;
@@ -12,11 +13,16 @@ public class ProblemInstance {
 
     public ProblemInstance(ProblemConfiguration config) throws IOException {
         configuration = config;
-        tspLibInstance = new TSPLibInstance(configuration.problemFile.openStream());
+        InputStream tmp;
+        tmp = configuration.problemFile.openStream();
+        tspLibInstance = new TSPLibInstance(tmp);
+        tmp.close();
         name = tspLibInstance.getName();
         switch (configuration.solutionType) {
             case TOUR:
-                tspLibInstance.addTour(configuration.tourFile.openStream());
+                tmp = configuration.tourFile.openStream();
+                tspLibInstance.addTour(tmp);
+                tmp.close();
                 targetCost = (long)tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
                 break;
             case COST:
@@ -29,7 +35,9 @@ public class ProblemInstance {
 
     public ProblemInstance(ProblemConfiguration config, TSPLibInstance tspLibInstance, String name) throws IOException {
         configuration = config;
-        tspLibInstance = new TSPLibInstance(configuration.problemFile.openStream());
+        InputStream tmp;
+        tmp = configuration.problemFile.openStream();
+        tspLibInstance = new TSPLibInstance(tmp);
         this.name = name;
         switch (configuration.solutionType) {
             case TOUR:

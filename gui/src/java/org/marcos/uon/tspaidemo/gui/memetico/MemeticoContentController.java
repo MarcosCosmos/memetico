@@ -157,7 +157,7 @@ public class MemeticoContentController implements ContentController {
 
         txtProblemName.textProperty().bind(
                 Bindings.createStringBinding(
-                        () -> currentInstance.get() == null ? "Unknown" : currentInstance.get().getName(),
+                        () -> currentInstance.get() == null ? "Unknown (Notice: You may need to wait for an old run to safely exit before a new run can start)" : currentInstance.get().getName(),
                         currentInstance
                 )
         );
@@ -275,6 +275,8 @@ public class MemeticoContentController implements ContentController {
     public void frameCountUpdate() {
         try {
             if(!theView.isValid()) {
+                //the view we want it future could be attached to a separate logger (so we can start a new run without waiting for the old run to terminate, for example)
+                theView = optionsBoxController.getLogger().newView();
                 currentSnapshot.set(null);
                 numberOfFrames.set(0); //set it to zero at least once so that the frame index moves to zero
             }
@@ -421,7 +423,7 @@ public class MemeticoContentController implements ContentController {
                     double eachHue = hueSegmentSize*GridPane.getRowIndex(eachAgent);
 
                     eachAgent.setPocketColor(Color.hsb(eachHue, 1, 1, 0.75));
-                    eachAgent.setCurrentColor(Color.hsb(eachHue, 1, 0.75, 0.75));
+                    eachAgent.setCurrentColor(Color.hsb(eachHue, 1, 0.70, 0.75));
                 }
             }
 

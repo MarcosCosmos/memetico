@@ -436,12 +436,6 @@ public class OptionsBoxController implements Initializable {
         if(memeticoThread != null && memeticoThread.isAlive()) {
             //tell memetico to stop, then wait for that to happen safely
             currentMemeticoContinuePermission.invalidate();
-            try {
-                memeticoThread.join();
-                logger.reset();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         currentMemeticoContinuePermission = new ValidityFlag.Synchronised();
@@ -451,20 +445,19 @@ public class OptionsBoxController implements Initializable {
         try {
             TSPLibInstance tspLibInstance = finalizedProblem.getTspLibInstance();
             long maxGenerations = finalizedConfig.maxGenerations != 0 ? finalizedConfig.maxGenerations : (int) (5 * 13 * Math.log(13) * Math.sqrt(tspLibInstance.getDimension()));
-            FileOutputStream dataOut = null;
-            dataOut = new FileOutputStream("result.txt");
-            DataOutputStream fileOut = new DataOutputStream(dataOut);
-
-            FileOutputStream compact_dataOut = new FileOutputStream("result_fim.txt");
-            DataOutputStream compact_fileOut = new DataOutputStream(compact_dataOut);
-
-            long targetCost = finalizedProblem.getTargetCost();
-
             boolean finalizedLKHInclusion = cbMemeticoIncludeLKH.isSelected();
 
+            final Thread oldMemeticoThread = memeticoThread;
             //launch memetico
             memeticoThread = new Thread(() -> {
                 try {
+                    try {
+                        if(oldMemeticoThread != null) {
+                            oldMemeticoThread.join(); //wait for the old thread to die; the the new thread will eventually reset it's logger
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace(); //we don't mind if that thread was interrupted, as long as it's dead
+                    }
                     Memetico meme = new Memetico(logger, finalizedContinuePermission, finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
                             finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp, finalizedLKHInclusion,
                             finalizedConfig.maxTime, maxGenerations, finalizedConfig.numReplications);

@@ -179,7 +179,7 @@ public class Memetico {
 //                assert newCost == originalCost;
 
                 // if (memePop.bestAgent.bestCost <= OptimalSol)  break;
-                if (memePop.bestSolution.cost <= problem.getTargetCost()) {
+                if (memePop.bestSolution.cost <= problem.getTargetCost() || !continuePermission.isValid()) {
                     //prevent a double log; but force the log if this is the end of the run
                     logger.log(problem.getName(), memePop, GenNum);
                     break;
@@ -188,10 +188,6 @@ public class Memetico {
                     logger.tryLog(problem.getName(), memePop, GenNum);
                 }
 
-                //decide whether or not to continue (if not, break out of this loop and do the final logging)
-                if (!continuePermission.isValid()) {
-                    break;
-                }
 //	  memePop.orderChildren();
 
                 recombinePocketsWithCurrents(memePop, refCrossover, inst, refLocalSearch);
