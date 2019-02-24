@@ -1,5 +1,8 @@
 package org.marcos.uon.tspaidemo.util.log;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -36,6 +39,12 @@ public interface ILogger<T> {
          * @return
          */
         boolean isValid() throws InterruptedException;
+
+        /**
+         * Creates and returns a JSON-serialized copy of the state of the logger as at the time of the call
+         * @return
+         */
+        JsonElement jsonify() throws InterruptedException;
     }
 
     /**
@@ -68,4 +77,10 @@ public interface ILogger<T> {
      * Resets the logger to a valid initial state
      */
     void reset() throws InterruptedException;
+
+    /**
+     * Loads the log contents stored in the supplied Json string, overriding/losing any existing data (similarly, but not necessarily identical to a reset() call)
+     * @param data
+     */
+    void loadJson(JsonElement data) throws InterruptedException;
 }

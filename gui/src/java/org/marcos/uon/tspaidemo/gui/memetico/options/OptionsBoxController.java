@@ -1,5 +1,10 @@
 package org.marcos.uon.tspaidemo.gui.memetico.options;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -143,6 +148,40 @@ public class OptionsBoxController implements Initializable {
         }
     }
 
+    public void saveLog() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Log destination file");
+        File selection = fileChooser.showSaveDialog(new Stage());
+        if (selection != null) {
+            try {
+                Writer writer = new FileWriter(selection);
+                Gson gson = new Gson();
+                gson.toJson(logger.newView().jsonify(), writer);
+                writer.close();
+
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void loadLog() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Log source file");
+        File selection = fileChooser.showOpenDialog(new Stage());
+        if (selection != null) {
+            try {
+                Reader reader = new FileReader(selection);
+                JsonParser parser = new JsonParser();
+                JsonObject data = parser.parse(reader).getAsJsonObject();
+                currentMemeticoContinuePermission.invalidate();
+                logger.loadJson(data);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void adjustAgentOptionsDisplay(int oldCount, int newCount) {
         List<Node> children = memeticoAgentOptionsWrapper.getChildren();
         try {
@@ -216,6 +255,8 @@ public class OptionsBoxController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        //todo: add an option for changing the log frequency through the UI/clean up save/load buttons
         memeticoOptionsBoxRoot.getStylesheets().addAll(
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.css").toExternalForm(),
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()

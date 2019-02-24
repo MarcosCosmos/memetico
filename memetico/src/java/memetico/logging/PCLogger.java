@@ -1,18 +1,23 @@
 package memetico.logging;
 
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+import memetico.Memetico;
 import memetico.Population;
 import org.marcos.uon.tspaidemo.util.log.BasicLogger;
+import sun.plugin2.message.Serializer;
+
+import java.lang.reflect.Type;
 
 public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger {
     private long startTime;
-    protected double logFrequency;
-
+    protected transient double logFrequency;
     public class View extends BasicLogger<MemeticoSnapshot>.View implements IPCLogger.View {
-        protected long internalStartTime;
+        protected long startTime;
 
         protected View() throws InterruptedException {
             super();
-            internalStartTime = startTime;
+            startTime = PCLogger.this.startTime;
         }
 
         /**
@@ -22,14 +27,21 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
         protected void _update() {
             //update the start time if that's necessary
             if(!_isValid()) {
-                internalStartTime = startTime;
+                startTime = PCLogger.this.startTime;
             }
             super._update();
         }
 
         @Override
         public long getStartTime() {
-            return internalStartTime;
+            return startTime;
+        }
+
+        @Override
+        public JsonObject jsonify() {
+            JsonObject result = super.jsonify();
+            result.addProperty("startTime", startTime);
+            return result;
         }
     }
 
@@ -42,9 +54,14 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
     }
 
     public PCLogger(int logFrequency) {
+        super(MemeticoSnapshot.class);
         this.logFrequency = logFrequency;
         //give the clock a sane-ish default start; non-locking since there can be no other lock users until the end of this
         startTime=System.nanoTime();
+        gsonBuilder.registerTypeHierarchyAdapter(MemeticoSnapshot.LightTour.class, new MemeticoSnapshot.LightTour.Deserializer());
+//        gsonBuilder.registerTypeHierarchyAdapter(MemeticoSnapshot.AgentSnapshot.class, new MemeticoSnapshot.AgentSnapshot.Deserializer());
+//        gsonBuilder.registerTypeAdapter(MemeticoSnapshot.class, new MemeticoSnapshot.Deserializer());
+        gson = gsonBuilder.create();
     }
 
     /**
@@ -112,5 +129,17 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
         this.logFrequency = logFrequency;
         lock.releaseWriteLock();
         return result;
+    }
+
+    protected void _loadJson(JsonObject data) {
+        super._loadJson(data);
+        startTime = data.get("startTime").getAsLong();
+    }
+
+    public void loadJson(JsonElement data) throws InterruptedException {
+        lock.acquireWriteLock();
+        super._reset();
+        _loadJson(data.getAsJsonObject());
+        lock.releaseWriteLock();
     }
 }

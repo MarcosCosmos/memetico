@@ -1,5 +1,8 @@
 package memetico.logging;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import memetico.Population;
 import org.marcos.uon.tspaidemo.util.log.NullLogger;
 
@@ -13,6 +16,11 @@ public class NullPCLogger extends NullLogger<MemeticoSnapshot> implements IPCLog
     public IPCLogger.View newView() {
         return NULL_VIEW;
     }
+
+    @Override
+    public void loadJson(JsonElement data) {
+    }
+
     public static final IPCLogger.View NULL_VIEW = new IPCLogger.View() {
         @Override
         public long getStartTime() {
@@ -32,6 +40,14 @@ public class NullPCLogger extends NullLogger<MemeticoSnapshot> implements IPCLog
         @Override
         public boolean isValid() {
             return false;
+        }
+
+        @Override
+        public JsonElement jsonify() throws InterruptedException {
+            JsonObject result = new JsonObject();
+            result.add("states", new JsonArray());
+            result.addProperty("startTime", getStartTime());
+            return result;
         }
 
         @Override

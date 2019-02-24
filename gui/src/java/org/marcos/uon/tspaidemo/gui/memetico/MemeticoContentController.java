@@ -225,9 +225,9 @@ public class MemeticoContentController implements ContentController {
             MemeticoSnapshot theSnapshot = currentSnapshot.get();
             if (optionsBoxController.getBestDisplayToggle().get()) {
                 int[][] edgesToAdd = new int[theInstance.getDimension()][];
-                int[] bestTour = theSnapshot.bestSolution.tour;
-                for(int j = 0; j<bestTour.length; ++j) {
-                    edgesToAdd[j] = new int[]{bestTour[j], bestTour[(j+1)%bestTour.length]};
+                List<Integer> bestTour = theSnapshot.bestSolution.tour;
+                for(int j = 0; j<bestTour.size(); ++j) {
+                    edgesToAdd[j] = new int[]{bestTour.get(j), bestTour.get((j+1)%bestTour.size())};
                 }
                 displayGraph.addPredictionEdges(
                         Arrays.asList(edgesToAdd),
@@ -244,16 +244,17 @@ public class MemeticoContentController implements ContentController {
                         MemeticoSnapshot.LightTour eachSolution = (
                                 k == 0 ?
                                         theSnapshot
-                                                .agents[i]
+                                                .agents.get(i)
                                                 .pocket
                                         :
                                         theSnapshot
-                                                .agents[i]
+                                                .agents.get(i)
                                                 .current
                         );
                         int[][] edgesToAdd = new int[theInstance.getDimension()][];
-                        for(int j = 0; j<eachSolution.tour.length; ++j) {
-                            edgesToAdd[j] = new int[]{eachSolution.tour[j], eachSolution.tour[(j+1)%eachSolution.tour.length]};
+                        List<Integer> bestTour = theSnapshot.bestSolution.tour;
+                        for(int j = 0; j<bestTour.size(); ++j) {
+                            edgesToAdd[j] = new int[]{bestTour.get(j), bestTour.get((j+1)%bestTour.size())};
                         }
 //                        double tmpCost = 0;
 //                        DistanceTable tblDistance = theInstance.getDistanceTable();
@@ -309,7 +310,7 @@ public class MemeticoContentController implements ContentController {
                 lastDrawnGraphName = currentValue.instanceName;
             }
 
-            int oldCount = optionsBoxController.getSolutionDisplayToggles().size(), newCount = currentValue.agents.length;
+            int oldCount = optionsBoxController.getSolutionDisplayToggles().size(), newCount = currentValue.agents.size();
             optionsBoxController.adjustAgentOptionsDisplay(oldCount, newCount);
             if(newCount != oldCount) {
                 listUpdated = true;
@@ -341,7 +342,7 @@ public class MemeticoContentController implements ContentController {
             if (listUpdated) {
                 //use a tree structure for ease of understanding and debugging; populate using known structure from memetico
 
-                List<GridPositionData> arrangementInstructions = new ArrayList<>(currentValue.agents.length); //unordered list of instructions which can be used to assign grid positions
+                List<GridPositionData> arrangementInstructions = new ArrayList<>(currentValue.agents.size()); //unordered list of instructions which can be used to assign grid positions
 
                 //the following implements a horizontal-then-vertical arrangement (root is top-left)
                 {
@@ -360,7 +361,7 @@ public class MemeticoContentController implements ContentController {
                         TreeNode<GridPositionData> eachNode = creationStack.pop();
                         GridPositionData eachData = eachNode.getData();
                         int firstChildId = currentValue.nAry * eachData.id + 1;
-                        int pastChildId = Math.min(firstChildId + currentValue.nAry, currentValue.agents.length); //value past the end of the to-create list.
+                        int pastChildId = Math.min(firstChildId + currentValue.nAry, currentValue.agents.size()); //value past the end of the to-create list.
                         for (int i = firstChildId; i < pastChildId; ++i) {
                             GridPositionData newData = new GridPositionData();
                             newData.id = i;
@@ -428,7 +429,7 @@ public class MemeticoContentController implements ContentController {
             }
 
             for(int i=0; i<agentControllers.size(); ++i) {
-                agentControllers.get(i).setSnapShot(currentSnapshot.get().agents[i]);
+                agentControllers.get(i).setSnapShot(currentSnapshot.get().agents.get(i));
             }
         } else if(currentSnapshot.get() == null){
             toursOutdated = false;

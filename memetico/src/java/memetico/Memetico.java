@@ -178,8 +178,13 @@ public class Memetico {
 //                double newCost = ((PocCurAgent)memePop.pop[0]).pocket.calculateCost(inst);
 //                assert newCost == originalCost;
 
+                //importantly, we want to prevent any logging from happening once we lose permission, lest it interfere with other data such as loaded json
+                if (!continuePermission.isValid()) {
+                    break;
+                }
+
                 // if (memePop.bestAgent.bestCost <= OptimalSol)  break;
-                if (memePop.bestSolution.cost <= problem.getTargetCost() || !continuePermission.isValid()) {
+                if (memePop.bestSolution.cost <= problem.getTargetCost()) {
                     //prevent a double log; but force the log if this is the end of the run
                     logger.log(problem.getName(), memePop, GenNum);
                     break;

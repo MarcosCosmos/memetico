@@ -9,10 +9,11 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="com.sirolf2009:fxgraph:0.0.31" level="project" />
-    <orderEntry type="library" name="com.sirolf2009:fxgraph:0.0.3" level="project" />
+    <orderEntry type="library" exported="" name="com.sirolf2009:fxgraph:0.0.3" level="project" />
     <orderEntry type="library" name="jorlib-core-1.1.1" level="project" />
     <orderEntry type="module" module-name="memetico" />
     <orderEntry type="module" module-name="util" />
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.8.1" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.8.5" level="project" />
   </component>
 </module>

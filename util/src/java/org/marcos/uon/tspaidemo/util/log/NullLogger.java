@@ -1,5 +1,9 @@
 package org.marcos.uon.tspaidemo.util.log;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.util.AbstractList;
 import java.util.Collection;
 
@@ -34,6 +38,13 @@ public class NullLogger<T> implements ILogger<T> {
         public boolean isValid() throws InterruptedException {
             return false;
         }
+
+        @Override
+        public JsonElement jsonify() throws InterruptedException {
+            JsonObject result = new JsonObject();
+            result.add("states", new JsonArray());
+            return result;
+        }
     }
 
     public static <T> NullView<T> nullView() {
@@ -56,5 +67,9 @@ public class NullLogger<T> implements ILogger<T> {
 
     @Override
     public void reset() {
+    }
+
+    @Override
+    public void loadJson(JsonElement data) throws InterruptedException {
     }
 }

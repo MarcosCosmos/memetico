@@ -1,18 +1,19 @@
 package org.marcos.uon.tspaidemo.util.log;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.*;
 
 public class BasicLogger<T> implements ILogger<T> {
     //todo: use a synchronised validity flag (with it's own read-write-lock) instead of potentially locking on isvalid checks on already dead views?
     public class View extends AbstractList<T> implements ILogger.View<T> {
-        private final List<T> internalStates;
-        private ValidityFlag.ReadOnly internalValidity;
+        private final List<T> states;
+        private transient ValidityFlag.ReadOnly validity;
         protected View() throws InterruptedException {
-            internalStates = new ArrayList<>();
-            internalValidity = ValidityFlag.INVALID;
+            states = new ArrayList<>();
+            validity = ValidityFlag.INVALID;
             update();
         }
 
@@ -20,13 +21,13 @@ public class BasicLogger<T> implements ILogger<T> {
          * Non-locking reset, for internal use by extending classes that already took the lock in the caller
          */
         protected void _update() {
-            if (!internalValidity.isValid()) {
-                internalStates.clear();
-                internalValidity = currentValidity.getReadOnly();
+            if (!validity.isValid()) {
+                states.clear();
+                validity = currentValidity.getReadOnly();
             }
             //only add what we need to
-            if (size() < states.size()) {
-                internalStates.addAll(states.subList(size(), states.size()));
+            if (size() < BasicLogger.this.states.size()) {
+                states.addAll(BasicLogger.this.states.subList(size(), BasicLogger.this.states.size()));
             }
         }
 
@@ -34,8 +35,8 @@ public class BasicLogger<T> implements ILogger<T> {
          * Non-locking reset, for internal use by extending classes that already took the lock in the caller
          */
         protected void _tryUpdate() {
-            if(internalValidity.isValid() && size() < states.size()) {
-                internalStates.addAll(states.subList(size(), states.size()));
+            if(validity.isValid() && size() < BasicLogger.this.states.size()) {
+                states.addAll(BasicLogger.this.states.subList(size(), BasicLogger.this.states.size()));
             }
         }
 
@@ -43,7 +44,7 @@ public class BasicLogger<T> implements ILogger<T> {
          * {@inheritDoc}
          */
         public boolean update() throws InterruptedException {
-            boolean wasValid = internalValidity.isValid();
+            boolean wasValid = validity.isValid();
             lock.withReadLock(this::_update);
             return wasValid;
         }
@@ -53,7 +54,7 @@ public class BasicLogger<T> implements ILogger<T> {
          */
         @Override
         public boolean tryUpdate() throws InterruptedException {
-            boolean wasValid = internalValidity.isValid();
+            boolean wasValid = validity.isValid();
             lock.withReadLock(this::_tryUpdate);
             return wasValid;
         }
@@ -62,7 +63,7 @@ public class BasicLogger<T> implements ILogger<T> {
          * Non-locking check, for internal use by extending classes that already took the lock in the caller
          */
         protected boolean _isValid() {
-            return internalValidity.isValid();
+            return validity.isValid();
         }
 
         /**
@@ -70,26 +71,43 @@ public class BasicLogger<T> implements ILogger<T> {
          */
         public boolean isValid() throws InterruptedException {
             lock.acquireReadLock();
-            boolean wasValid = internalValidity.isValid();
+            boolean wasValid = validity.isValid();
             lock.releaseReadLock();
             return wasValid;
         }
 
         @Override
         public int size() {
-            return internalStates.size();
+            return states.size();
         }
 
         @Override
         public T get(int index) {
-            return internalStates.get(index);
+            return states.get(index);
+        }
+
+        @Override
+        public JsonObject jsonify() {
+            JsonObject result = new JsonObject();
+            result.add("states", gson.toJsonTree(states));
+            return result;
         }
     }
-    private final List<T> states;
-    private ValidityFlag currentValidity; //invalidate views after a reset using a shared-pointer for validity that is invalidated and swapped for a new one on every reset
-    protected final ReadWriteLock lock = new ReadWriteLock(); //never allow lock to be changed
 
-    public BasicLogger() {
+    protected transient Gson gson;
+    protected transient GsonBuilder gsonBuilder;
+    private final List<T> states;
+    private transient ValidityFlag currentValidity; //invalidate views after a reset using a shared-pointer for validity that is invalidated and swapped for a new one on every reset
+    protected final transient ReadWriteLock lock = new ReadWriteLock(); //never allow lock to be changed
+    protected final Class<T> tClass;
+    /**
+     * Specifies the type to use for gson deserialisation
+     * @param tClass
+     */
+    protected BasicLogger(Class<T> tClass) {
+        this.tClass = tClass;
+        gsonBuilder = new GsonBuilder();
+        gson = gsonBuilder.create();
         states = new ArrayList<>();
         currentValidity = new ValidityFlag.Synchronised();
     }
@@ -120,7 +138,7 @@ public class BasicLogger<T> implements ILogger<T> {
     }
 
     public void _logAll(Collection<T> states) throws InterruptedException {
-        states.addAll(states);
+        this.states.addAll(states);
     }
 
     /**
@@ -150,5 +168,17 @@ public class BasicLogger<T> implements ILogger<T> {
     @Override
     public void reset() throws InterruptedException {
         lock.withWriteLock(this::_reset);
+    }
+
+    protected void _loadJson(JsonObject data) {
+        data.get("states").getAsJsonArray().forEach(each -> states.add(gson.fromJson(each, tClass)));
+    }
+
+    @Override
+    public void loadJson(JsonElement data) throws InterruptedException {
+        lock.acquireWriteLock();
+        _reset();
+        _loadJson(data.getAsJsonObject());
+        lock.releaseWriteLock();
     }
 }

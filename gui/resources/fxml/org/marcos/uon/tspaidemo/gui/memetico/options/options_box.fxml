@@ -59,6 +59,8 @@
         <TextFlow styleClass="h1">
             <Text fx:id="txtMemeticoDisplayOptionsTitle" styleClass="sectionTitle">Display Options</Text>
         </TextFlow>
+        <Button fx:id="btnMemeticoSaveLog" onAction="#saveLog">Save Log</Button>
+        <Button fx:id="btnMemeticoLoadLog" onAction="#loadLog">Load Log</Button>
         <GridPane styleClass="optionGrid">
             <!--display options-->
             <TextFlow styleClass="h2" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
