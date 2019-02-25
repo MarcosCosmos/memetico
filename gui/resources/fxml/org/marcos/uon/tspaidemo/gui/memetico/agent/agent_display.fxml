@@ -8,11 +8,11 @@
             <Text styleClass="lblAgentId">Agent&#160;</Text>
             <Text styleClass="txtAgentId"/>
         </TextFlow>
-        <Text GridPane.rowIndex="1" GridPane.columnIndex="0">Pocket:</Text>
-        <Text GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="txtPocketCost"/>
-        <Label GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="tourColorSample,pocketColorSample">&#160;</Label>
-        <Text GridPane.rowIndex="2" GridPane.columnIndex="0">Current:</Text>
-        <Text GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="txtCurrentCost"/>
-        <Label GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="tourColorSample,currentColorSample">&#160;</Label>
+        <Label GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="colorLabel,pocketColorSample">&#160;</Label>
+        <Text GridPane.rowIndex="1" GridPane.columnIndex="1">Pocket:</Text>
+        <Text GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="txtPocketCost" textAlignment="RIGHT"/>
+        <Label GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="colorLabel,currentColorSample,color">&#160;</Label>
+        <Text GridPane.rowIndex="2" GridPane.columnIndex="1">Current:</Text>
+        <Text GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="txtCurrentCost" textAlignment="RIGHT"/>
     </GridPane>
 </fx:root>

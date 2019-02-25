@@ -71,6 +71,9 @@ public class VisualisationController implements Initializable {
      *
      */
     public void setup(ContentController contentController) {
+        if(this.contentController != null) {
+            root.getChildren().remove(this.contentController.getRoot());
+        }
         this.contentController = contentController;
         Parent contentRoot = contentController.getRoot();
         root.getChildren().add(0, contentRoot);

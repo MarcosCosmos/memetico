@@ -7,11 +7,16 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.text.Text;
 import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
@@ -36,16 +41,21 @@ public class MemeticoContentController implements ContentController {
         public int id = -1;
         public int row = -1;
         public int column = -1;
+        public int colorIndex = -1;
     }
 
     @FXML
     private ScrollPane infoPane;
     @FXML
+    private StackPane infoStack;
+    @FXML
     private VBox infoBox;
     @FXML
-    private HBox contentRoot;
+    private VBox contentRoot;
     @FXML
     private Text txtGeneration, txtProblemName, txtTargetCost, txtBestCost, txtTimeGeneration, txtTimeTotal;
+    @FXML
+    private Label lblTargetColor, lblBestColor;
     @FXML
     private GridPane agentsGrid;
     @FXML
@@ -97,9 +107,10 @@ public class MemeticoContentController implements ContentController {
         //enable auto sizing
         graphContainer.widthProperty().addListener(this::autoSizeListener);
         graphContainer.heightProperty().addListener(this::autoSizeListener);
-        infoPane.prefViewportHeightProperty().bind(infoBox.heightProperty());
-        infoPane.prefViewportWidthProperty().bind(infoBox.widthProperty());
-
+        infoPane.prefViewportHeightProperty().bind(agentsGrid.heightProperty());
+        infoPane.prefViewportWidthProperty().bind(agentsGrid.widthProperty());
+        infoStack.minWidthProperty().bind(Bindings.createDoubleBinding(() ->
+                infoPane.getViewportBounds().getWidth(), infoPane.viewportBoundsProperty()));
             try {
 
                 //set up the content display with an observable reference to the current currentSnapshot to display.
@@ -164,7 +175,7 @@ public class MemeticoContentController implements ContentController {
 
         txtTargetCost.textProperty().bind(
                 Bindings.createStringBinding(
-                        () -> currentInstance.get() == null ? "Unknown" : String.valueOf(currentInstance.get().getTargetCost()),
+                        () -> currentInstance.get() == null ? "Unknown" : String.valueOf((double) currentInstance.get().getTargetCost()),
                         currentInstance
                 )
         );
@@ -181,6 +192,22 @@ public class MemeticoContentController implements ContentController {
 
         currentInstance.addListener((observable, oldValue, newValue) -> contentOutdated = true);
         selectedFrameIndex.addListener((observable, oldValue, newValue) -> contentOutdated = true);
+
+        lblTargetColor.backgroundProperty().set(new Background(new BackgroundFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, Arrays.asList(
+                new Stop(0.0, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+                new Stop(0.08333333333, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+                new Stop(0.08333333333, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+                new Stop(0.36111111111, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+                new Stop(0.36111111111, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+                new Stop(0.63888888888, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+                new Stop(0.63888888888, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+                new Stop(0.9166666666, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+                new Stop(0.9166666666, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR)
+        )), CornerRadii.EMPTY, Insets.EMPTY)));
+
+
+        lblBestColor.backgroundProperty().set(new Background(new BackgroundFill(CanvasTSPGraph.DEFAULT_EDGE_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
+
     }
 
     public int getNumberOfFrames() {
@@ -344,88 +371,166 @@ public class MemeticoContentController implements ContentController {
 
                 List<GridPositionData> arrangementInstructions = new ArrayList<>(currentValue.agents.size()); //unordered list of instructions which can be used to assign grid positions
 
-                //the following implements a horizontal-then-vertical arrangement (root is top-left)
+//                //the following implements a horizontal-then-vertical arrangement (root is top-left)
+//                {
+//                    GridPositionData rootData = new GridPositionData();
+//
+//                    rootData.id = 0;
+//                    rootData.column = 0;
+//                    TreeNode<GridPositionData> root = new TreeNode<>(rootData);
+//
+//                    int seen = 0;
+//                    //construct the tree by having each node create and attach their children.
+//                    Stack<TreeNode<GridPositionData>> creationStack = new Stack<>();
+//
+//                    creationStack.push(root);
+//                    while (!creationStack.isEmpty()) {
+//                        TreeNode<GridPositionData> eachNode = creationStack.pop();
+//                        GridPositionData eachData = eachNode.getData();
+//                        int firstChildId = currentValue.nAry * eachData.id + 1;
+//                        int pastChildId = Math.min(firstChildId + currentValue.nAry, currentValue.agents.size()); //value past the end of the to-create list.
+//                        for (int i = firstChildId; i < pastChildId; ++i) {
+//                            GridPositionData newData = new GridPositionData();
+//                            newData.id = i;
+//                            newData.column = eachData.column + 1;
+//                            TreeNode<GridPositionData> newNode = new TreeNode<>(newData);
+//                            eachNode.attach(newNode);
+//                            creationStack.push(newNode);
+//                        }
+//                    }
+//
+//                    //now walk the root
+//                    TreeNode<GridPositionData> current = root;
+//                    do {
+//                        GridPositionData curData = current.getData();
+//                        //if unseen, (row == -1), drill down
+//                        if (curData.row == -1) {
+//                            curData.row = seen++;
+//                            arrangementInstructions.add(curData);
+//                            if (!current.isLeaf()) {
+//                                current = current.children().get(0);
+//                                continue;
+//                            }
+//                        }
+//                        if (current.hasNextSibling()) {
+//                            current = current.nextSibling();
+//                        } else {
+//                            //if we can't drill down further, drill up until we can
+//                            while (!current.isRoot() && current.getData().row != -1) {
+//                                current = current.parent();
+//                                if (current.hasNextSibling()) {
+//                                    current = current.nextSibling();
+//                                }
+//                            }
+//                        }
+//                    } while (current != root);
+//                }
+
+                                    //the following implements a vertical-then-horizontal arrangement (root is at the center-top)
                 {
-                    GridPositionData rootData = new GridPositionData();
-
-                    rootData.id = 0;
-                    rootData.column = 0;
-                    TreeNode<GridPositionData> root = new TreeNode<>(rootData);
-
-                    int seen = 0;
                     //construct the tree by having each node create and attach their children.
-                    Stack<TreeNode<GridPositionData>> creationStack = new Stack<>();
+                    Queue<TreeNode<GridPositionData>> creationQueue = new ArrayDeque<>();
+                    GridPositionData rootData = new GridPositionData();
+                    int seen = 0;
+                    int columnsAllocated = 0;
+                    rootData.id = 0;
+                    rootData.row = 0;
+                    rootData.colorIndex = seen++;
+                    TreeNode<GridPositionData> root = new TreeNode<>(rootData);
+                    creationQueue.add(root);
 
-                    creationStack.push(root);
-                    while (!creationStack.isEmpty()) {
-                        TreeNode<GridPositionData> eachNode = creationStack.pop();
+                    Stack<TreeNode<GridPositionData>> arrangementStack = new Stack<>();
+                    while (!creationQueue.isEmpty()) {
+                        TreeNode<GridPositionData> eachNode = creationQueue.remove();
                         GridPositionData eachData = eachNode.getData();
                         int firstChildId = currentValue.nAry * eachData.id + 1;
                         int pastChildId = Math.min(firstChildId + currentValue.nAry, currentValue.agents.size()); //value past the end of the to-create list.
                         for (int i = firstChildId; i < pastChildId; ++i) {
                             GridPositionData newData = new GridPositionData();
                             newData.id = i;
-                            newData.column = eachData.column + 1;
+                            newData.row = eachData.row + 1;
+                            newData.colorIndex = seen++;
                             TreeNode<GridPositionData> newNode = new TreeNode<>(newData);
                             eachNode.attach(newNode);
-                            creationStack.push(newNode);
+                            creationQueue.add(newNode);
+                        }
+                        //if it's not an orphan, add it to the stack to column-positioned later;
+                        //if it is an orphan, we can position it now; (this ensures the left-most branch is full if the tree were to be unbalanced)
+                        if (eachNode.isLeaf()) {
+                            eachData.column = columnsAllocated++;
+
+                            //we want placeholders to leave empty columns between subpopulations visually
+                            if (eachData.id != currentValue.agents.size() - 1 && eachNode.parent().children().indexOf(eachNode) == eachNode.parent().children().size() - 1) {
+                                GridPositionData placeholderData = new GridPositionData();
+                                placeholderData.id = -1;
+                                placeholderData.row = eachData.row;
+                                placeholderData.column = columnsAllocated++;
+                                arrangementInstructions.add(placeholderData);
+                            }
+                            arrangementInstructions.add(eachData);
+                        } else {
+                            arrangementStack.push(eachNode);
                         }
                     }
 
-                    //now walk the root
-                    TreeNode<GridPositionData> current = root;
-                    do {
-                        GridPositionData curData = current.getData();
-                        //if unseen, (row == -1), drill down
-                        if (curData.row == -1) {
-                            curData.row = seen++;
-                            arrangementInstructions.add(curData);
-                            if (!current.isLeaf()) {
-                                current = current.children().get(0);
-                                continue;
+                    //all lowest-level nodes have been positioned, so we can safely position progressive parents
+                    while (!arrangementStack.isEmpty()) {
+                        TreeNode<GridPositionData> eachNode = arrangementStack.pop();
+                        GridPositionData eachData = eachNode.getData();
+                        List<TreeNode<GridPositionData>> eachChildren = eachNode.children();
+                        //use the middle for odd-numbers and for evens, base it on which side we are on within the parents
+                        int childToAlignTo;
+                        if (eachChildren.size() % 2 == 1) {
+                            //uneven is the easy option
+                            childToAlignTo = eachChildren.size() / 2;
+                        } else if (!eachNode.isRoot()) {
+                            List<TreeNode<GridPositionData>> eachSiblings = eachNode.parent().children();
+                            if (eachSiblings.indexOf(eachNode) >= eachSiblings.size() / 2) {
+                                childToAlignTo = eachChildren.size() / 2 - 1;
+                            } else {
+                                childToAlignTo = eachChildren.size() / 2;
                             }
-                        }
-                        if (current.hasNextSibling()) {
-                            current = current.nextSibling();
                         } else {
-                            //if we can't drill down further, drill up until we can
-                            while (!current.isRoot() && current.getData().row != -1) {
-                                current = current.parent();
-                                if (current.hasNextSibling()) {
-                                    current = current.nextSibling();
-                                }
-                            }
+
+                            childToAlignTo = eachChildren.size() / 2 - 1;
                         }
-                    } while (current != root);
+                        eachData.column = eachNode.children().get(childToAlignTo).getData().column;
+                        arrangementInstructions.add(eachData);
+                    }
+
+
                 }
 
+                double hueSegmentSize = 360.0/(newCount);
                 for (GridPositionData eachData : arrangementInstructions) {
                     if (eachData.id == -1) {
                         //create a placeholder
                         Pane placeHolder = new Pane();
+                        placeHolder.getStyleClass().add("filler");
                         placeHolder.setMinWidth(25);
                         agentNodes.add(placeHolder);
                         GridPane.setRowIndex(placeHolder, eachData.row);
                         GridPane.setColumnIndex(placeHolder, eachData.column);
                         GridPane.setColumnSpan(placeHolder, 1);
                     } else {
-                        Node eachAgent = agentNodes.get(eachData.id);
+
+                        AgentDisplay eachAgent = agentControllers.get(eachData.id);
                         GridPane.setRowIndex(eachAgent, eachData.row);
                         GridPane.setColumnIndex(eachAgent, eachData.column);
+                        double eachHue = hueSegmentSize*eachData.colorIndex;
+                        eachAgent.setPocketColor(Color.hsb(eachHue, 1, 1, 0.75));
+                        eachAgent.setCurrentColor(Color.hsb(eachHue, 1, 0.70, 0.75));
                     }
                 }
 
-                //setup some colours
-
-                //clear the old colours
-                double hueSegmentSize = 360.0/(newCount);
-                for(int i=0; i<newCount; ++i) {
-                    AgentDisplay eachAgent = agentControllers.get(i);
-                    double eachHue = hueSegmentSize*GridPane.getRowIndex(eachAgent);
-
-                    eachAgent.setPocketColor(Color.hsb(eachHue, 1, 1, 0.75));
-                    eachAgent.setCurrentColor(Color.hsb(eachHue, 1, 0.70, 0.75));
-                }
+//                //setup some colours
+//
+//                for(int i=0; i<newCount; ++i) {
+//                    double eachHue = hueSegmentSize*GridPane.getRowIndex(eachAgent);
+//
+//                    eachAgent.setPocketColor(Color.hsb(eachHue, 1, 1, 0.75));
+//                    eachAgent.setCurrentColor(Color.hsb(eachHue, 1, 0.70, 0.75));
+//                }
             }
 
             for(int i=0; i<agentControllers.size(); ++i) {

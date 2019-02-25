@@ -1,8 +1,11 @@
-#infoPane {
+#infoBox {
     -fx-padding: 5px;
 }
 .dot {
     -fx-fill:red;
+}
+.scroll-pane {
+    -fx-background-color:transparent;
 }
 
 #tfProblemName {
@@ -51,6 +54,10 @@
     -fx-vgap: 5px;
 }
 
+.metaGrid {
+   -fx-vgap: 5px;
+}
+
 .statisticsBox > * {
     -fx-padding: 5px 0 5px 0;
 }
@@ -60,4 +67,10 @@
     -fx-vgap: 5px;
 }
 
+.colorLabel {
+   -fx-min-width:9px;
+}
 
+.colorPadding {
+    -fx-min-width: 5px;
+}

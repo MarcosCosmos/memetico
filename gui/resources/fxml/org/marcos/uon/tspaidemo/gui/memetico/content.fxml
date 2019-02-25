@@ -3,52 +3,62 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<HBox fx:id="contentRoot" fx:controller="org.marcos.uon.tspaidemo.gui.memetico.MemeticoContentController"
+<?import javafx.scene.control.Label?>
+<VBox fx:id="contentRoot" fx:controller="org.marcos.uon.tspaidemo.gui.memetico.MemeticoContentController"
       xmlns:fx="http://javafx.com/fxml">
-    <ScrollPane fx:id="infoPane">
-        <VBox fx:id="infoBox" alignment="CENTER">
-            <BorderPane fx:id="titleBar">
-                <left>
-                    <TextFlow styleClass="h1" fx:id="tfProblemName">
-                        <Text fx:id="lblProblemName">Problem:&#160;</Text>
-                        <Text fx:id="txtProblemName"/>
-                    </TextFlow>
-                </left>
-                <right>
-                    <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
-                </right>
-            </BorderPane>
-            <VBox styleClass="statisticsBox">
-                <TextFlow>
-                    <Text fx:id="lblTargetCost">Target cost:&#160;</Text>
-                    <Text fx:id="txtTargetCost"/>
+
+    <VBox fx:id="infoBox" VBox.vgrow="NEVER">
+        <BorderPane fx:id="titleBar">
+            <left>
+                <TextFlow styleClass="h1" fx:id="tfProblemName">
+                    <Text fx:id="lblProblemName">Problem:&#160;</Text>
+                    <Text fx:id="txtProblemName"/>
                 </TextFlow>
-                <TextFlow>
-                    <Text fx:id="lblBestCost">Best found cost:&#160;</Text>
-                    <Text fx:id="txtBestCost"/>
-                </TextFlow>
+            </left>
+            <right>
+                <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
+            </right>
+        </BorderPane>
+        <VBox styleClass="statisticsBox" VBox.vgrow="ALWAYS" alignment="CENTER" spacing="5">
+            <HBox>
                 <TextFlow>
                     <Text fx:id="lblTeneration">Generation:</Text>
                     <Text fx:id="txtGeneration"/>
                 </TextFlow>
-                <TextFlow>
-                    <Text fx:id="lblTimeGeneration">Time (Generation):&#160;</Text>
-                    <Text fx:id="txtTimeGeneration"/>
-                </TextFlow>
-                <TextFlow>
-                    <Text fx:id="lblTimeTotal">Time (Total):&#160;</Text>
-                    <Text fx:id="txtTimeTotal"/>
-                </TextFlow>
-            </VBox>
-            <HBox VBox.vgrow="ALWAYS" alignment="CENTER">
-                <GridPane fx:id="agentsGrid" styleClass="dataGrid"/>
-                <!--<TreeView fx:id="agentsTree"/>-->
             </HBox>
+            <BorderPane>
+                <left>
+                    <GridPane styleClass="metaGrid">
+                        <Label GridPane.rowIndex="0" GridPane.columnIndex="0" fx:id="lblTargetColor" styleClass="colorLabel">&#160;</Label>
+                        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="colorPadding"/>
+                        <Text GridPane.rowIndex="0" GridPane.columnIndex="2" fx:id="lblTargetCost">Target cost:&#160;</Text>
+                        <Text GridPane.rowIndex="0" GridPane.columnIndex="3" textAlignment="RIGHT" fx:id="txtTargetCost"/>
+                        <Label GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblBestColor" styleClass="colorLabel">&#160;</Label>
+                        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="colorPadding"/>
+                        <Text GridPane.rowIndex="1" GridPane.columnIndex="2" fx:id="lblBestCost">Best found:&#160;</Text>
+                        <Text GridPane.rowIndex="1" GridPane.columnIndex="3" textAlignment="RIGHT" fx:id="txtBestCost"/>
+                    </GridPane>
+                </left>
+                <right>
+                    <GridPane styleClass="metaGrid">
+                        <Text GridPane.rowIndex="0" GridPane.columnIndex="0" fx:id="lblTimeGeneration">Time (Generation):&#160;</Text>
+                        <Text GridPane.rowIndex="0" GridPane.columnIndex="1" fx:id="txtTimeGeneration" textAlignment="RIGHT"/>
+                        <Text GridPane.rowIndex="0" GridPane.columnIndex="2">s</Text>
+                        <Text GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblTimeTotal">Time (Total):&#160;</Text>
+                        <Text GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="txtTimeTotal" textAlignment="RIGHT"/>
+                        <Text GridPane.rowIndex="1" GridPane.columnIndex="2">s</Text>
+                    </GridPane>
+                </right>
+            </BorderPane>
         </VBox>
-    </ScrollPane>
-    <BorderPane fx:id="graphWrapper" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
-        <center>
-            <BorderPane fx:id="graphContainer"/>
-        </center>
-    </BorderPane>
-</HBox>
+        <ScrollPane fx:id="infoPane" VBox.vgrow="NEVER">
+            <StackPane fx:id="infoStack" alignment="CENTER">
+                <GridPane fx:id="agentsGrid" styleClass="dataGrid" alignment="CENTER"/>
+                <!--<TreeView fx:id="agentsTree"/>-->
+            </StackPane>
+        </ScrollPane>
+    </VBox>
+    <AnchorPane fx:id="graphWrapper" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+            <BorderPane fx:id="graphContainer" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+    </AnchorPane>
+</VBox>
