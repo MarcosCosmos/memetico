@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 public class OptionsBoxController implements Initializable {
     public static final List<ProblemConfiguration> INCLUDED_PROBLEMS;
     public static final MemeticoConfiguration DEFAULT_CONFIG = new MemeticoConfiguration(13, 5, LocalSearchOpName.RAI.toString(), CrossoverOpName.SAX.toString(), RestartOpName.INSERTION.toString());
-
+    public static final int DEFAULT_LOG_INTERVAL = 1;
 
     static {
         Function<String, ProblemConfiguration> newToured = (filePrefix) -> new ProblemConfiguration(
@@ -95,7 +95,7 @@ public class OptionsBoxController implements Initializable {
     @FXML
     private VBox memeticoAgentOptionsWrapper;
     @FXML
-    private TextField fldMemeticoTourCost, fldMemeticoPopDepth, fldMemeticoMutRate,fldMemeticoMaxGen;
+    private TextField fldMemeticoTourCost, fldMemeticoPopDepth, fldMemeticoMutRate,fldMemeticoMaxGen,fldMemeticoLogInterval;
     @FXML
     private ChoiceBox<String> choiceMemeticoProblemTemplate, choiceMemeticoSolutionType, choiceMemeticoLocalSearch, choiceMemeticoCrossover, choiceMemeticoRestart;
 
@@ -183,8 +183,33 @@ public class OptionsBoxController implements Initializable {
                 JsonObject data = parser.parse(reader).getAsJsonObject();
                 currentMemeticoContinuePermission.invalidate();
                 logger.loadJson(data);
-                chosenProblemInstance.set(new ProblemInstance(gson.fromJson(data.get("problem"), ProblemConfiguration.class)));
-                chosenMemeticoConfiguration.set(gson.fromJson(data.get("settings"), MemeticoConfiguration.class));
+                if(data.has("problem")) {
+                    ProblemConfiguration tmp = gson.fromJson(data.get("problem"), ProblemConfiguration.class);
+                    URL problemFile = tmp.problemFile;
+                    String problemText = problemFile.getPath();
+                    if(problemText.contains("!")) {
+                        problemFile = getClass().getResource(problemText.split("!")[1]);
+                    } else {
+                        problemFile = new File(problemText).toURI().toURL();
+                    }
+                    if(tmp.solutionType == ProblemConfiguration.SolutionType.TOUR) {
+                        URL tourFile;
+                        String tourText = tmp.tourFile.getPath();
+                        if(tourText.contains("!")) {
+                            tourFile = getClass().getResource(tourText.split("!")[1]);
+                        } else {
+                            tourFile = new File(lblMemeticoTourFile.getText()).toURI().toURL();
+                        }
+                        tmp = new ProblemConfiguration(problemFile, tourFile);
+                    } else {
+                        tmp = new ProblemConfiguration(problemFile, tmp.targetCost);
+                    }
+                    chosenProblemInstance.set(new ProblemInstance(tmp));
+                    instances.put(chosenProblemInstance.get().getName(), chosenProblemInstance.get());
+                }
+                if(data.has("settings")) {
+                    chosenMemeticoConfiguration.set(gson.fromJson(data.get("settings"), MemeticoConfiguration.class));
+                }
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -354,6 +379,7 @@ public class OptionsBoxController implements Initializable {
         fldMemeticoPopDepth.textProperty().addListener(generateIntFieldFixer(fldMemeticoPopDepth));
         fldMemeticoMutRate.textProperty().addListener(generateIntFieldFixer(fldMemeticoMutRate));
         fldMemeticoMaxGen.textProperty().addListener(generateIntFieldFixer(fldMemeticoMaxGen));
+        fldMemeticoLogInterval.textProperty().addListener(generateIntFieldFixer(fldMemeticoLogInterval));
 
 
 
@@ -436,6 +462,8 @@ public class OptionsBoxController implements Initializable {
         choiceMemeticoLocalSearch.setValue(DEFAULT_CONFIG.localSearchOp);
         choiceMemeticoCrossover.setValue(DEFAULT_CONFIG.crossoverOp);
         choiceMemeticoRestart.setValue(DEFAULT_CONFIG.restartOp);
+
+        fldMemeticoLogInterval.setText(String.valueOf(DEFAULT_LOG_INTERVAL));
 
 
 
@@ -523,6 +551,11 @@ public class OptionsBoxController implements Initializable {
         if(memeticoThread != null && memeticoThread.isAlive()) {
             //tell memetico to stop, then wait for that to happen safely
             currentMemeticoContinuePermission.invalidate();
+        }
+        try {
+            logger.setLogFrequency(Integer.parseInt(fldMemeticoLogInterval.getText()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         currentMemeticoContinuePermission = new ValidityFlag.Synchronised();

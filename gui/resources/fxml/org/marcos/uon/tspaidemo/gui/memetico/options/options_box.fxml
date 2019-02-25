@@ -54,6 +54,11 @@
             <ChoiceBox fx:id="choiceMemeticoRestart" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
             <Label fx:id="lblMemeticoIncludeLKH" GridPane.rowIndex="12" GridPane.columnIndex="0" labelFor="$cbMemeticoIncludeLKH">Use Lin-Kernighan heuristic?</Label>
             <CheckBox GridPane.rowIndex="12" GridPane.columnIndex="1" fx:id="cbMemeticoIncludeLKH"/>
+            <TextFlow styleClass="h2" GridPane.rowIndex="13" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                <Text fx:id="txtMemeticoLogSettingsTitle" >Log Settings</Text>
+            </TextFlow>
+            <Label GridPane.rowIndex="14" GridPane.columnIndex="0" fx:id="lblLogInterval" labelFor="$fldMemeticoTourCost">Generations between log entries:</Label>
+            <TextField GridPane.rowIndex="14" GridPane.columnIndex="1" fx:id="fldMemeticoLogInterval" styleClass="intField"/>
         </GridPane>
         <Button fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
         <TextFlow styleClass="h1">
