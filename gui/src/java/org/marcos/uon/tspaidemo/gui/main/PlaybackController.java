@@ -42,7 +42,7 @@ public class PlaybackController implements Initializable {
     private double leftOverFrames = 0;
     private long lastUpdateTime;
 
-    private final DoubleProperty speedInterval = new SimpleDoubleProperty(100/1.0);
+    private final DoubleProperty speedInterval = new SimpleDoubleProperty(1000/1.0);
 
     /**
      * Values are measured as FPS
@@ -101,7 +101,7 @@ public class PlaybackController implements Initializable {
 
         cbSpeed.setValue(1.0);
         speedInterval.bind(Bindings.createDoubleBinding(
-                () -> 100/cbSpeed.getValue(),
+                () -> 1000/cbSpeed.getValue(),
                 cbSpeed.valueProperty()
         ));
 

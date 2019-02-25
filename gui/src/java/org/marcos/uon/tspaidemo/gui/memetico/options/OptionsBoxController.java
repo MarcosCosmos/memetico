@@ -22,6 +22,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import memetico.*;
 import memetico.lkh.LocalSearchLKH;
+import memetico.logging.IPCLogger;
 import memetico.logging.PCLogger;
 import memetico.util.CrossoverOpName;
 import memetico.util.LocalSearchOpName;
@@ -60,7 +61,8 @@ public class OptionsBoxController implements Initializable {
                 newToured.apply("berlin52"),
                 newToured.apply("eil51"),
                 newToured.apply("eil76"),
-                newCosted.apply("att532", 27686L)
+                newToured.apply("att532"),
+                newToured.apply("mnpeano_mod_o8_1452")
         );
     }
 
@@ -188,6 +190,32 @@ public class OptionsBoxController implements Initializable {
             }
         }
     }
+
+    public void saveTour() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Tour destination file");
+        File selection = fileChooser.showSaveDialog(new Stage());
+        if (selection != null) {
+            try {
+                IPCLogger.View theView = logger.newView();
+                List<Integer> tour = theView.get(theView.size()-1).bestSolution.tour;
+                PrintWriter writer = new PrintWriter(new FileWriter(selection));
+                writer.printf("NAME : %s%n", selection.getName());
+                writer.println("TYPE : TOUR");
+                writer.printf("DIMENSION : %d%n", tour.size());
+                writer.println("TOUR_SECTION");
+                for (Integer each : tour) {
+                    writer.println(each+1);
+                }
+                writer.println("-1");
+                writer.println("EOF");
+                writer.close();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     public void adjustAgentOptionsDisplay(int oldCount, int newCount) {
         List<Node> children = memeticoAgentOptionsWrapper.getChildren();
@@ -442,11 +470,23 @@ public class OptionsBoxController implements Initializable {
             ProblemInstance targetInstance;
             switch (choiceMemeticoProblemTemplate.getValue()) {
                 case "Custom":
-                    URL problemFile = new File(lblMemeticoProblemFile.getText()).toURI().toURL();
+                    URL problemFile;
+                    String problemText = lblMemeticoProblemFile.getText();
+                    if(problemText.contains("!")) {
+                        problemFile = getClass().getResource(problemText.split("!")[1]);
+                    } else {
+                     problemFile = new File(problemText).toURI().toURL();
+                    }
                     ProblemConfiguration configuration;
                     switch (choiceMemeticoSolutionType.getValue()) {
                         case "Tour":
-                            URL tourFile = new File(lblMemeticoTourFile.getText()).toURI().toURL();
+                            URL tourFile;
+                            String tourText = lblMemeticoTourFile.getText();
+                            if(tourText.contains("!")) {
+                                tourFile = getClass().getResource(tourText.split("!")[1]);
+                            } else {
+                                tourFile = new File(lblMemeticoTourFile.getText()).toURI().toURL();
+                            }
                             configuration = new ProblemConfiguration(problemFile, tourFile);
                             break;
                         case "Cost":

@@ -41,6 +41,10 @@
                 <Double fx:value="10" />
                 <Double fx:value="30" />
                 <Double fx:value="60" />
+                <Double fx:value="120" />
+                <Double fx:value="240" />
+                <Double fx:value="480" />
+                <Double fx:value="960" />
             </ChoiceBox>
         </HBox>
         <Text fx:id="txtTest"/>
