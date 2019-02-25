@@ -156,7 +156,11 @@ public class OptionsBoxController implements Initializable {
             try {
                 Writer writer = new FileWriter(selection);
                 Gson gson = new Gson();
-                gson.toJson(logger.newView().jsonify(), writer);
+                JsonObject data = logger.newView().jsonify();
+                //note that the logger will ignore any additional fields it doesn't need/recognise in the json so we can add the problem and configuration settings
+                data.add("problem", gson.toJsonTree(chosenProblemInstance.get().getConfiguration()));
+                data.add("settings", gson.toJsonTree(chosenMemeticoConfiguration.get()));
+                gson.toJson(data, writer);
                 writer.close();
 
             } catch (IOException | InterruptedException e) {
@@ -171,11 +175,14 @@ public class OptionsBoxController implements Initializable {
         File selection = fileChooser.showOpenDialog(new Stage());
         if (selection != null) {
             try {
+                Gson gson = new Gson();
                 Reader reader = new FileReader(selection);
                 JsonParser parser = new JsonParser();
                 JsonObject data = parser.parse(reader).getAsJsonObject();
                 currentMemeticoContinuePermission.invalidate();
                 logger.loadJson(data);
+                chosenProblemInstance.set(new ProblemInstance(gson.fromJson(data.get("problem"), ProblemConfiguration.class)));
+                chosenMemeticoConfiguration.set(gson.fromJson(data.get("settings"), MemeticoConfiguration.class));
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -351,41 +358,40 @@ public class OptionsBoxController implements Initializable {
                     .collect(Collectors.toList())
         );
 
-        //this is unneeded since external changes are not currently permitted
-//        //bind the displayed fields etc to the actual problem via listeners
-//        chosenProblemInstance.addListener(
-//                (observable, oldValue, newValue) -> {
-//                    lblMemeticoProblemFile.setText(newValue.getConfiguration().problemFile.getPath());
-//                    choiceMemeticoSolutionType.setValue(newValue.getConfiguration().solutionType.toString());
-//                    switch (newValue.getConfiguration().solutionType) {
-//                        case TOUR:
-//                            lblMemeticoTourFile.setText(newValue.getConfiguration().tourFile.getPath());
-//                            lblMemeticoToggleTarget.setVisible(true);
-//                            cbMemeticoToggleTarget.setVisible(true);
-//                            break;
-//                        case COST:
-//                            fldMemeticoTourCost.setText(String.valueOf(newValue.getTargetCost()));
-//                            lblMemeticoToggleTarget.setVisible(false);
-//                            cbMemeticoToggleTarget.setVisible(false);
-//                            break;
-//                    }
-//                }
-//        );
-//
-//        chosenMemeticoConfiguration.addListener((observable, oldValue, newValue) -> {
-//            int popSize = newValue.populationSize;
-//            int popDepth = (int)Math.ceil(
-//                    (Math.log(
-//                        ( (Population.DEFAULT_N_ARY-1) * popSize ) + 1
-//                    ) / Math.log(Population.DEFAULT_N_ARY)) - 1
-//            );
-//            fldMemeticoPopDepth.setText(String.valueOf(popDepth));
-//            fldMemeticoMutRate.setText(String.valueOf(newValue.mutationRate));
-//            fldMemeticoMaxGen.setText(String.valueOf(newValue.maxGenerations));
-//            choiceMemeticoLocalSearch.setValue(newValue.localSearchOp);
-//            choiceMemeticoCrossover.setValue(newValue.crossoverOp);
-//            choiceMemeticoRestart.setValue(newValue.restartOp);
-//        });
+        //bind the displayed fields etc to the actual problem via listeners
+        chosenProblemInstance.addListener(
+                (observable, oldValue, newValue) -> {
+                    lblMemeticoProblemFile.setText(newValue.getConfiguration().problemFile.getPath());
+                    choiceMemeticoSolutionType.setValue(newValue.getConfiguration().solutionType.toString());
+                    switch (newValue.getConfiguration().solutionType) {
+                        case TOUR:
+                            lblMemeticoTourFile.setText(newValue.getConfiguration().tourFile.getPath());
+                            lblMemeticoToggleTarget.setVisible(true);
+                            cbMemeticoToggleTarget.setVisible(true);
+                            break;
+                        case COST:
+                            fldMemeticoTourCost.setText(String.valueOf(newValue.getTargetCost()));
+                            lblMemeticoToggleTarget.setVisible(false);
+                            cbMemeticoToggleTarget.setVisible(false);
+                            break;
+                    }
+                }
+        );
+
+        chosenMemeticoConfiguration.addListener((observable, oldValue, newValue) -> {
+            int popSize = newValue.populationSize;
+            int popDepth = (int)Math.ceil(
+                    (Math.log(
+                        ( (Population.DEFAULT_N_ARY-1) * popSize ) + 1
+                    ) / Math.log(Population.DEFAULT_N_ARY)) - 1
+            );
+            fldMemeticoPopDepth.setText(String.valueOf(popDepth));
+            fldMemeticoMutRate.setText(String.valueOf(newValue.mutationRate));
+            fldMemeticoMaxGen.setText(String.valueOf(newValue.maxGenerations));
+            choiceMemeticoLocalSearch.setValue(newValue.localSearchOp);
+            choiceMemeticoCrossover.setValue(newValue.crossoverOp);
+            choiceMemeticoRestart.setValue(newValue.restartOp);
+        });
 
 
         //apply the default configuration and display it on screen
