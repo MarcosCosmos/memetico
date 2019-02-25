@@ -145,10 +145,7 @@ public class MemeticoContentController implements ContentController {
 
         txtGeneration.textProperty()
                 .bind(generationValue.asString());
-        currentInstance.bind(Bindings.createObjectBinding(
-                () -> currentSnapshot.get() == null ? null : optionsBoxController.getInstances().get(currentSnapshot.get().instanceName),
-                currentSnapshot
-        ));
+        currentInstance.bind(optionsBoxController.chosenProblemInstanceProperty());
 
         txtTimeGeneration.textProperty().bind(Bindings.createStringBinding(
                 () -> currentSnapshot.get() == null ? "Unknown" : String.valueOf(TimeUnit.NANOSECONDS.toSeconds(currentSnapshot.get().logTime - (selectedFrameIndex.get() == 0 ? theView.getStartTime() : theView.get(selectedFrameIndex.get()-1).logTime))),

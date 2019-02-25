@@ -198,7 +198,7 @@ public class OptionsBoxController implements Initializable {
                         if(tourText.contains("!")) {
                             tourFile = getClass().getResource(tourText.split("!")[1]);
                         } else {
-                            tourFile = new File(lblMemeticoTourFile.getText()).toURI().toURL();
+                            tourFile = new File(tourText).toURI().toURL();
                         }
                         tmp = new ProblemConfiguration(problemFile, tourFile);
                     } else {
