@@ -1,4 +1,4 @@
-NAME: MNPeano_mod
+NAME: mnpeano mod o8 1452
 TYPE: TSP
 COMMENT: Created by Farhan Ahammed (farhan.ahammed@it.usyd.edu.au) and Pablo Moscato (Pablo.Moscato@newcastle.edu.au)
 DIMENSION: 1452

@@ -252,7 +252,7 @@ public class MemeticoContentController implements ContentController {
                                                 .current
                         );
                         int[][] edgesToAdd = new int[theInstance.getDimension()][];
-                        List<Integer> bestTour = theSnapshot.bestSolution.tour;
+                        List<Integer> bestTour = eachSolution.tour;
                         for(int j = 0; j<bestTour.size(); ++j) {
                             edgesToAdd[j] = new int[]{bestTour.get(j), bestTour.get((j+1)%bestTour.size())};
                         }
