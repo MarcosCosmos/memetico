@@ -24,6 +24,14 @@ import java.util.List;
  * (todo: rename? this is probably more generalised than it was before)
  */
 public class CanvasGraph extends Pane {
+//
+//    public void setPivot(double x, double y) {
+//        setTranslateX(getTranslateX() - x);
+//        setTranslateY(getTranslateY() - y);
+//    }
+//
+//
+
     /**
      * Publically exposed interface; hides the
      * @param <T> the content contained in the layer
