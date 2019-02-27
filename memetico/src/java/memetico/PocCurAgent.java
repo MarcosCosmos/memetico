@@ -106,6 +106,9 @@ public class PocCurAgent extends Agent {
         // we calculate the cost of each current solution
         current.calculateCost(inst);
 
+        //updates Agent's avgCost
+        super.avgCost = (current.cost + pocket.cost) / 2;
+
         // if the the Current solution is strictly better than the Pocket
         if (current.cost < pocket.cost) {
             auxSolutionStructure = pocket;        // a typical triangulation
@@ -113,7 +116,6 @@ public class PocCurAgent extends Agent {
             current = auxSolutionStructure;    // places
             super.cost = pocket.cost;   //updates agent cost
             super.bestCost = pocket.cost;
-
             // we reset the counter
             noChangeCounter = 1;
         } else

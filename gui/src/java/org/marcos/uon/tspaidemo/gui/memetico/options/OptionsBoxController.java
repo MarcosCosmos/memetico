@@ -95,7 +95,7 @@ public class OptionsBoxController implements Initializable {
     @FXML
     private VBox memeticoAgentOptionsWrapper;
     @FXML
-    private TextField fldMemeticoTourCost, fldMemeticoPopDepth, fldMemeticoMutRate,fldMemeticoMaxGen,fldMemeticoLogInterval;
+    private TextField fldMemeticoTourCost, fldMemeticoPopDepth, fldMemeticoMutRate,fldMemeticoMaxGen,fldMemeticoLogInterval,fldMemeticoReignLimit;
     @FXML
     private ChoiceBox<String> choiceMemeticoProblemTemplate, choiceMemeticoSolutionType, choiceMemeticoLocalSearch, choiceMemeticoCrossover, choiceMemeticoRestart;
 
@@ -305,12 +305,13 @@ public class OptionsBoxController implements Initializable {
 //    }
 
 
-    private static ChangeListener<String> generateIntFieldFixer(TextField target) {
-        return (observable, oldValue, newValue) -> {
+    private static void attachIntFieldFixer(TextField target) {
+        ChangeListener<String> fixer = (observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 target.setText(newValue.replaceAll("[^\\d]", ""));
             }
         };
+        target.textProperty().addListener(fixer);
     }
 
     @Override
@@ -375,11 +376,8 @@ public class OptionsBoxController implements Initializable {
         lblMemeticoTourFile.textProperty().addListener(new TemplateSelectionListener<>());
         fldMemeticoTourCost.textProperty().addListener(new TemplateSelectionListener<>());
 
-        fldMemeticoTourCost.textProperty().addListener(generateIntFieldFixer(fldMemeticoTourCost));
-        fldMemeticoPopDepth.textProperty().addListener(generateIntFieldFixer(fldMemeticoPopDepth));
-        fldMemeticoMutRate.textProperty().addListener(generateIntFieldFixer(fldMemeticoMutRate));
-        fldMemeticoMaxGen.textProperty().addListener(generateIntFieldFixer(fldMemeticoMaxGen));
-        fldMemeticoLogInterval.textProperty().addListener(generateIntFieldFixer(fldMemeticoLogInterval));
+        Arrays.asList(fldMemeticoTourCost,fldMemeticoPopDepth,fldMemeticoMutRate,fldMemeticoMaxGen,fldMemeticoReignLimit,fldMemeticoLogInterval)
+                .forEach(OptionsBoxController::attachIntFieldFixer);
 
 
 
@@ -442,6 +440,7 @@ public class OptionsBoxController implements Initializable {
             fldMemeticoPopDepth.setText(String.valueOf(popDepth));
             fldMemeticoMutRate.setText(String.valueOf(newValue.mutationRate));
             fldMemeticoMaxGen.setText(String.valueOf(newValue.maxGenerations));
+            fldMemeticoReignLimit.setText(String.valueOf(newValue.reignLimit));
             choiceMemeticoLocalSearch.setValue(newValue.localSearchOp);
             choiceMemeticoCrossover.setValue(newValue.crossoverOp);
             choiceMemeticoRestart.setValue(newValue.restartOp);
@@ -450,19 +449,19 @@ public class OptionsBoxController implements Initializable {
 
         //apply the default configuration and display it on screen
         chosenMemeticoConfiguration.set(DEFAULT_CONFIG);
-        int popSize = DEFAULT_CONFIG.populationSize;
-        int popDepth = (int)Math.ceil(
-                (Math.log(
-                        ( (Population.DEFAULT_N_ARY-1) * popSize ) + 1
-                ) / Math.log(Population.DEFAULT_N_ARY)) - 1
-        );
-        fldMemeticoPopDepth.setText(String.valueOf(popDepth));
-        fldMemeticoMutRate.setText(String.valueOf(DEFAULT_CONFIG.mutationRate));
-        fldMemeticoMaxGen.setText(String.valueOf(DEFAULT_CONFIG.maxGenerations));
-        choiceMemeticoLocalSearch.setValue(DEFAULT_CONFIG.localSearchOp);
-        choiceMemeticoCrossover.setValue(DEFAULT_CONFIG.crossoverOp);
-        choiceMemeticoRestart.setValue(DEFAULT_CONFIG.restartOp);
-
+//        int popSize = DEFAULT_CONFIG.populationSize;
+//        int popDepth = (int)Math.ceil(
+//                (Math.log(
+//                        ( (Population.DEFAULT_N_ARY-1) * popSize ) + 1
+//                ) / Math.log(Population.DEFAULT_N_ARY)) - 1
+//        );
+//        fldMemeticoPopDepth.setText(String.valueOf(popDepth));
+//        fldMemeticoMutRate.setText(String.valueOf(DEFAULT_CONFIG.mutationRate));
+//        fldMemeticoMaxGen.setText(String.valueOf(DEFAULT_CONFIG.maxGenerations));
+//        choiceMemeticoLocalSearch.setValue(DEFAULT_CONFIG.localSearchOp);
+//        choiceMemeticoCrossover.setValue(DEFAULT_CONFIG.crossoverOp);
+//        choiceMemeticoRestart.setValue(DEFAULT_CONFIG.restartOp);
+//
         fldMemeticoLogInterval.setText(String.valueOf(DEFAULT_LOG_INTERVAL));
 
 
@@ -540,7 +539,8 @@ public class OptionsBoxController implements Initializable {
             int populationSize = (int) ((Math.pow(3, populationHeight + 1) - 1) / 2.0);
             int mutationRate = Integer.parseInt(fldMemeticoMutRate.textProperty().get());
             int maxGenerations = Integer.parseInt(fldMemeticoMaxGen.textProperty().get());
-            chosenMemeticoConfiguration.set(new MemeticoConfiguration(populationSize, mutationRate, choiceMemeticoLocalSearch.getValue(), choiceMemeticoCrossover.getValue(), choiceMemeticoRestart.getValue(), maxGenerations));
+            int reignLimit = Integer.parseInt(fldMemeticoReignLimit.textProperty().get());
+            chosenMemeticoConfiguration.set(new MemeticoConfiguration(populationSize, mutationRate, choiceMemeticoLocalSearch.getValue(), choiceMemeticoCrossover.getValue(), choiceMemeticoRestart.getValue(), maxGenerations, reignLimit));
             launchMemetico();
         } catch (IOException e) {
             e.printStackTrace();
@@ -580,7 +580,7 @@ public class OptionsBoxController implements Initializable {
                     }
                     Memetico meme = new Memetico(logger, finalizedContinuePermission, finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
                             finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp, finalizedLKHInclusion,
-                            finalizedConfig.maxTime, maxGenerations, finalizedConfig.numReplications);
+                            finalizedConfig.maxTime, maxGenerations, finalizedConfig.reignLimit, finalizedConfig.numReplications);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

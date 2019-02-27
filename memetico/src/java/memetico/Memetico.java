@@ -45,9 +45,7 @@ public class Memetico {
      * @param structPop: struct of the Population
      * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
-    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, ProblemInstance problem, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, boolean includeLKH, long MaxTime, long MaxGenNum, long numReplications/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
-        //todo: compute the memetico Instance here instead of passing it as a parameter
-
+    public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, ProblemInstance problem, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, boolean includeLKH, long MaxTime, long MaxGenNum, long reignLimit, long numReplications/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
         this.problem = problem;
         TSPLibInstance tspLibInstance = problem.getTspLibInstance();
         Instance inst;
@@ -84,7 +82,8 @@ public class Memetico {
 
 
         // we set up a global upper bound, this should be done differently...
-        double best_aux = Double.MAX_VALUE;
+//        double best_aux = Double.MAX_VALUE;
+        int ageOfBest = 0;
 
 //   Agent refAgent = null;
 
@@ -135,20 +134,36 @@ public class Memetico {
           //System.out.println("Pockets: "+str);*/
 
 
-            SolutionStructure lastRootCur = null;
 
             memePop.updateAgents(inst);
 
+            int gensSinceNewBestOrRestart = 0;
+            SolutionStructure bestSolution = memePop.bestSolution;
             while (GenNum < MaxGenNum)
             // the stoping criteria used are two in this case.
             // This should be improved in a future version.
             {
                 memePop.agentPropagation();
 
+                {
+                    PocCurAgent curRoot = (PocCurAgent) memePop.pop[0];
+                    if (reignLimit > 0 && curRoot.noChangeCounter >= reignLimit) {
+                        //kill the king and propagate again
+                        NNInicializePop(refConstr, 0, (int) (Math.random() * ((GraphInstance) inst).dimension),
+                                (int) (Math.random() * ((GraphInstance) inst).dimension), inst, false);
+                        curRoot.pocket.calculateCost(inst);
+                        curRoot.updateAgent(inst);
+                        memePop.agentPropagation();
+                        gensSinceNewBestOrRestart = 0;
+                    }
+                }
 
-                if (memePop.bestSolution.cost < best_aux) {
-
-                } else memePop.newBestSol++;
+                if(bestSolution != memePop.bestSolution) {
+                    bestSolution = memePop.bestSolution;
+                    gensSinceNewBestOrRestart = 0;
+                } else {
+                    ++gensSinceNewBestOrRestart;
+                }
 
 //                if(includeLKH) {
 //                    //if the current of the root update, try improving it with lkh
@@ -172,7 +187,7 @@ public class Memetico {
 
 
 
-                best_aux = memePop.bestSolution.cost;
+//                best_aux = memePop.bestSolution.cost;
 
 //                double originalCost = ((PocCurAgent) memePop.pop[0]).pocket.cost;
 //                double newCost = ((PocCurAgent)memePop.pop[0]).pocket.calculateCost(inst);
@@ -180,18 +195,16 @@ public class Memetico {
 
                 //importantly, we want to prevent any logging from happening once we lose permission, lest it interfere with other data such as loaded json
                 if (!continuePermission.isValid()) {
-                    break;
+                    return;
                 }
 
                 // if (memePop.bestAgent.bestCost <= OptimalSol)  break;
                 if (memePop.bestSolution.cost <= problem.getTargetCost()) {
-                    //prevent a double log; but force the log if this is the end of the run
-                    logger.log(problem.getName(), memePop, GenNum);
                     break;
-                } else {
-                    /* This seems to be the correct point at which to log since it's above the break? */
-                    logger.tryLog(problem.getName(), memePop, GenNum);
                 }
+
+                /* This seems to be the correct point at which to log since it's above the break? */
+                logger.tryLog(problem.getName(), memePop, GenNum);
 
 //	  memePop.orderChildren();
 
@@ -200,7 +213,7 @@ public class Memetico {
                 for (i = 0; i < memePop.popSize; i++) refMut.runMutation(pocCurPop[i].current);
                 // if the incumbent hasn't been altered in 30 generations
                 // RestartPablo
-                if (pocCurPop[0].noChangeCounter % 30 == 0) {
+                if (gensSinceNewBestOrRestart > 0 && gensSinceNewBestOrRestart % 30 == 0) {
                     int aux_rand = (int) (Math.random() * 3 + 1);
                     //System.out.println("aux_rand: " + aux_rand);
                     NNInicializePop(refConstr, aux_rand, (int) (Math.random() * ((GraphInstance) inst).dimension),
@@ -251,6 +264,7 @@ public class Memetico {
 	   /* System.out.println("getting out of Restart... incumbent cost is:" + pocCurPop[0].pocket.cost +
                               " GenNum: " +GenNum + " Tempo: " +
                               bestTime);*/
+	                gensSinceNewBestOrRestart = 0;
                 }// end of RestartPablo
 
 //	    for(i=0; i < memePop.popSize; i++)  refLocalSearch.runLocalSearch(pocCurPop[i].current, inst);
@@ -271,11 +285,13 @@ public class Memetico {
                 if(includeLKH) {
                     //apply LKH to all currents
                     for (PocCurAgent agent : pocCurPop) {
-                        SolutionStructure tmp = agent.current.deepCopy();
+                        DiCycle tmp = (DiCycle)agent.current.deepCopy();
                         lkh.runLocalSearch(tmp, inst);
                         tmp.calculateCost(inst);
-                        agent.insertSolutionStructure(tmp);
-                        agent.updateAgent(inst); //note that there is a redundant call to calculateCost since it was already run above/for the pocket still in the agent at the beginning of the call
+                        if (memePop.isNewSolutionStructure(tmp.cost) || memePop.pop[0].testValues(getSameValues(tmp))) {
+                            agent.insertSolutionStructure(tmp);
+                            agent.updateAgent(inst); //note that there is a redundant call to calculateCost since it was already run above/for the pocket still in the agent at the beginning of the call
+                        }
                     }
                 }
 
@@ -283,7 +299,8 @@ public class Memetico {
                 GenNum++;
 
             } // end of while, exiting the generations loop.
-
+            //force a log since this is the end of the run
+            logger.log(problem.getName(), memePop, GenNum);
 //            TotalTime = (System.currentTimeMillis() - TotalTime);
 
 //      if (count==0)                                 //?
@@ -498,7 +515,7 @@ public class Memetico {
 
                 Memetico meme = new Memetico(logger, () -> true, problem, structSol, structPop, MetodoConstrutivo,
                         PopSize, mutationRate, BuscaLocal, OPCrossover, OPReStart, OPMutacao, false, //default to false even though the lkh performance is good; just an example configuration
-                        MaxTime, MaxGenNum, numReplications);
+                        MaxTime, MaxGenNum, 0, numReplications);
             }//for
 
 //            compact_fileOut.writeBytes('\t' + String.valueOf(prec.format((double) (AverPopInit / countNames))) + '\t' + '\t');

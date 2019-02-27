@@ -54,13 +54,17 @@
             <ChoiceBox fx:id="choiceMemeticoRestart" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
             <Label fx:id="lblMemeticoIncludeLKH" GridPane.rowIndex="12" GridPane.columnIndex="0" labelFor="$cbMemeticoIncludeLKH">Use Lin-Kernighan heuristic?</Label>
             <CheckBox GridPane.rowIndex="12" GridPane.columnIndex="1" fx:id="cbMemeticoIncludeLKH"/>
-            <TextFlow styleClass="h2" GridPane.rowIndex="13" GridPane.columnIndex="0" GridPane.columnSpan="2">
-                <Text fx:id="txtMemeticoLogSettingsTitle" >Log Settings</Text>
-            </TextFlow>
-            <Label GridPane.rowIndex="14" GridPane.columnIndex="0" fx:id="lblLogInterval" labelFor="$fldMemeticoTourCost">Generations between log entries:</Label>
-            <TextField GridPane.rowIndex="14" GridPane.columnIndex="1" fx:id="fldMemeticoLogInterval" styleClass="intField"/>
+            <Label GridPane.rowIndex="13" GridPane.columnIndex="0" fx:id="lblMemeticoReignLimit" labelFor="$fldMemeticoMaxGen">Refresh root after N generations (0 = never):</Label>
+            <TextField GridPane.rowIndex="13" GridPane.columnIndex="1" fx:id="fldMemeticoReignLimit" styleClass="intField"/>
         </GridPane>
-        <Button fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
+        <TextFlow styleClass="h1" GridPane.columnSpan="2">
+            <Text fx:id="txtMemeticoLogSettingsTitle" >Log Settings</Text>
+        </TextFlow>
+        <GridPane styleClass="optionGrid">
+            <Label GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblLogInterval" labelFor="$fldMemeticoTourCost">Generations between log entries:</Label>
+            <TextField GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="fldMemeticoLogInterval" styleClass="intField"/>
+            <Button fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
+        </GridPane>
         <TextFlow styleClass="h1">
             <Text fx:id="txtMemeticoDisplayOptionsTitle" styleClass="sectionTitle">Display Options</Text>
         </TextFlow>
