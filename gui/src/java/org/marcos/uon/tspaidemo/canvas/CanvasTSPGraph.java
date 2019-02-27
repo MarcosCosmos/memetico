@@ -25,7 +25,7 @@ public class CanvasTSPGraph {
 //    public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
 //    public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
 //    public static final Color DEFAULT_LABEL_COLOR = null;
-    public static final Color DEFAULT_DOT_COLOR = Color.WHITE;
+    public static final Color DEFAULT_DOT_COLOR = Color.YELLOW;
     public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;//Color.rgb(255, 255, 0);
     public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
     public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;

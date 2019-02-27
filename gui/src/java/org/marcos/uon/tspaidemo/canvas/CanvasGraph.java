@@ -76,6 +76,7 @@ public class CanvasGraph extends Pane {
     }
 
     public class VertexLayer extends LayerImpl<Vertex> {
+        public static final double MIN_RADIUS = 4;
         public VertexLayer(int priority) {
             super(priority);
         }
@@ -85,7 +86,7 @@ public class CanvasGraph extends Pane {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.clearRect(0,0, canvas.getWidth(), canvas.getHeight());
             for (Vertex each : this) {
-                double radiusToUse = Math.max(2, each.getDotRadius()*scale);
+                double radiusToUse = Math.max(MIN_RADIUS, each.getDotRadius()*scale);
                 double halfRad = radiusToUse/2;
                 gc.setFill(each.getDotFill());
                 Point2D minCorner = each.getLocation().multiply(scale).subtract(new Point2D(halfRad, halfRad));
@@ -96,6 +97,8 @@ public class CanvasGraph extends Pane {
     }
 
     public class EdgeLayer extends LayerImpl<Edge> {
+
+        public static final double MIN_LINE_WIDTH = 1;
         public EdgeLayer(int priority) {
             super(priority);
         }
@@ -106,7 +109,7 @@ public class CanvasGraph extends Pane {
             gc.clearRect(0,0, getWidth(), getHeight());
             for(Edge each : this) {
                 gc.setStroke(each.getLineStroke());
-                gc.setLineWidth(Math.max(0.5, scale*each.getLineWidth()));
+                gc.setLineWidth(Math.max(MIN_LINE_WIDTH, scale*each.getLineWidth()));
                 Point2D aPos = each.getA().getLocation().multiply(scale), bPos = each.getB().getLocation().multiply(scale);
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
             }
@@ -115,6 +118,8 @@ public class CanvasGraph extends Pane {
     }
 
     public class OutlineEdgeLayer extends LayerImpl<Edge> {
+
+        public static final double MIN_LINE_WIDTH = EdgeLayer.MIN_LINE_WIDTH;
         public OutlineEdgeLayer(int priority) {
             super(priority);
         }
@@ -125,11 +130,11 @@ public class CanvasGraph extends Pane {
             gc.clearRect(0,0, getWidth(), getHeight());
             for(Edge each : this) {
                 Point2D aPos = each.getA().getLocation().multiply(scale), bPos = each.getB().getLocation().multiply(scale);
-                gc.setLineWidth(Math.max(1, scale*each.getLineWidth()*2));
+                gc.setLineWidth(Math.max(2*MIN_LINE_WIDTH, scale*each.getLineWidth()*2));
                 gc.setStroke(each.getLineStroke());
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
                 gc.setStroke(backgroundColor);
-                gc.setLineWidth(Math.max(0.5, scale*each.getLineWidth()));
+                gc.setLineWidth(Math.max(MIN_LINE_WIDTH, scale*each.getLineWidth()));
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
             }
             requiresRedraw = false;
