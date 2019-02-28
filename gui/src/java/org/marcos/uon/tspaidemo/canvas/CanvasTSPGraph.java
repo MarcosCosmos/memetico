@@ -2,6 +2,7 @@ package org.marcos.uon.tspaidemo.canvas;
 
 import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.geometry.BoundingBox;
+import javafx.scene.Parent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
@@ -13,10 +14,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CanvasTSPGraph {
+
     private CanvasGraph internalGraphic;
     private CanvasGraph.VertexLayer vertexLayer;
     private CanvasGraph.OutlineEdgeLayer targetLayer;
     private CanvasGraph.EdgeLayer predictionLayer;
+
+    private ViewportGestures gestures;
 
     public static final double DEFAULT_DOT_RADIUS = 3;
     public static final Color DEFAULT_BACKGROUND_COLOR = Color.BLACK;
@@ -43,6 +47,7 @@ public class CanvasTSPGraph {
         targetLayer = internalGraphic.addOutlineEdgeLayer(0);
         predictionLayer = internalGraphic.addEdgeLayer(10);
         vertexLayer = internalGraphic.addVertexLayer(100);
+        gestures = new ViewportGestures(internalGraphic.getDragContext());
     }
 
     /**
@@ -62,7 +67,7 @@ public class CanvasTSPGraph {
         for (int i = 0; i < newVertices.size(); i++) {
             double[] eachCoords = newVertices.get(i);
             //invert the y-axis
-            vertexLayer.add(new Vertex(eachCoords[0], -eachCoords[1], DEFAULT_DOT_RADIUS, "C"+String.valueOf(i), DEFAULT_DOT_COLOR, DEFAULT_LABEL_COLOR));
+            vertexLayer.add(new Vertex(eachCoords[0], -eachCoords[1], DEFAULT_DOT_RADIUS, "C"+i, DEFAULT_DOT_COLOR, DEFAULT_LABEL_COLOR));
         }
         vertexLayer.requestRedraw();
     }
@@ -109,29 +114,7 @@ public class CanvasTSPGraph {
      * @return
      */
     public BoundingBox getLogicalBounds() {
-//        (todo: cater for text in the bounds check?)
-        double minX=Double.POSITIVE_INFINITY, minY=Double.POSITIVE_INFINITY, maxX=Double.NEGATIVE_INFINITY, maxY=Double.NEGATIVE_INFINITY;
-        for(Vertex each : vertexLayer) {
-            double x = each.getLocation().getX();
-            double y = each.getLocation().getY();
-            double radius = each.getDotRadius();
-            double mnX = x-radius, mxX = x+radius, mnY = y-radius, mxY = y+radius;
-            if(minX > mnX) {
-                minX=mnX;
-            }
-            if(minY > mnY) {
-                minY=mnY;
-            }
-            if(maxX < mxX) {
-                maxX=mxX;
-            }
-            if(maxY < mxY) {
-                maxY=mxY;
-            }
-        }
-
-        return new BoundingBox(minX, minY, maxX-minX, maxY-minY);
-
+        return vertexLayer.getLogicalBounds();
     }
 
     public void draw() {
@@ -140,14 +123,6 @@ public class CanvasTSPGraph {
 
     public void requestRedraw() {
         internalGraphic.requestAllRedraw();
-    }
-
-    public double getScale() {
-        return internalGraphic.getScale();
-    }
-
-    public void setScale(double scale) {
-        internalGraphic.setScale(scale);
     }
 
     public void showTargets() {
@@ -199,5 +174,13 @@ public class CanvasTSPGraph {
                         )
                         .collect(Collectors.toList())
         );
+    }
+
+    public DragContext getDragContext() {
+        return internalGraphic.getDragContext();
+    }
+
+    public ViewportGestures getGestures() {
+        return gestures;
     }
 }

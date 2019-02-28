@@ -12,6 +12,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -23,6 +25,8 @@ import memetico.logging.NullPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
+import org.marcos.uon.tspaidemo.canvas.DragContext;
+import org.marcos.uon.tspaidemo.canvas.ViewportGestures;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
 import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
@@ -60,6 +64,8 @@ public class MemeticoContentController implements ContentController {
     private GridPane agentsGrid;
     @FXML
     private BorderPane titleBar, graphContainer;
+    @FXML
+    private AnchorPane graphWrapper;
 
     private List<AgentDisplay> agentControllers = new ArrayList<>();
 
@@ -75,9 +81,9 @@ public class MemeticoContentController implements ContentController {
     private String lastDrawnGraphName = null;
     private CanvasTSPGraph displayGraph;
 
-
-
     private boolean toursOutdated = false, contentOutdated = false;
+
+    private double lastScale = 1;
 
     private void autoSizeListener(ObservableValue<? extends Number> observable12, Number oldValue12, Number newValue12){
         BoundingBox canvasBounds = displayGraph.getLogicalBounds();
@@ -88,11 +94,18 @@ public class MemeticoContentController implements ContentController {
         double availableWidth = graphContainer.getWidth();
         double scaleWidth = availableWidth / (canvasBounds.getWidth() + padding);
         double chosenScale = Math.min(scaleWidth, scaleHeight);
-        displayGraph.setScale(chosenScale);
-
-        displayGraph.getGraphic().setMaxSize(canvasBounds.getWidth()*chosenScale, canvasBounds.getHeight()*chosenScale);
-        displayGraph.requestRedraw(); //unneeded, it is automatically handled by the canvas now? (no?)
+        DragContext dragContext = displayGraph.getDragContext();
+//        if (lastScale == 0) {
+//            dragContext.setScale(chosenScale);
+//        } else {
+//            chosenScale = chosenScale/lastScale;
+//            dragContext.zoom(chosenScale);
+//        }
+        dragContext.setScale(chosenScale);
+//        displayGraph.getGraphic().setMinSize(canvasBounds.getWidth()*chosenScale, canvasBounds.getHeight()*chosenScale);
+//        displayGraph.requestRedraw(); //unneeded, it is automatically handled by the canvas now? (no?)
         toursOutdated = true;
+        lastScale = chosenScale;
     };
 
     @Override
@@ -107,6 +120,8 @@ public class MemeticoContentController implements ContentController {
         //enable auto sizing
         graphContainer.widthProperty().addListener(this::autoSizeListener);
         graphContainer.heightProperty().addListener(this::autoSizeListener);
+        displayGraph.getGraphic().prefWidthProperty().bind(graphContainer.widthProperty());
+        displayGraph.getGraphic().prefHeightProperty().bind(graphContainer.heightProperty());
         infoPane.prefViewportHeightProperty().bind(agentsGrid.heightProperty());
         infoPane.prefViewportWidthProperty().bind(agentsGrid.widthProperty());
         infoStack.minWidthProperty().bind(Bindings.createDoubleBinding(() ->
@@ -204,6 +219,11 @@ public class MemeticoContentController implements ContentController {
 
 
         lblBestColor.backgroundProperty().set(new Background(new BackgroundFill(CanvasTSPGraph.DEFAULT_EDGE_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        ViewportGestures gestures = displayGraph.getGestures();
+        graphContainer.addEventHandler(MouseEvent.MOUSE_PRESSED, gestures.getOnMousePressedEventHandler());
+        graphContainer.addEventHandler(MouseEvent.MOUSE_DRAGGED, gestures.getOnMouseDraggedEventHandler());
+        graphContainer.addEventHandler(ScrollEvent.ANY, gestures.getOnScrollEventHandler());
 
     }
 

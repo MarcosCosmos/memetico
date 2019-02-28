@@ -3,6 +3,8 @@ package org.marcos.uon.tspaidemo.canvas;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -31,6 +33,8 @@ public class CanvasGraph extends Pane {
 //    }
 //
 //
+
+    ViewportGestures gestures;
 
     /**
      * Publically exposed interface; hides the
@@ -84,23 +88,81 @@ public class CanvasGraph extends Pane {
     }
 
     public class VertexLayer extends LayerImpl<Vertex> {
+        private BoundingBox logicalBounds;
         public static final double MIN_RADIUS = 4;
         public VertexLayer(int priority) {
             super(priority);
+            computeLogicalBounds();
         }
 
         @Override
         public void redraw() {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.clearRect(0,0, canvas.getWidth(), canvas.getHeight());
+            Point2D dragOffset = new Point2D(dragContext.getTranslateAnchorX(), dragContext.getTranslateAnchorY());
+            double scale = dragContext.getScale();
+//            gc.setFill(Color.BLACK);
+//
+//            Bounds logicalBounds = dragContext.getLogicalBoundsRaw();
+//            Bounds viewportBounds = dragContext.getViewportBounds();
+//            double translatedMin = (logicalBounds.getMinY()+dragOffset.getY())*scale;
+//            double translatedMax = (logicalBounds.getMaxY()+dragOffset.getY())*scale;
+//            gc.fillRect(dragOffset.getX(), translatedMin, dragContext.getLogicalBoundsScaled().getWidth(), dragContext.getLogicalBoundsScaled().getHeight());
             for (Vertex each : this) {
                 double radiusToUse = Math.max(MIN_RADIUS, each.getDotRadius()*scale);
                 double halfRad = radiusToUse/2;
                 gc.setFill(each.getDotFill());
-                Point2D minCorner = each.getLocation().multiply(scale).subtract(new Point2D(halfRad, halfRad));
+                Point2D minCorner = each.getLocation().add(dragOffset).multiply(scale).subtract(new Point2D(halfRad, halfRad));
                 gc.fillOval(minCorner.getX(), minCorner.getY(), radiusToUse, radiusToUse);
             }
             requiresRedraw = false;
+        }
+
+        /**
+         * Returns the bounds as determined by the cells
+         * @return
+         */
+        private void computeLogicalBounds() {
+//        (todo: cater for text in the bounds check?)
+            double minX=Double.POSITIVE_INFINITY, minY=Double.POSITIVE_INFINITY, maxX=Double.NEGATIVE_INFINITY, maxY=Double.NEGATIVE_INFINITY;
+            for(Vertex each : this) {
+                double x = each.getLocation().getX();
+                double y = each.getLocation().getY();
+                double radius = each.getDotRadius();
+                double mnX = x-radius, mxX = x+radius, mnY = y-radius, mxY = y+radius;
+                if(minX > mnX) {
+                    minX=mnX;
+                }
+                if(minY > mnY) {
+                    minY=mnY;
+                }
+                if(maxX < mxX) {
+                    maxX=mxX;
+                }
+                if(maxY < mxY) {
+                    maxY=mxY;
+                }
+            }
+
+            logicalBounds = new BoundingBox(minX, minY, maxX-minX, maxY-minY);
+            dragContext.setLogicalBoundsRaw(logicalBounds);
+        }
+
+        /**
+         * {@inheritDoc}
+         * Note: also updates the logicalBounds
+         */
+        @Override
+        public void requestRedraw() {
+            //if this is the first redraw request since the last draw, update the bounds
+            if (!requiresRedraw()) {
+                computeLogicalBounds();
+            }
+            requiresRedraw = true;
+        }
+
+        public BoundingBox getLogicalBounds() {
+            return logicalBounds;
         }
     }
 
@@ -115,10 +177,12 @@ public class CanvasGraph extends Pane {
         public void redraw() {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.clearRect(0,0, getWidth(), getHeight());
+            double scale = dragContext.getScale();
+            Point2D dragOffset = new Point2D(dragContext.getTranslateAnchorX(), dragContext.getTranslateAnchorY());
             for(Edge each : this) {
                 gc.setStroke(each.getLineStroke());
                 gc.setLineWidth(Math.max(MIN_LINE_WIDTH, scale*each.getLineWidth()));
-                Point2D aPos = each.getA().getLocation().multiply(scale), bPos = each.getB().getLocation().multiply(scale);
+                Point2D aPos = each.getA().getLocation().add(dragOffset).multiply(scale), bPos = each.getB().getLocation().add(dragOffset).multiply(scale);
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
             }
             requiresRedraw = false;
@@ -136,8 +200,10 @@ public class CanvasGraph extends Pane {
         public void redraw() {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.clearRect(0,0, getWidth(), getHeight());
+            double scale = dragContext.getScale();
+            Point2D dragOffset = new Point2D(dragContext.getTranslateAnchorX(), dragContext.getTranslateAnchorY());
             for(Edge each : this) {
-                Point2D aPos = each.getA().getLocation().multiply(scale), bPos = each.getB().getLocation().multiply(scale);
+                Point2D aPos = each.getA().getLocation().add(dragOffset).multiply(scale), bPos = each.getB().getLocation().add(dragOffset).multiply(scale);
                 gc.setLineWidth(Math.max(2*MIN_LINE_WIDTH, scale*each.getLineWidth()*2));
                 gc.setStroke(each.getLineStroke());
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
@@ -152,10 +218,8 @@ public class CanvasGraph extends Pane {
 
     private Color backgroundColor;
     private final ObservableList<Layer> layers;
+    private final DragContext dragContext;
     private boolean requiresReordering;
-
-
-    private double scale = 1;
 
 
     public CanvasGraph() {
@@ -188,11 +252,19 @@ public class CanvasGraph extends Pane {
         );
 
         setBackgroundColor(Color.BLACK);
+        styleProperty().set("-fx-border-color:white;");
         requiresReordering = false;
 
         //automatically redraw when resized
         widthProperty().addListener((x,y,z) -> requestAllRedraw());
         heightProperty().addListener((x,y,z) -> requestAllRedraw());
+        this.dragContext = new DragContext();
+        dragContext.viewportBoundsProperty().bind(boundsInLocalProperty());
+//        this.dragContext.mouseAnchorXProperty().addListener((observable, oldValue, newValue) -> requestAllRedraw());
+//        this.dragContext.mouseAnchorYProperty().addListener((observable, oldValue, newValue) -> requestAllRedraw());
+        this.dragContext.translateAnchorXProperty().addListener((observable, oldValue, newValue) -> requestAllRedraw());
+        this.dragContext.translateAnchorYProperty().addListener((observable, oldValue, newValue) -> requestAllRedraw());
+        this.dragContext.scaleProperty().addListener((observable, oldValue, newValue) -> requestAllRedraw());
     }
 
 
@@ -228,12 +300,8 @@ public class CanvasGraph extends Pane {
         return requiresReordering;
     }
 
-    public double getScale() {
-        return scale;
-    }
-
-    public void setScale(double scale) {
-        this.scale = scale;
+    public DragContext getDragContext() {
+        return dragContext;
     }
 
     public ObservableList<Layer> getLayers() {
