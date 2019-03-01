@@ -177,6 +177,7 @@ public class CanvasTSPGraph {
                         )
                         .collect(Collectors.toList())
         );
+        getDragContext().setTransformAutomatically(true);
     }
 
     public DragContext getDragContext() {
