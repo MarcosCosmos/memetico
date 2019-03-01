@@ -1,8 +1,8 @@
 package org.marcos.uon.tspaidemo.canvas;
 
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
@@ -13,28 +13,116 @@ public class DragContext {
     private DoubleProperty mouseAnchorX;
     private DoubleProperty mouseAnchorY;
 
-    private DoubleProperty translateAnchorX;
-    private DoubleProperty translateAnchorY;
+    private DoubleProperty translationX;
+    private DoubleProperty translationY;
     private DoubleProperty scale;
-    private ObjectProperty<Bounds> logicalBoundsRaw, viewportBounds;
-    private ObservableValue<Bounds> logicalBoundsScaled;
+    private ObjectProperty<Bounds> boundsInLocal, canvasBounds;
+    private ObservableValue<Bounds> boundsInCanvas;
+
+    //track the targeted "ideal" scale - the largest scale that shows everything
+    private DoubleProperty autoScale;
+    private DoubleProperty autoTranslationX;
+    private DoubleProperty autoTranslationY;
+
+//    private ChangeListener<Bounds> minScaleAdjusterInstance =
+
+    private BooleanProperty transformAutomatically = new SimpleBooleanProperty(false);
+
+    private void minScaleAdjuster(ObservableValue<? extends Bounds> canvasBounds, Bounds oldBounds, Bounds newBounds) {
+        if(getScale() < getAutoScale()) {
+            transformAutomatically.set(true);
+        }
+    }
 
     public DragContext() {
         mouseAnchorX = new SimpleDoubleProperty(0);
         mouseAnchorY = new SimpleDoubleProperty(0);
-        translateAnchorX = new SimpleDoubleProperty(0);
-        translateAnchorY = new SimpleDoubleProperty(0);
+        translationX = new SimpleDoubleProperty(0);
+        translationY = new SimpleDoubleProperty(0);
+
         scale = new SimpleDoubleProperty(1);
-        logicalBoundsRaw = new SimpleObjectProperty<>(new BoundingBox(0,0,100,100)); //arbitrary default really
-        logicalBoundsScaled = Bindings.createObjectBinding(
+        autoScale = new SimpleDoubleProperty(scale.get());
+        autoTranslationX = new SimpleDoubleProperty(translationX.get());
+        autoTranslationY = new SimpleDoubleProperty(translationY.get());
+        boundsInLocal = new SimpleObjectProperty<>(new BoundingBox(0,0,100,100));
+        canvasBounds = new SimpleObjectProperty<>(boundsInLocal.get()); //arbitrary default really
+        boundsInCanvas = Bindings.createObjectBinding(
                 () -> {
                     double scale = getScale();
-                    Bounds src = logicalBoundsRaw.get();
-                    return new BoundingBox(src.getMinX()*scale, src.getMinY()*scale, src.getWidth()*scale, src.getHeight()*scale);
+                    Bounds local = boundsInLocal.get();
+                    Point2D min = localToCanvas(local.getMinX(), local.getMinY());
+                    return new BoundingBox(min.getX(), min.getY(), local.getWidth()*scale, local.getHeight()*scale);
                 },
-                logicalBoundsRaw, scale
+                boundsInLocal, scale, translationX, translationY
         );
-        viewportBounds = new SimpleObjectProperty<>(logicalBoundsRaw.get());
+
+        autoScale.bind(Bindings.createDoubleBinding(
+                () -> {
+                    Bounds canvasBounds = getCanvasBounds();
+                    Bounds boundsInLocal = getBoundsInLocal();
+                    return Math.min(canvasBounds.getWidth()/boundsInLocal.getWidth(), canvasBounds.getHeight()/boundsInLocal.getHeight());
+                },
+                canvasBounds, boundsInLocal
+        ));
+
+        autoTranslationX.bind(Bindings.createDoubleBinding(() -> {
+                    Bounds canvasBounds = getCanvasBounds();
+                    Bounds boundsInLocal = getBoundsInLocal();
+                    double scale = getScale();
+                    return ((canvasBounds.getWidth() - boundsInLocal.getWidth()*scale) / 2) / scale;
+                },
+                canvasBounds, boundsInLocal, scale
+        ));
+        autoTranslationY.bind(Bindings.createDoubleBinding(() -> {
+                    Bounds canvasBounds = getCanvasBounds();
+                    Bounds boundsInLocal = getBoundsInLocal();
+                    double scale = getScale();
+                    return ((canvasBounds.getHeight() - boundsInLocal.getHeight()*scale) / 2) / scale;
+                },
+                canvasBounds, boundsInLocal, scale
+        ));
+
+
+
+        transformAutomatically.addListener((observable, oldValue, newValue) -> {
+            if(newValue) {
+                scale.bind(autoScale);
+                translationX.bind(autoTranslationX);
+                translationY.bind(autoTranslationY);
+            } else {
+                scale.unbind();
+                translationX.unbind();
+                translationY.unbind();
+                canvasBounds.addListener(this::minScaleAdjuster);
+            }
+        });
+
+        setTransformAutomatically(true);
+    }
+
+    public Point2D localToCanvas(Point2D point) {
+        double scale = getScale();
+        if(scale == 0) {
+            return new Point2D(0,0);
+        } else {
+            return point.add(translationX.get(), translationY.get()).multiply(scale);
+        }
+    }
+
+    public Point2D localToCanvas(double x, double y) {
+        return localToCanvas(new Point2D(x,y));
+    }
+
+    public Point2D canvasToLocal(Point2D point) {
+        double scale = getScale();
+        if (scale == 0) {
+            return point.subtract(translationX.get(), translationY.get());
+        } else {
+            return point.multiply(1 / scale).subtract(translationX.get(), translationY.get());
+        }
+    }
+    public Point2D canvasToLocal(double x, double y) {
+        return canvasToLocal(new Point2D(x,y));
     }
 
     public double getMouseAnchorX() {
@@ -60,84 +148,107 @@ public class DragContext {
     public void setMouseAnchorY(double mouseAnchorY) {
         this.mouseAnchorY.set(mouseAnchorY);
     }
+    
+    public Point2D getMouseAnchor() {
+        return new Point2D(getMouseAnchorX(), getMouseAnchorY());
+    }
 
-    public double getTranslateAnchorX() {
-        return translateAnchorX.get();
+    public void setMouseAnchor(Point2D anchor) {
+        setMouseAnchor(anchor.getX(), anchor.getY());
+    }
+    public void setMouseAnchor(double x, double y) {
+        setMouseAnchorX(x);
+        setMouseAnchorY(y);
+    }
+
+    public double getTranslationX() {
+        return translationX.get();
     }
 
     /**
      * Note that it is almost always better to use the setters or {@code #translate(int x, int y)} then to set via properties, as this will ensure that objects don't move entirely off-screen
-     * @see #setTranslateAnchorX(double)
+     * @see #setTranslationX(double)
      * @see #translate(double, double)
      * @return
      */
-    public DoubleProperty translateAnchorXProperty() {
-        return translateAnchorX;
+    public DoubleProperty translationXProperty() {
+        return translationX;
+    }
+    
+    public void setTranslationX(double translationX) {
+        setTransformAutomatically(false);
+        this.translationX.set(translationX);
+    }
+    
+    public double getTranslationY() {
+        return translationY.get();
     }
 
-    public void setTranslateAnchorX(double translateAnchorX) {
-        Bounds logicalBounds = getLogicalBoundsScaled();
-        Bounds viewportBounds = getViewportBounds();
-        double scale=getScale();
-        double scaledTranslation = translateAnchorX*scale;
-        double translatedMin = logicalBounds.getMinX()+scaledTranslation;
-        double translatedMax = logicalBounds.getMaxX()+scaledTranslation;
-        if(logicalBounds.getWidth() <= viewportBounds.getWidth()) {
-            if (translatedMin < viewportBounds.getMinX() && translatedMax < viewportBounds.getMaxX()) {
-                translateAnchorX = 0;
-            } else if (translatedMax > viewportBounds.getMaxX() && translatedMin > viewportBounds.getMinX()) {
-                translateAnchorX = (viewportBounds.getWidth() - logicalBounds.getWidth())/scale;
-            }
+    /**
+     * Note that it is almost always better to use the setters or {@code #translate(int x, int y)} then to set via properties, as this will ensure that objects don't move entirely off-screen
+     * @see #setTranslationY(double)
+     * @see #translate(double, double)
+     * @return
+     */
+    public DoubleProperty translationYProperty() {
+        return translationY;
+    }
+
+    public void setTranslationY(double translationY) {
+        setTransformAutomatically(false);
+        this.translationY.set(translationY);
+    }
+
+    //prevents the translation from leaving components unnecessarily out of bounds
+    public void santiseTranslation() {
+        Bounds boundsInCanvas = getBoundsInCanvas();
+        Bounds canvasBounds = getCanvasBounds();
+        double oldTranslationX = getTranslationX();
+        double oldTranslationY = getTranslationY();
+        double newTranslationX = oldTranslationX, newTranslationY = oldTranslationY;
+        Point2D translationDiff = new Point2D(0, 0);
+        Point2D translationInCanvas = localToCanvas(translationDiff);
+        double translatedMinX = translationInCanvas.getX();
+        double translatedMaxX = translationInCanvas.getX()+boundsInCanvas.getWidth();
+        double translatedMinY = translationInCanvas.getY();
+        double translatedMaxY = translationInCanvas.getY()+boundsInCanvas.getHeight();
+        if(boundsInCanvas.getWidth() <= canvasBounds.getWidth()) {
+            newTranslationX = autoTranslationX.get();
         } else {
-            if(translatedMax < viewportBounds.getMaxX()) {
-                translateAnchorX = (viewportBounds.getWidth()-logicalBounds.getWidth())/scale;
-            } else if (translatedMin > viewportBounds.getMinX()) {
-                translateAnchorX = 0;
+            if(translatedMaxX < canvasBounds.getMaxX()) {
+                newTranslationX  = (canvasBounds.getWidth() - boundsInCanvas.getWidth())/scale.get();
+            } else if (translatedMinX > canvasBounds.getMinX()) {
+                newTranslationX = 0;
             }
         }
-        this.translateAnchorX.set(translateAnchorX);
+        if(boundsInCanvas.getHeight() <= canvasBounds.getHeight()) {
+            newTranslationY = autoTranslationY.get();
+        } else {
+            if(translatedMaxY < canvasBounds.getMaxY()) {
+                newTranslationY = (canvasBounds.getHeight() - boundsInCanvas.getHeight())/scale.get();
+            } else if (translatedMinY > canvasBounds.getMinY()) {
+                newTranslationY = 0;
+            }
+        }
+        setTranslation(newTranslationX, newTranslationY);
     }
+
 
     public void translate(double x, double y) {
-        setTranslateAnchorX(getTranslateAnchorX() + x);
-        setTranslateAnchorY(getTranslateAnchorY() + y);
+        setTranslation(getTranslationX() + x, getTranslationY() + y);
     }
 
-    public double getTranslateAnchorY() {
-        return translateAnchorY.get();
+    public void setTranslation(Point2D translation) {
+        setTranslation(translation.getX(), translation.getY());
     }
 
-    /**
-     * Note that it is almost always better to use the setters or {@code #translate(int x, int y)} then to set via properties, as this will ensure that objects don't move entirely off-screen
-     * @see #setTranslateAnchorY(double)
-     * @see #translate(double, double)
-     * @return
-     */
-    public DoubleProperty translateAnchorYProperty() {
-        return translateAnchorY;
+    public void setTranslation(double x, double y) {
+        setTranslationX(x);
+        setTranslationY(y);
     }
-
-    public void setTranslateAnchorY(double translateAnchorY) {
-        Bounds logicalBounds = getLogicalBoundsScaled();
-        Bounds viewportBounds = getViewportBounds();
-        double scale=getScale();
-        double scaledTranslation = translateAnchorY*scale;
-        double translatedMin = logicalBounds.getMinY()+scaledTranslation;
-        double translatedMax = logicalBounds.getMaxY()+scaledTranslation;
-        if(logicalBounds.getHeight() <= viewportBounds.getHeight()) {
-            if (translatedMin < viewportBounds.getMinY() && translatedMax < viewportBounds.getMaxY()) {
-                translateAnchorY = 0;
-            } else if (translatedMax > viewportBounds.getMaxY() && translatedMin > viewportBounds.getMinY()) {
-                translateAnchorY = (viewportBounds.getHeight() - logicalBounds.getHeight())/scale;
-            }
-        } else {
-            if(translatedMax < viewportBounds.getMaxY() && translatedMin <= viewportBounds.getMinY()) {
-                translateAnchorY = (viewportBounds.getHeight()-logicalBounds.getHeight())/scale;
-            } else if (translatedMin > viewportBounds.getMinY() && translatedMax >= viewportBounds.getMaxY()) {
-                translateAnchorY = 0;
-            }
-        }
-        this.translateAnchorY.set(translateAnchorY);
+    
+    public Point2D getTranslation() {
+        return new Point2D(getTranslationX(), getTranslationY());
     }
 
 
@@ -151,65 +262,113 @@ public class DragContext {
     }
 
     public void setScale(double scale) {
+        setTransformAutomatically(false);
+        scale = Math.max(scale, getAutoScale());
         if(scale == 0) {
             return;
         }
-        double oldScale = this.scale.get();
-        Bounds scaledBounds = getLogicalBoundsScaled();
-        Bounds bounds = getLogicalBoundsRaw();
-        Bounds viewportBounds = getViewportBounds();
-        Point2D oldTranslationInLocal = new Point2D(getTranslateAnchorX(), getTranslateAnchorY());
-        Point2D oldTranslationInParent = oldTranslationInLocal.multiply(oldScale);
-        Point2D positionInLocal = new Point2D(bounds.getMinX(), bounds.getMinY());
-        Point2D positionInParent = positionInLocal.add(oldTranslationInLocal).multiply(scale);
-        Point2D viewCenterInParent = new Point2D(getMouseAnchorX(), getMouseAnchorY()).subtract(positionInParent);
-        Point2D viewCenterInLocal = viewCenterInParent.multiply(1/oldScale);
-//        apply the translation fixers
-        Point2D resultTranslation = oldTranslationInLocal.subtract(viewCenterInLocal)
-                .multiply(scale/oldScale)
-                .add(viewCenterInLocal)
-                .multiply(oldScale/scale);
+        double oldScale = getScale();
+        Point2D originForScale;
+        Point2D mouseAnchor = getMouseAnchor();
+        Bounds boundsInCanvas = getBoundsInCanvas();
+        Point2D positionInCanvas = new Point2D(boundsInCanvas.getMinX(), boundsInCanvas.getMinY());
+        if(boundsInCanvas.contains(mouseAnchor)) {
+            originForScale = mouseAnchor;
+        } else {
+            Point2D sizeInCanvas = new Point2D(boundsInCanvas.getWidth(), boundsInCanvas.getHeight());
+            originForScale = positionInCanvas.add(sizeInCanvas.multiply(1 / 2.0)); //if the mouse is outside the box, use the center of the box
+        }
+        Point2D newTranslation = positionInCanvas.subtract(originForScale).multiply(scale/oldScale).add(originForScale).multiply(1/scale);
+        setTranslation(newTranslation);
         this.scale.set(scale);
-        setTranslateAnchorX(resultTranslation.getX());
-        setTranslateAnchorY(resultTranslation.getY());
-//        setTranslateAnchorX(getTranslateAnchorX());
-//        setTranslateAnchorY(getTranslateAnchorY());
+
+//        (10,10) = x1
+//        (20,20) = x2
+//        gap = (10, 10)
+
     }
 
     public void zoom(double factor) {
         setScale(getScale()*factor);
     }
 
-    public Bounds getLogicalBoundsRaw() {
-        return logicalBoundsRaw.get();
+    public Bounds getBoundsInLocal() {
+        return boundsInLocal.get();
     }
 
-    public ObjectProperty<Bounds> logicalBoundsRawProperty() {
-        return logicalBoundsRaw;
+    public ObjectProperty<Bounds> boundsInLocalProperty() {
+        return boundsInLocal;
     }
 
-    public void setLogicalBoundsRaw(Bounds logicalBoundsRaw) {
-        this.logicalBoundsRaw.set(logicalBoundsRaw);
+    public void setBoundsInLocal(Bounds boundsInLocal) {
+        this.boundsInLocal.set(boundsInLocal);
     }
 
-
-    public Bounds getLogicalBoundsScaled() {
-        return logicalBoundsScaled.getValue();
+    public Bounds getBoundsInCanvas() {
+        return boundsInCanvas.getValue();
     }
 
-    public ObservableValue<Bounds> logicalBoundsScaledProperty() {
-        return logicalBoundsScaled;
+    public ObservableValue<Bounds> boundsInCanvasProperty() {
+        return boundsInCanvas;
     }
 
-    public Bounds getViewportBounds() {
-        return viewportBounds.get();
+    public Bounds getCanvasBounds() {
+        return canvasBounds.get();
     }
 
-    public ObjectProperty<Bounds> viewportBoundsProperty() {
-        return viewportBounds;
+    public ObjectProperty<Bounds> canvasBoundsProperty() {
+        return canvasBounds;
     }
 
-    public void setViewportBounds(Bounds viewportBounds) {
-        this.viewportBounds.set(viewportBounds);
+    public void setCanvasBounds(Bounds canvasBounds) {
+        this.canvasBounds.set(canvasBounds);
+    }
+
+    public double getAutoScale() {
+        return autoScale.get();
+    }
+
+    public DoubleProperty autoScaleProperty() {
+        return autoScale;
+    }
+
+    public void setAutoScale(double autoScale) {
+        this.autoScale.set(autoScale);
+    }
+
+    public double getAutoTranslationX() {
+        return autoTranslationX.get();
+    }
+
+    public DoubleProperty autoTranslationXProperty() {
+        return autoTranslationX;
+    }
+
+    public void setAutoTranslationX(double autoTranslationX) {
+        this.autoTranslationX.set(autoTranslationX);
+    }
+
+    public double getAutoTranslationY() {
+        return autoTranslationY.get();
+    }
+
+    public DoubleProperty autoTranslationYProperty() {
+        return autoTranslationY;
+    }
+
+    public void setAutoTranslationY(double autoTranslationY) {
+        this.autoTranslationY.set(autoTranslationY);
+    }
+
+    public boolean isTransformAutomatically() {
+        return transformAutomatically.get();
+    }
+
+    public BooleanProperty transformAutomaticallyProperty() {
+        return transformAutomatically;
+    }
+
+    public void setTransformAutomatically(boolean transformAutomatically) {
+        this.transformAutomatically.set(transformAutomatically);
     }
 }

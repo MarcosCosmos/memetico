@@ -40,11 +40,7 @@ public class ViewportGestures {
                 return;
             }
 
-            sceneDragContext.setMouseAnchorX(event.getSceneX());
-            sceneDragContext.setMouseAnchorY(event.getSceneY());
-//
-//            sceneDragContext.setTranslateAnchorX(); = canvas.getTranslateX();
-//            sceneDragContext.translateAnchorY = canvas.getTranslateY();
+            sceneDragContext.setMouseAnchor(event.getX(), event.getY());
         }
 
     };
@@ -58,12 +54,13 @@ public class ViewportGestures {
                 return;
             }
 
-//            sceneDragContext.setTranslateAnchorX(sceneDragContext.getTranslateAnchorX() + (event.getSceneX() - sceneDragContext.getMouseAnchorX())/sceneDragContext.getScale());
-//            sceneDragContext.setTranslateAnchorY(sceneDragContext.getTranslateAnchorY() + (event.getSceneY() - sceneDragContext.getMouseAnchorY())/sceneDragContext.getScale());
-            sceneDragContext.translate((event.getSceneX() - sceneDragContext.getMouseAnchorX())/sceneDragContext.getScale(), (event.getSceneY() - sceneDragContext.getMouseAnchorY())/sceneDragContext.getScale());
+//            sceneDragContext.setTranslationX(sceneDragContext.getTranslationX() + (event.getX() - sceneDragContext.getMouseAnchorX())/sceneDragContext.getScale());
+//            sceneDragContext.setTranslationY(sceneDragContext.getTranslationY() + (event.getY() - sceneDragContext.getMouseAnchorY())/sceneDragContext.getScale());
+            sceneDragContext.translate((event.getX() - sceneDragContext.getMouseAnchorX())/sceneDragContext.getScale(), (event.getY() - sceneDragContext.getMouseAnchorY())/sceneDragContext.getScale());
 
-            sceneDragContext.setMouseAnchorX(event.getSceneX());
-            sceneDragContext.setMouseAnchorY(event.getSceneY());
+            sceneDragContext.setMouseAnchor(event.getX(), event.getY());
+
+            sceneDragContext.santiseTranslation();
             event.consume();
         }
     };
@@ -75,7 +72,9 @@ public class ViewportGestures {
 
         @Override
         public void handle(ScrollEvent event) {
+            sceneDragContext.setMouseAnchor(event.getX(), event.getY());
             sceneDragContext.zoom(event.getDeltaY() < 0 ? 1/getZoomSpeed() : getZoomSpeed());
+//            sceneDragContext.santiseTranslation();
             event.consume();
         }
 

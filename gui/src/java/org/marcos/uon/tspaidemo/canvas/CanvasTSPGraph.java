@@ -1,12 +1,9 @@
 package org.marcos.uon.tspaidemo.canvas;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
-import javafx.geometry.BoundingBox;
-import javafx.scene.Parent;
+import javafx.geometry.Bounds;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
-import org.jorlib.io.tspLibReader.TSPLibTour;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
 
 import java.util.Arrays;
@@ -23,18 +20,22 @@ public class CanvasTSPGraph {
     private ViewportGestures gestures;
 
     public static final double DEFAULT_DOT_RADIUS = 3;
+    public static final double DEFAULT_STROKE_WIDTH = 1;
     public static final Color DEFAULT_BACKGROUND_COLOR = Color.BLACK;
-//    public static final Color DEFAULT_DOT_COLOR = Color.BLACK;
+//    public static final Color DEFAULT_DOT_FILL = Color.BLACK;
 //    public static final Color DEFAULT_EDGE_COLOR = Color.BLACK;
 //    public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
 //    public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
 //    public static final Color DEFAULT_LABEL_COLOR = null;
-    public static final Color DEFAULT_DOT_COLOR = Color.YELLOW;
+//    public static final Color DEFAULT_DOT_FILL = Color.YELLOW;
+
+    public static final Color DEFAULT_DOT_FILL = DEFAULT_BACKGROUND_COLOR;
+    public static final Color DEFAULT_DOT_STROKE = Color.WHITE;
     public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;//Color.rgb(255, 255, 0);
     public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
     public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
     public static final Color DEFAULT_LABEL_COLOR = null;
-//    public static final Color DEFAULT_DOT_COLOR = Color.WHITE;
+//    public static final Color DEFAULT_DOT_FILL = Color.WHITE;
 //    public static final Color DEFAULT_EDGE_COLOR = Color.rgb(255, 255, 0);
 //    public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
 //    public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
@@ -47,7 +48,9 @@ public class CanvasTSPGraph {
         targetLayer = internalGraphic.addOutlineEdgeLayer(0);
         predictionLayer = internalGraphic.addEdgeLayer(10);
         vertexLayer = internalGraphic.addVertexLayer(100);
-        gestures = new ViewportGestures(internalGraphic.getDragContext());
+        DragContext dragContext = getDragContext();
+        dragContext.boundsInLocalProperty().bind(vertexLayer.logicalBoundsProperty());
+        gestures = new ViewportGestures(dragContext);
     }
 
     /**
@@ -67,7 +70,7 @@ public class CanvasTSPGraph {
         for (int i = 0; i < newVertices.size(); i++) {
             double[] eachCoords = newVertices.get(i);
             //invert the y-axis
-            vertexLayer.add(new Vertex(eachCoords[0], -eachCoords[1], DEFAULT_DOT_RADIUS, "C"+i, DEFAULT_DOT_COLOR, DEFAULT_LABEL_COLOR));
+            vertexLayer.add(new Vertex(eachCoords[0], -eachCoords[1], DEFAULT_DOT_RADIUS, DEFAULT_STROKE_WIDTH, "C"+i, DEFAULT_DOT_FILL, DEFAULT_DOT_STROKE, DEFAULT_LABEL_COLOR));
         }
         vertexLayer.requestRedraw();
     }
@@ -113,8 +116,8 @@ public class CanvasTSPGraph {
      * Returns the bounds as determined by the cells
      * @return
      */
-    public BoundingBox getLogicalBounds() {
-        return vertexLayer.getLogicalBounds();
+    public Bounds getLogicalBounds() {
+        return getDragContext().getBoundsInLocal();
     }
 
     public void draw() {
@@ -157,7 +160,7 @@ public class CanvasTSPGraph {
         setVertices(Arrays.stream(nodeData.listNodes()).mapToObj(i -> nodeData.get(i).getPosition()).collect(Collectors.toList()));
 
         //clip the logical bounds to remove excess min x/y
-        BoundingBox logicalBounds = getLogicalBounds();
+        Bounds logicalBounds = getLogicalBounds();
         for (Vertex each: vertexLayer) {
             each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
         }

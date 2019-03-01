@@ -6,20 +6,24 @@ import javafx.scene.paint.Color;
 public class Vertex {
     private Point2D location;
     private double dotRadius;
+    private double strokeWidth;
     private String label;
     private Color dotFill;
     private Color labelFill;
+    private Color dotStroke;
 
-    public Vertex(Point2D location, double radius, String label, Color dotFill, Color labelFill) {
+    public Vertex(Point2D location, double radius, double strokeWidth, String label, Color dotFill, Color dotStroke, Color labelFill) {
         this.location = location;
         this.dotRadius = radius;
+        this.strokeWidth = strokeWidth;
         this.label = label;
         this.dotFill = dotFill;
+        this.dotStroke = dotStroke;
         this.labelFill = labelFill;
     }
 
-    public Vertex(double x, double y, double radius, String label, Color dotFill, Color labelFill) {
-        this(new Point2D(x, y), radius, label, dotFill, labelFill);
+    public Vertex(double x, double y, double radius, double strokeWidth, String label, Color dotFill, Color dotStroke, Color labelFill) {
+        this(new Point2D(x, y), radius, strokeWidth, label, dotFill, dotStroke, labelFill);
     }
 
     public Point2D getLocation() {
@@ -60,5 +64,21 @@ public class Vertex {
 
     public void setLabelFill(Color labelFill) {
         this.labelFill = labelFill;
+    }
+
+    public double getStrokeWidth() {
+        return strokeWidth;
+    }
+
+    public void setStrokeWidth(double strokeWidth) {
+        this.strokeWidth = strokeWidth;
+    }
+
+    public Color getDotStroke() {
+        return dotStroke;
+    }
+
+    public void setDotStroke(Color dotStroke) {
+        this.dotStroke = dotStroke;
     }
 }

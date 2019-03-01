@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -83,31 +84,6 @@ public class MemeticoContentController implements ContentController {
 
     private boolean toursOutdated = false, contentOutdated = false;
 
-    private double lastScale = 1;
-
-    private void autoSizeListener(ObservableValue<? extends Number> observable12, Number oldValue12, Number newValue12){
-        BoundingBox canvasBounds = displayGraph.getLogicalBounds();
-        double availableHeight = graphContainer.getHeight();
-        double padding = Math.max(canvasBounds.getMinX() * 2, canvasBounds.getMinY() * 2);
-        double scaleHeight = availableHeight / (canvasBounds.getHeight() + padding);
-        //technically this is effected by divider style, not sure how to compute that yet
-        double availableWidth = graphContainer.getWidth();
-        double scaleWidth = availableWidth / (canvasBounds.getWidth() + padding);
-        double chosenScale = Math.min(scaleWidth, scaleHeight);
-        DragContext dragContext = displayGraph.getDragContext();
-//        if (lastScale == 0) {
-//            dragContext.setScale(chosenScale);
-//        } else {
-//            chosenScale = chosenScale/lastScale;
-//            dragContext.zoom(chosenScale);
-//        }
-        dragContext.setScale(chosenScale);
-//        displayGraph.getGraphic().setMinSize(canvasBounds.getWidth()*chosenScale, canvasBounds.getHeight()*chosenScale);
-//        displayGraph.requestRedraw(); //unneeded, it is automatically handled by the canvas now? (no?)
-        toursOutdated = true;
-        lastScale = chosenScale;
-    };
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         contentRoot.getStylesheets().addAll(
@@ -117,9 +93,9 @@ public class MemeticoContentController implements ContentController {
 
         displayGraph = new CanvasTSPGraph();
         graphContainer.setCenter(displayGraph.getGraphic());
-        //enable auto sizing
-        graphContainer.widthProperty().addListener(this::autoSizeListener);
-        graphContainer.heightProperty().addListener(this::autoSizeListener);
+//        //enable auto sizing
+//        graphContainer.widthProperty().addListener(this::autoSizeListener);
+//        graphContainer.heightProperty().addListener(this::autoSizeListener);
         displayGraph.getGraphic().prefWidthProperty().bind(graphContainer.widthProperty());
         displayGraph.getGraphic().prefHeightProperty().bind(graphContainer.heightProperty());
         infoPane.prefViewportHeightProperty().bind(agentsGrid.heightProperty());
@@ -348,9 +324,6 @@ public class MemeticoContentController implements ContentController {
             //for all the graphs we are going to keep, if the instance changed, switch to the new one.
             if (!currentValue.instanceName.equals(lastDrawnGraphName)) {
                 displayGraph.applyInstance(tspLibInstance);
-                if (!displayGraph.isEmpty()) {
-                    autoSizeListener(null, -1, -1);
-                }
                 lastDrawnGraphName = currentValue.instanceName;
             }
 
