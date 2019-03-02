@@ -16,8 +16,7 @@ public class DragContext {
     private DoubleProperty translationX;
     private DoubleProperty translationY;
     private DoubleProperty scale;
-    private ObjectProperty<Bounds> boundsInLocal, canvasBounds;
-    private ObservableValue<Bounds> boundsInCanvas;
+    private ObjectProperty<Bounds> logicalBounds, boundsInLocal, boundsInCanvas, canvasBounds;
 
     //track the targeted "ideal" scale - the largest scale that shows everything
     private DoubleProperty autoScale;
@@ -27,6 +26,8 @@ public class DragContext {
 //    private ChangeListener<Bounds> minScaleAdjusterInstance =
 
     private BooleanProperty transformAutomatically = new SimpleBooleanProperty(false);
+
+    private DoubleProperty maxScaleProperty;
 
     private void minScaleAdjuster(ObservableValue<? extends Bounds> canvasBounds, Bounds oldBounds, Bounds newBounds) {
         if(getScale() < getAutoScale()) {
@@ -44,23 +45,37 @@ public class DragContext {
         autoScale = new SimpleDoubleProperty(scale.get());
         autoTranslationX = new SimpleDoubleProperty(translationX.get());
         autoTranslationY = new SimpleDoubleProperty(translationY.get());
-        boundsInLocal = new SimpleObjectProperty<>(new BoundingBox(0,0,100,100));
-        canvasBounds = new SimpleObjectProperty<>(boundsInLocal.get()); //arbitrary default really
-        boundsInCanvas = Bindings.createObjectBinding(
-                () -> {
-                    double scale = getScale();
-                    Bounds local = boundsInLocal.get();
-                    Point2D min = localToCanvas(local.getMinX(), local.getMinY());
-                    return new BoundingBox(min.getX(), min.getY(), local.getWidth()*scale, local.getHeight()*scale);
-                },
-                boundsInLocal, scale, translationX, translationY
-        );
+        logicalBounds = new SimpleObjectProperty<>(new BoundingBox(0,0,100,100));
+        boundsInLocal = new SimpleObjectProperty<>(logicalBounds.get());
+        boundsInCanvas = new SimpleObjectProperty<>(logicalBounds.get());
+        canvasBounds = new SimpleObjectProperty<>(logicalBounds.get()); //arbitrary default really
+//        boundsInCanvas = Bindings.createObjectBinding(
+//                () -> {
+//                    double scale = getScale();
+//                    Bounds local = boundsInLocal.get();
+//                    Point2D min = localToCanvas(local.getMinX(), local.getMinY());
+//                    //todo: make this more robust vertices with custom sizes
+//                    double appliedRadius = CanvasGraph.computeRadiusToUse(CanvasGraph.MIN_RADIUS, scale) + CanvasGraph.computeLineWidthToUse(CanvasGraph.MIN_LINE_WIDTH, scale);
+//                    return new BoundingBox(min.getX()-padding, min.getY()-padding, local.getWidth()*scale + 2*padding, local.getHeight()*scale + 2*padding);
+//                },
+//                boundsInLocal, scale, translationX, translationY
+//        );
 
         autoScale.bind(Bindings.createDoubleBinding(
                 () -> {
                     Bounds canvasBounds = getCanvasBounds();
                     Bounds boundsInLocal = getBoundsInLocal();
-                    return Math.min(canvasBounds.getWidth()/boundsInLocal.getWidth(), canvasBounds.getHeight()/boundsInLocal.getHeight());
+                    double naiveScale = Math.min(canvasBounds.getWidth()/boundsInLocal.getWidth(), canvasBounds.getHeight()/boundsInLocal.getHeight());
+                    double decorationScale = CanvasGraph.computeDecorationScale(naiveScale);
+                    //if we are trying to scale outside of the normal decoration scale range, we will need to factor in the clamped decoration padding
+                    if(naiveScale == decorationScale) {
+                        return naiveScale;
+                    } else {
+                        Bounds logicalBounds = getLogicalBounds();
+                        double baseDecorationPaddingX = boundsInLocal.getWidth()-logicalBounds.getWidth();
+                        double baseDecorationPaddingY = boundsInLocal.getHeight()-logicalBounds.getHeight();
+                        return Math.min((canvasBounds.getWidth()-(baseDecorationPaddingX*decorationScale))/logicalBounds.getWidth(), (canvasBounds.getHeight()-(baseDecorationPaddingY*decorationScale))/logicalBounds.getHeight());
+                    }
                 },
                 canvasBounds, boundsInLocal
         ));
@@ -69,7 +84,7 @@ public class DragContext {
                     Bounds canvasBounds = getCanvasBounds();
                     Bounds boundsInLocal = getBoundsInLocal();
                     double scale = getScale();
-                    return ((canvasBounds.getWidth() - boundsInLocal.getWidth()*scale) / 2) / scale;
+                    return ((canvasBounds.getWidth() - boundsInLocal.getWidth()*scale) / 2) / scale - boundsInLocal.getMinX();
                 },
                 canvasBounds, boundsInLocal, scale
         ));
@@ -77,7 +92,7 @@ public class DragContext {
                     Bounds canvasBounds = getCanvasBounds();
                     Bounds boundsInLocal = getBoundsInLocal();
                     double scale = getScale();
-                    return ((canvasBounds.getHeight() - boundsInLocal.getHeight()*scale) / 2) / scale;
+                    return ((canvasBounds.getHeight() - boundsInLocal.getHeight()*scale) / 2) / scale - boundsInLocal.getMinY();
                 },
                 canvasBounds, boundsInLocal, scale
         ));
@@ -96,6 +111,17 @@ public class DragContext {
                 canvasBounds.addListener(this::minScaleAdjuster);
             }
         });
+
+        maxScaleProperty = new SimpleDoubleProperty(1);
+        maxScaleProperty.bind(
+                Bindings.createDoubleBinding(
+                        () -> {
+                            Bounds logicalBounds = getLogicalBounds();
+                            return 10*Math.max(logicalBounds.getWidth(), logicalBounds.getHeight());
+                        }
+                )
+        );
+
 
         setTransformAutomatically(true);
     }
@@ -201,36 +227,38 @@ public class DragContext {
 
     //prevents the translation from leaving components unnecessarily out of bounds
     public void santiseTranslation() {
-        Bounds boundsInCanvas = getBoundsInCanvas();
         Bounds canvasBounds = getCanvasBounds();
-        double oldTranslationX = getTranslationX();
-        double oldTranslationY = getTranslationY();
-        double newTranslationX = oldTranslationX, newTranslationY = oldTranslationY;
-        Point2D translationDiff = new Point2D(0, 0);
-        Point2D translationInCanvas = localToCanvas(translationDiff);
-        double translatedMinX = translationInCanvas.getX();
-        double translatedMaxX = translationInCanvas.getX()+boundsInCanvas.getWidth();
-        double translatedMinY = translationInCanvas.getY();
-        double translatedMaxY = translationInCanvas.getY()+boundsInCanvas.getHeight();
+        Bounds boundsInCanvas = getBoundsInCanvas();
+        double newTranslationX = getTranslationX(), newTranslationY = getTranslationY();
+        double scale = getScale();
+        boolean autoX = false;
+        boolean autoY = false;
         if(boundsInCanvas.getWidth() <= canvasBounds.getWidth()) {
             newTranslationX = autoTranslationX.get();
+            autoX = true;
         } else {
-            if(translatedMaxX < canvasBounds.getMaxX()) {
-                newTranslationX  = (canvasBounds.getWidth() - boundsInCanvas.getWidth())/scale.get();
-            } else if (translatedMinX > canvasBounds.getMinX()) {
-                newTranslationX = 0;
+            if(boundsInCanvas.getMaxX() < canvasBounds.getMaxX()) {
+                newTranslationX += (canvasBounds.getMaxX()-boundsInCanvas.getMaxX())/scale;//(canvasBounds.getWidth() - boundsInCanvas.getWidth())/scale-boundsInLocal.getMinX();
+            } else if (boundsInCanvas.getMinX() > canvasBounds.getMinX()) {
+                newTranslationX += (canvasBounds.getMinX()-boundsInCanvas.getMinX())/scale;
             }
         }
         if(boundsInCanvas.getHeight() <= canvasBounds.getHeight()) {
             newTranslationY = autoTranslationY.get();
+            autoY = true;
         } else {
-            if(translatedMaxY < canvasBounds.getMaxY()) {
-                newTranslationY = (canvasBounds.getHeight() - boundsInCanvas.getHeight())/scale.get();
-            } else if (translatedMinY > canvasBounds.getMinY()) {
-                newTranslationY = 0;
+            if(boundsInCanvas.getMaxY() < canvasBounds.getMaxY()) {
+                newTranslationY += (canvasBounds.getMaxY()-boundsInCanvas.getMaxY())/scale;//(canvasBounds.getHeight() - boundsInCanvas.getHeight())/scale-boundsInLocal.getMinY();
+            } else if (boundsInCanvas.getMinY() > canvasBounds.getMinY()) {
+                newTranslationY += (canvasBounds.getMinY()-boundsInCanvas.getMinY())/scale;
             }
         }
-        setTranslation(newTranslationX, newTranslationY);
+        //if we are automatically managing both x and y - we may as well enable autotransforms entirely
+        if(autoX && autoY) {
+            transformAutomatically.set(true);
+        } else {
+            setTranslation(newTranslationX, newTranslationY);
+        }
     }
 
 
@@ -262,6 +290,7 @@ public class DragContext {
     }
 
     public void setScale(double scale) {
+        scale = Math.min(maxScaleProperty.get(), scale);
         setTransformAutomatically(false);
         scale = Math.max(scale, getAutoScale());
         if(scale == 0) {
@@ -271,25 +300,33 @@ public class DragContext {
         Point2D originForScale;
         Point2D mouseAnchor = getMouseAnchor();
         Bounds boundsInCanvas = getBoundsInCanvas();
-        Point2D positionInCanvas = new Point2D(boundsInCanvas.getMinX(), boundsInCanvas.getMinY());
+        Point2D minInCanvas = new Point2D(boundsInCanvas.getMinX(), boundsInCanvas.getMinY());
         if(boundsInCanvas.contains(mouseAnchor)) {
             originForScale = mouseAnchor;
         } else {
             Point2D sizeInCanvas = new Point2D(boundsInCanvas.getWidth(), boundsInCanvas.getHeight());
-            originForScale = positionInCanvas.add(sizeInCanvas.multiply(1 / 2.0)); //if the mouse is outside the box, use the center of the box
+            originForScale = minInCanvas.midpoint(sizeInCanvas); //if the mouse is outside the box, use the center of the box
         }
+        Point2D positionInCanvas = localToCanvas(0,0);
         Point2D newTranslation = positionInCanvas.subtract(originForScale).multiply(scale/oldScale).add(originForScale).multiply(1/scale);
         setTranslation(newTranslation);
         this.scale.set(scale);
-
-//        (10,10) = x1
-//        (20,20) = x2
-//        gap = (10, 10)
-
     }
 
     public void zoom(double factor) {
         setScale(getScale()*factor);
+    }
+
+    public Bounds getLogicalBounds() {
+        return logicalBounds.get();
+    }
+
+    public ObjectProperty<Bounds> logicalBoundsProperty() {
+        return logicalBounds;
+    }
+
+    public void setLogicalBounds(Bounds logicalBounds) {
+        this.logicalBounds.set(logicalBounds);
     }
 
     public Bounds getBoundsInLocal() {
@@ -305,11 +342,15 @@ public class DragContext {
     }
 
     public Bounds getBoundsInCanvas() {
-        return boundsInCanvas.getValue();
+        return boundsInCanvas.get();
     }
 
-    public ObservableValue<Bounds> boundsInCanvasProperty() {
+    public ObjectProperty<Bounds> boundsInCanvasProperty() {
         return boundsInCanvas;
+    }
+
+    public void setBoundsInCanvas(Bounds boundsInCanvas) {
+        this.boundsInCanvas.set(boundsInCanvas);
     }
 
     public Bounds getCanvasBounds() {

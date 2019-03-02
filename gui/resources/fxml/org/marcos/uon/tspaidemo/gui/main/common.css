@@ -36,3 +36,88 @@
 .h1, .h2, .h3, .h4 {
     -fx-font-weight: bold;
 }
+/*
+.root, GridPane, BorderPane, VBox, HBox, GridPane > *, TextFlow, TextFlow *, Label, .choice-box .label, .choice-box .context-menu, .choice-box .menu-item, .choice-box .menu-item .label, .scroll-pane {
+   -fx-background-color: #26262b;
+   -fx-fill: #cecece;
+   -fx-text-fill: #cecece;
+}
+
+.choice-box .menu-item:focused > .label { -fx-text-fill: white !important; }
+
+Button, ChoiceBox, TextField, .check-box .box, .scroll-bar .thumb, .slider .thumb, .slider .track {
+    -fx-background-color: #26262b;
+    -fx-text-fill: #cecece !important;
+    -fx-mark-color: #cecece; // arrow color
+    -fx-border-color: #cecece;
+}
+
+.scroll-bar, .scroll-pane .filler, .scroll-pane .corner, .scroll-pane .viewport, .scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar .increment-arrow .scroll-bar .decrement-arrow {
+    -fx-background-color:transparent;
+}
+
+.choice-box .label, .choice-box .context-menu, .choice-box .menu-item, .button, .choice-box, .text-field, .check-box .box, .scroll-bar .thumb, .slider .track {
+    -fx-border-radius: 5px !important;
+    -fx-background-radius: 5px !important;
+}
+
+.slider .thumb {
+    -fx-border-radius: 50%;
+}
+
+.choice-box .context-menu { -fx-background-color: black; }
+*/
+
+.root {
+    -fx-base: #26262b;
+    -fx-background-color: -fx-base;
+    -fx-accent: #e7eff7 ;
+    -fx-default-button: #7f878f ;
+    -fx-focus-color: #efefef;
+    -fx-faint-focus-color: #efefef22;
+    -fx-focused-text-base-color : ladder(
+            -fx-selection-bar,
+            -fx-light-text-color 45%,
+            -fx-dark-text-color 46%,
+            -fx-dark-text-color 59%,
+            -fx-mid-text-color 60%
+        );
+    -fx-focused-mark-color : -fx-focused-text-base-color ;
+    -fx-text-base-color: #cecece;
+    -fx-text-background-color: -fx-text-base-color;
+    /*-fx-text-inner-color*/
+    -fx-outer-border: derive(-fx-accent, -50%);
+
+}
+
+.root, .scroll-pane .viewport, .choice-box .context-menu, .scroll-bar > .increment-button, .scroll-bar > .decrement-button {
+    -fx-background-color: -fx-base;
+}
+
+TextFlow > Text {
+    -fx-fill: -fx-text-base-color;
+}
+
+.scroll-bar > .thumb {
+    -fx-background-color: -fx-accent;
+}
+
+.scroll-bar > .increment-button > .increment-arrow,
+.scroll-bar > .decrement-button > .decrement-arrow {
+    -fx-background-color: -fx-accent;
+}
+
+.text-input:focused {
+    -fx-highlight-text-fill: ladder(
+        -fx-highlight-fill,
+        -fx-light-text-color 45%,
+        -fx-dark-text-color  46%,
+        -fx-dark-text-color  59%,
+        -fx-mid-text-color   60%
+    );
+}

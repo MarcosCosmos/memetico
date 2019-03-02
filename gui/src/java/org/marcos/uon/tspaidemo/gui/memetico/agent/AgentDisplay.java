@@ -39,6 +39,12 @@ public class AgentDisplay extends Pane {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+
+        getStylesheets().addAll(
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/content.css").toExternalForm(),
+                getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()
+        );
+        getStyleClass().add("root");
         txtAgentId = (Text) lookup(".txtAgentId");
         txtPocketCost = (Text) lookup(".txtPocketCost");
         txtCurrentCost = (Text) lookup(".txtCurrentCost");

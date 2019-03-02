@@ -181,20 +181,30 @@ public class MemeticoContentController implements ContentController {
         currentInstance.addListener((observable, oldValue, newValue) -> contentOutdated = true);
         selectedFrameIndex.addListener((observable, oldValue, newValue) -> contentOutdated = true);
 
-        lblTargetColor.backgroundProperty().set(new Background(new BackgroundFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, Arrays.asList(
-                new Stop(0.0, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
-                new Stop(0.08333333333, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
-                new Stop(0.08333333333, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
-                new Stop(0.36111111111, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
-                new Stop(0.36111111111, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
-                new Stop(0.63888888888, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
-                new Stop(0.63888888888, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
-                new Stop(0.9166666666, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
-                new Stop(0.9166666666, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR)
-        )), CornerRadii.EMPTY, Insets.EMPTY)));
+//        lblTargetColor.backgroundProperty().bind(new SimpleObjectProperty<>(new Background(new BackgroundFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, Arrays.asList(
+//                new Stop(0.0, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+//                new Stop(0.08333333333, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+//                new Stop(0.08333333333, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+//                new Stop(0.36111111111, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+//                new Stop(0.36111111111, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+//                new Stop(0.63888888888, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+//                new Stop(0.63888888888, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+//                new Stop(0.9166666666, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+//                new Stop(0.9166666666, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR)
+//        )), CornerRadii.EMPTY, Insets.EMPTY))));
+
+        lblTargetColor.backgroundProperty().bind(new SimpleObjectProperty<>(new Background(new BackgroundFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, Arrays.asList(
+                new Stop(0.0, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+                new Stop(0.25, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+                new Stop(0.25, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+                new Stop(0.75, CanvasTSPGraph.DEFAULT_BACKGROUND_COLOR),
+                new Stop(0.75, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR),
+                new Stop(1, CanvasTSPGraph.DEFAULT_TARGET_EDGE_COLOR)
+        )), CornerRadii.EMPTY, Insets.EMPTY))));
 
 
-        lblBestColor.backgroundProperty().set(new Background(new BackgroundFill(CanvasTSPGraph.DEFAULT_EDGE_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        lblBestColor.backgroundProperty().bind(new SimpleObjectProperty<>(new Background(new BackgroundFill(CanvasTSPGraph.DEFAULT_EDGE_COLOR, CornerRadii.EMPTY, Insets.EMPTY))));
 
         ViewportGestures gestures = displayGraph.getGestures();
         graphContainer.addEventHandler(MouseEvent.MOUSE_PRESSED, gestures.getOnMousePressedEventHandler());
@@ -244,13 +254,13 @@ public class MemeticoContentController implements ContentController {
             }
             MemeticoSnapshot theSnapshot = currentSnapshot.get();
             if (optionsBoxController.getBestDisplayToggle().get()) {
-                int[][] edgesToAdd = new int[theInstance.getDimension()][];
+                List<int[]> edgesToAdd = new ArrayList<>(theInstance.getDimension());
                 List<Integer> bestTour = theSnapshot.bestSolution.tour;
                 for(int j = 0; j<bestTour.size(); ++j) {
-                    edgesToAdd[j] = new int[]{bestTour.get(j), bestTour.get((j+1)%bestTour.size())};
+                    edgesToAdd.add(new int[]{bestTour.get(j), bestTour.get((j+1)%bestTour.size())});
                 }
                 displayGraph.addPredictionEdges(
-                        Arrays.asList(edgesToAdd),
+                        edgesToAdd,
                         CanvasTSPGraph.DEFAULT_PREDICTION_COLOR
                 );
             }
@@ -271,10 +281,10 @@ public class MemeticoContentController implements ContentController {
                                                 .agents.get(i)
                                                 .current
                         );
-                        int[][] edgesToAdd = new int[theInstance.getDimension()][];
-                        List<Integer> bestTour = eachSolution.tour;
-                        for(int j = 0; j<bestTour.size(); ++j) {
-                            edgesToAdd[j] = new int[]{bestTour.get(j), bestTour.get((j+1)%bestTour.size())};
+                        List<int[]> edgesToAdd = new ArrayList<>(theInstance.getDimension());
+                        List<Integer> eachTour = eachSolution.tour;
+                        for(int j = 0; j<eachTour.size(); ++j) {
+                            edgesToAdd.add(new int[]{eachTour.get(j), eachTour.get((j+1)%eachTour.size())});
                         }
 //                        double tmpCost = 0;
 //                        DistanceTable tblDistance = theInstance.getDistanceTable();
@@ -283,7 +293,7 @@ public class MemeticoContentController implements ContentController {
 //                        }
 //                        System.out.println(tmpCost);
                         displayGraph.addPredictionEdges(
-                                Arrays.asList(edgesToAdd),
+                                edgesToAdd,
                                 (k == 0 ? eachAgentController.getPocketColor() : eachAgentController.getCurrentColor())
                         );
                     }

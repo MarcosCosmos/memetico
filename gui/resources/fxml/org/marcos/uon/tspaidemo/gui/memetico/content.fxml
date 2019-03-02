@@ -5,7 +5,7 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.Label?>
 <VBox fx:id="contentRoot" fx:controller="org.marcos.uon.tspaidemo.gui.memetico.MemeticoContentController"
-      xmlns:fx="http://javafx.com/fxml">
+      xmlns:fx="http://javafx.com/fxml" styleClass="root">
 
     <VBox fx:id="infoBox" VBox.vgrow="NEVER">
         <BorderPane fx:id="titleBar">
@@ -31,22 +31,42 @@
                     <GridPane styleClass="metaGrid">
                         <Label GridPane.rowIndex="0" GridPane.columnIndex="0" fx:id="lblTargetColor" styleClass="colorLabel">&#160;</Label>
                         <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="colorPadding"/>
-                        <Text GridPane.rowIndex="0" GridPane.columnIndex="2" fx:id="lblTargetCost">Target cost:&#160;</Text>
-                        <Text GridPane.rowIndex="0" GridPane.columnIndex="3" textAlignment="RIGHT" fx:id="txtTargetCost"/>
+                        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="2">
+                            <Text fx:id="lblTargetCost">Target cost:&#160;</Text>
+                        </TextFlow>
+                        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="3">
+                            <Text textAlignment="RIGHT" fx:id="txtTargetCost"/>
+                        </TextFlow>
                         <Label GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblBestColor" styleClass="colorLabel">&#160;</Label>
                         <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="colorPadding"/>
-                        <Text GridPane.rowIndex="1" GridPane.columnIndex="2" fx:id="lblBestCost">Best found:&#160;</Text>
-                        <Text GridPane.rowIndex="1" GridPane.columnIndex="3" textAlignment="RIGHT" fx:id="txtBestCost"/>
+                        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="2">
+                            <Text fx:id="lblBestCost">Best found:&#160;</Text>
+                        </TextFlow>
+                        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="3">
+                            <Text  textAlignment="RIGHT" fx:id="txtBestCost"/>
+                        </TextFlow>
                     </GridPane>
                 </left>
                 <right>
                     <GridPane styleClass="metaGrid">
-                        <Text GridPane.rowIndex="0" GridPane.columnIndex="0" fx:id="lblTimeGeneration">Time (Generation):&#160;</Text>
-                        <Text GridPane.rowIndex="0" GridPane.columnIndex="1" fx:id="txtTimeGeneration" textAlignment="RIGHT"/>
-                        <Text GridPane.rowIndex="0" GridPane.columnIndex="2">s</Text>
-                        <Text GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblTimeTotal">Time (Total):&#160;</Text>
-                        <Text GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="txtTimeTotal" textAlignment="RIGHT"/>
-                        <Text GridPane.rowIndex="1" GridPane.columnIndex="2">s</Text>
+                        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="0" fx:id="lblTimeGeneration">
+                            <Text>Time (Generation):&#160;</Text>
+                        </TextFlow>
+                        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <Text fx:id="txtTimeGeneration" textAlignment="RIGHT"/>
+                        </TextFlow>
+                        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="2">
+                            <Text>s</Text>
+                        </TextFlow>
+                        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="0">
+                            <Text fx:id="lblTimeTotal">Time (Total):&#160;</Text>
+                        </TextFlow>
+                        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <Text fx:id="txtTimeTotal" textAlignment="RIGHT"/>
+                        </TextFlow>
+                        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="2">
+                            <Text>s</Text>
+                        </TextFlow>
                     </GridPane>
                 </right>
             </BorderPane>

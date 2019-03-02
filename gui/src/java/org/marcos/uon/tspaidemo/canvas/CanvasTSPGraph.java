@@ -1,6 +1,7 @@
 package org.marcos.uon.tspaidemo.canvas;
 
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
@@ -19,9 +20,9 @@ public class CanvasTSPGraph {
 
     private ViewportGestures gestures;
 
-    public static final double DEFAULT_DOT_RADIUS = 3;
+    public static final double DEFAULT_DOT_RADIUS = 2;
     public static final double DEFAULT_STROKE_WIDTH = 1;
-    public static final Color DEFAULT_BACKGROUND_COLOR = Color.BLACK;
+    public static final Color DEFAULT_BACKGROUND_COLOR = Color.web("#26262b");
 //    public static final Color DEFAULT_DOT_FILL = Color.BLACK;
 //    public static final Color DEFAULT_EDGE_COLOR = Color.BLACK;
 //    public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
@@ -49,7 +50,9 @@ public class CanvasTSPGraph {
         predictionLayer = internalGraphic.addEdgeLayer(10);
         vertexLayer = internalGraphic.addVertexLayer(100);
         DragContext dragContext = getDragContext();
-        dragContext.boundsInLocalProperty().bind(vertexLayer.logicalBoundsProperty());
+        dragContext.logicalBoundsProperty().bind(vertexLayer.logicalBoundsProperty());
+        dragContext.boundsInLocalProperty().bind(vertexLayer.boundsInLocalProperty());
+        dragContext.boundsInCanvasProperty().bind(vertexLayer.boundsInCanvasProperty());
         gestures = new ViewportGestures(dragContext);
     }
 
@@ -86,7 +89,8 @@ public class CanvasTSPGraph {
     }
 //
     private void addEdges(CanvasGraph.Layer<Edge> edgeCategory, List<int[]> newEdges, Color strokeColour) {
-        for(int[] eachEdge : newEdges) {
+        for (int i = 0; i < newEdges.size(); i++) {
+            int[] eachEdge = newEdges.get(i);
             Vertex a = vertexLayer.get(eachEdge[0]),
                     b = vertexLayer.get(eachEdge[1])
                             ;
@@ -117,7 +121,7 @@ public class CanvasTSPGraph {
      * @return
      */
     public Bounds getLogicalBounds() {
-        return getDragContext().getBoundsInLocal();
+        return getDragContext().getLogicalBounds();
     }
 
     public void draw() {
@@ -158,12 +162,42 @@ public class CanvasTSPGraph {
         }
 
         setVertices(Arrays.stream(nodeData.listNodes()).mapToObj(i -> nodeData.get(i).getPosition()).collect(Collectors.toList()));
+//
+//        //clip the logical bounds to remove excess min x/y (Note: this only offsets against the logical location and doesn't remove any radial padding etc)
+//        Bounds logicalBounds = getLogicalBounds();
+//
+//        //upscale everything so that points are at least far enough to only not directly touch (including outlines) at /some/ scale;
+//
+//        //todo: use a kdtree for this
+//        //first find the minimum current distance in logical space
+//        double requiredScaling = 1;
+//        for (int i = 0; i < vertexLayer.size(); i++) {
+//            for (int k = i+1; k < vertexLayer.size(); k++) {
+//                Vertex eachA = vertexLayer.get(i);
+//                Vertex eachB = vertexLayer.get(k);
+//                double eachDist = eachA.getLocation().distance(vertexLayer.get(k).getLocation());
+//                double aDisplayRadius = eachA.getDotRadius() + eachA.getStrokeWidth()/2.0;
+//                double bDisplayRadius = eachB.getDotRadius() + eachB.getStrokeWidth()/2.0;
+//                double totalDisplayRadius = aDisplayRadius+bDisplayRadius;
+//                double minExpectedDist = 2*totalDisplayRadius;
+//                double eachRequiredScaling = minExpectedDist/(eachDist > 0 ? eachDist : 1);
+//                if(eachRequiredScaling > requiredScaling) {
+//                    requiredScaling = eachRequiredScaling;
+//                }
+//            }
+//        }
+//
+//        //also translate everything so that the logical minX is 0,0
+//        for (Vertex each: vertexLayer) {
+//            each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
+//        }
+//
+//        if(requiredScaling > 1) {
+//            for (Vertex each: vertexLayer) {
+//                each.setLocation(each.getLocation().multiply(requiredScaling));
+//            }
+//        }
 
-        //clip the logical bounds to remove excess min x/y
-        Bounds logicalBounds = getLogicalBounds();
-        for (Vertex each: vertexLayer) {
-            each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
-        }
         vertexLayer.requestRedraw();
 
         //add targets
@@ -171,12 +205,13 @@ public class CanvasTSPGraph {
                 instance.getTours()
                         .stream()
                         .flatMap(
-                            eachTour -> eachTour.toEdges()
-                                .stream()
-                                .map(eachEdge -> new int[]{eachEdge.getId1(), eachEdge.getId2()})
+                                eachTour -> eachTour.toEdges()
+                                        .stream()
+                                        .map(eachEdge -> new int[]{eachEdge.getId1(), eachEdge.getId2()})
                         )
                         .collect(Collectors.toList())
         );
+
         getDragContext().setTransformAutomatically(true);
     }
 

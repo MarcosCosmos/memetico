@@ -25,10 +25,6 @@
     -fx-stroke: lime;
 }
 
-.graph, #graphWrapper {
-    -fx-background-color:black;
-}
-
 #graphWrapper {
     -fx-padding: 1em;
 }

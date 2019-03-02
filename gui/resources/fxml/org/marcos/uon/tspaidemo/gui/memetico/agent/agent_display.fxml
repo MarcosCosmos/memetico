@@ -9,10 +9,18 @@
             <Text styleClass="txtAgentId"/>
         </TextFlow>
         <Label GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="colorLabel,pocketColorSample">&#160;</Label>
-        <Text GridPane.rowIndex="1" GridPane.columnIndex="1">Pocket:</Text>
-        <Text GridPane.rowIndex="1" GridPane.columnIndex="2" styleClass="txtPocketCost" textAlignment="RIGHT"/>
+        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Text>Pocket:</Text>
+        </TextFlow>
+        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="2">
+            <Text styleClass="txtPocketCost" textAlignment="RIGHT"/>
+        </TextFlow>
         <Label GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="colorLabel,currentColorSample,color">&#160;</Label>
-        <Text GridPane.rowIndex="2" GridPane.columnIndex="1">Current:</Text>
-        <Text GridPane.rowIndex="2" GridPane.columnIndex="2" styleClass="txtCurrentCost" textAlignment="RIGHT"/>
+        <TextFlow GridPane.rowIndex="2" GridPane.columnIndex="1">
+            <Text>Current:</Text>
+        </TextFlow>
+        <TextFlow GridPane.rowIndex="2" GridPane.columnIndex="2">
+            <Text styleClass="txtCurrentCost" textAlignment="RIGHT"/>
+        </TextFlow>
     </GridPane>
 </fx:root>

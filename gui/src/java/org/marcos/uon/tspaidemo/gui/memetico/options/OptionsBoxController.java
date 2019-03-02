@@ -316,6 +316,7 @@ public class OptionsBoxController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        memeticoOptionsBoxRoot.setFitToWidth(true);
 
         //todo: add an option for changing the log frequency through the UI/clean up save/load buttons
         memeticoOptionsBoxRoot.getStylesheets().addAll(

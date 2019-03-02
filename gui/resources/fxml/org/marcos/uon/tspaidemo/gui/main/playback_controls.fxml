@@ -3,16 +3,21 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import java.lang.*?>
+<?import javafx.scene.text.TextFlow?>
 <HBox fx:id="playbackControlsRoot" styleClass="controlBox" fx:controller="org.marcos.uon.tspaidemo.gui.main.PlaybackController"
-            xmlns:fx="http://javafx.com/fxml">
+      xmlns:fx="http://javafx.com/fxml">
     <BorderPane fx:id="sliderWrapper" HBox.hgrow="ALWAYS">
         <left>
-            <Text fx:id="txtMinFrame"/>
+            <TextFlow>
+                <Text fx:id="txtMinFrame"/>
+            </TextFlow>
         </left>
         <center>
             <BorderPane>
                 <center>
-                    <Text fx:id="txtCurFrame"/>
+                    <TextFlow>
+                        <Text fx:id="txtCurFrame"/>
+                    </TextFlow>
                 </center>
                 <bottom>
                     <Slider fx:id="sldrFrameIndex"/>
@@ -20,14 +25,18 @@
             </BorderPane>
         </center>
         <right>
-            <Text fx:id="txtMaxFrame"/>
+            <TextFlow>
+                <Text fx:id="txtMaxFrame"/>
+            </TextFlow>
         </right>
     </BorderPane>
     <HBox styleClass="controlBox">
         <Button fx:id="btnStop" text="■" onAction="#stopPlayback"/>
         <Button fx:id="btnPlayPause" onAction="#togglePlayState">/</Button>
         <HBox styleClass="controlBox">
-            <Label fx:id="lblSpeed">Speed:</Label>
+            <TextFlow>
+                <Label fx:id="lblSpeed">Speed:</Label>
+            </TextFlow>
             <ChoiceBox fx:id="cbSpeed">
                 <Double fx:value="0.00138888888"/>
                 <Double fx:value="0.015" />
@@ -47,6 +56,6 @@
                 <Double fx:value="960" />
             </ChoiceBox>
         </HBox>
-        <Text fx:id="txtTest"/>
+            <Text fx:id="txtTest"/>
     </HBox>
 </HBox>

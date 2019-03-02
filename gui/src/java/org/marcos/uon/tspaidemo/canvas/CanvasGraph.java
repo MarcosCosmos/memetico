@@ -27,15 +27,45 @@ import java.util.List;
  * (todo: rename? this is probably more generalised than it was before)
  */
 public class CanvasGraph extends Pane {
-//
-//    public void setPivot(double x, double y) {
-//        setTranslateX(getTranslateX() - x);
-//        setTranslateY(getTranslateY() - y);
-//    }
-//
-//
+    public static final double MIN_RADIUS = CanvasTSPGraph.DEFAULT_DOT_RADIUS;
+    public static final double MIN_LINE_WIDTH = CanvasTSPGraph.DEFAULT_STROKE_WIDTH;
+    public static final double MIN_DECORATION_SCALE = 1, MAX_DECORATION_SCALE = 5;
 
-    ViewportGestures gestures;
+    public static double computeDecorationScale(double requestedScale) {
+        if(requestedScale < MIN_DECORATION_SCALE) {
+            return MIN_DECORATION_SCALE;
+        } else if (requestedScale > MAX_DECORATION_SCALE) {
+            return MAX_DECORATION_SCALE;
+        } else {
+            return requestedScale;
+        }
+    }
+
+    /**
+     * Computes the radius used when drawing the vertex
+     * @param preferredRadius
+     * @param scale
+     */
+    public static double computeRadiusToUse(double preferredRadius, double scale) {
+        return preferredRadius*computeDecorationScale(scale);
+    }
+
+    /**
+     * Computes the line width used when drawing the vertex
+     * @param preferredWidth
+     * @param scale
+     */
+    public static double computeStrokeWidthToUse(double preferredWidth, double scale) {
+        return preferredWidth*computeDecorationScale(scale);
+    }
+    /**
+     * Computes the line width used when drawing the vertex
+     * @param preferredWidth
+     * @param scale
+     */
+    public static double computeLineWidthToUse(double preferredWidth, double scale) {
+        return  preferredWidth*computeDecorationScale(scale);
+    }
 
     /**
      * Publically exposed interface; hides the
@@ -89,16 +119,23 @@ public class CanvasGraph extends Pane {
     }
 
     public class VertexLayer extends LayerImpl<Vertex> {
-        public static final double MIN_RADIUS = 4;
 
         private final ReadOnlyObjectWrapper<Bounds> logicalBounds;
+        private final ReadOnlyObjectWrapper<Bounds> boundsInLocal;
+        private final ReadOnlyObjectWrapper<Bounds> boundsInCanvas;
         private final BooleanProperty boundsValid = new SimpleBooleanProperty(true);
+
+//        //these corner vertices are used for scaling/translation purposes;
+//        private Vertex
         public VertexLayer(int priority) {
             super(priority);
-            logicalBounds = new ReadOnlyObjectWrapper<>(computeLogicalBounds());
+            logicalBounds = new ReadOnlyObjectWrapper<>();
+            boundsInLocal = new ReadOnlyObjectWrapper<>();
+            boundsInCanvas = new ReadOnlyObjectWrapper<>();
+            updateBounds();
             boundsValid.addListener((observable, oldValue, newValue) -> {
                 if(!newValue) {
-                    logicalBounds.set(computeLogicalBounds());
+                    updateBounds();
                     boundsValid.set(true);
                 }
             });
@@ -110,21 +147,21 @@ public class CanvasGraph extends Pane {
             gc.clearRect(0,0, canvas.getWidth(), canvas.getHeight());
             double scale = dragContext.getScale();
             for (Vertex each : this) {
-                double radiusToUse = Math.max(MIN_RADIUS, (each.getDotRadius()+(each.getStrokeWidth()/2.0))*scale);
-                double halfRad = radiusToUse/2;
+                double radiusToUse = computeRadiusToUse(each.getDotRadius(), scale);
+                double lineWidthToUse = computeLineWidthToUse(each.getStrokeWidth(), scale);
                 gc.setFill(each.getDotFill());
-                Point2D minCorner = dragContext.localToCanvas(each.getLocation()).subtract(new Point2D(halfRad, halfRad));
-                gc.fillOval(minCorner.getX(), minCorner.getY(), radiusToUse, radiusToUse);
-                gc.setLineWidth(each.getStrokeWidth());
+                Point2D minCorner = dragContext.localToCanvas(each.getLocation()).subtract(new Point2D(radiusToUse, radiusToUse));
+                gc.fillOval(minCorner.getX(), minCorner.getY(), radiusToUse*2, radiusToUse*2);
+                gc.setLineWidth(lineWidthToUse);
                 gc.setStroke(each.getDotStroke());
-                gc.strokeOval(minCorner.getX(), minCorner.getY(), radiusToUse, radiusToUse);
+                gc.strokeOval(minCorner.getX(), minCorner.getY(), radiusToUse*2, radiusToUse*2);
             }
             requiresRedraw = false;
         }
 
         /**
          * {@inheritDoc}
-         * Note: also updates the logicalBounds
+         * Note: also updates the boundsInLocal
          */
         @Override
         public void requestRedraw() {
@@ -139,29 +176,66 @@ public class CanvasGraph extends Pane {
          * Returns the bounds as determined by the cells
          * @return
          */
-        private Bounds computeLogicalBounds() {
+        private void updateBounds() {
 //        (todo: cater for text in the bounds check?)
-            double minX=Double.POSITIVE_INFINITY, minY=Double.POSITIVE_INFINITY, maxX=Double.NEGATIVE_INFINITY, maxY=Double.NEGATIVE_INFINITY;
+            double minLogicalX=Double.POSITIVE_INFINITY, minLogicalY=Double.POSITIVE_INFINITY, maxLogicalX=Double.NEGATIVE_INFINITY, maxLogicalY=Double.NEGATIVE_INFINITY;
+            double minLocalX=Double.POSITIVE_INFINITY, minLocalY=Double.POSITIVE_INFINITY, maxLocalX=Double.NEGATIVE_INFINITY, maxLocalY=Double.NEGATIVE_INFINITY;
+            double minInCanvasX=Double.POSITIVE_INFINITY, minInCanvasY=Double.POSITIVE_INFINITY, maxInCanvasX=Double.NEGATIVE_INFINITY, maxInCanvasY=Double.NEGATIVE_INFINITY;
+            double scale = dragContext.getScale();
+            double translationX = dragContext.getTranslationX();
+            double translationY = dragContext.getTranslationY();
             for(Vertex each : this) {
                 double x = each.getLocation().getX();
                 double y = each.getLocation().getY();
-                double radius = each.getDotRadius()+each.getStrokeWidth()/2.0;
-                double mnX = x-radius, mxX = x+radius, mnY = y-radius, mxY = y+radius;
-                if(minX > mnX) {
-                    minX=mnX;
+                double baseRadius = CanvasGraph.computeRadiusToUse(each.getDotRadius(), 1) + CanvasGraph.computeStrokeWidthToUse(each.getStrokeWidth(), 1)/2.0;
+                double mnX = x-baseRadius, mxX=x+baseRadius, mnY=y-baseRadius, mxY=y+baseRadius;
+                double appliedRadius = CanvasGraph.computeRadiusToUse(each.getDotRadius(), scale) + CanvasGraph.computeLineWidthToUse(each.getStrokeWidth(), scale)/2.0;
+                double icX = (x+translationX)*scale, icY = (y+translationY)*scale;
+                double mnicX = icX-appliedRadius, mxicX = icX+appliedRadius, mnicY = icY-appliedRadius, mxicY = icY+appliedRadius;
+                
+                if(minLogicalX > x) {
+                    minLogicalX=x;
                 }
-                if(minY > mnY) {
-                    minY=mnY;
+                if(minLogicalY > y) {
+                    minLogicalY=y;
                 }
-                if(maxX < mxX) {
-                    maxX=mxX;
+                if(maxLogicalX < x) {
+                    maxLogicalX=x;
                 }
-                if(maxY < mxY) {
-                    maxY=mxY;
+                if(maxLogicalY < y) {
+                    maxLogicalY=y;
+                }
+
+                if(minLocalX > mnX) {
+                    minLocalX=mnX;
+                }
+                if(minLocalY > mnY) {
+                    minLocalY=mnY;
+                }
+                if(maxLocalX < mxX) {
+                    maxLocalX=mxX;
+                }
+                if(maxLocalY < mxY) {
+                    maxLocalY=mxY;
+                }
+
+                if(minInCanvasX > mnicX) {
+                    minInCanvasX=mnicX;
+                }
+                if(minInCanvasY > mnicY) {
+                    minInCanvasY=mnicY;
+                }
+                if(maxInCanvasX < mxicX) {
+                    maxInCanvasX=mxicX;
+                }
+                if(maxInCanvasY < mxicY) {
+                    maxInCanvasY=mxicY;
                 }
             }
 
-            return new BoundingBox(minX, minY, maxX-minX, maxY-minY);
+            logicalBounds.set(new BoundingBox(minLogicalX, minLogicalY, maxLogicalX-minLogicalX, maxLogicalY-minLogicalY));
+            boundsInLocal.set(new BoundingBox(minLocalX, minLocalY, maxLocalX-minLocalX, maxLocalY-minLocalY));
+            boundsInCanvas.set(new BoundingBox(minInCanvasX, minInCanvasY, maxInCanvasX-minInCanvasX, maxInCanvasY-minInCanvasY));
         }
 
         public Bounds getLogicalBounds() {
@@ -171,11 +245,37 @@ public class CanvasGraph extends Pane {
         public ReadOnlyObjectProperty<Bounds> logicalBoundsProperty() {
             return logicalBounds.getReadOnlyProperty();
         }
+
+        public void setLogicalBounds(Bounds logicalBounds) {
+            this.logicalBounds.set(logicalBounds);
+        }
+
+        public Bounds getBoundsInLocal() {
+            return boundsInLocal.get();
+        }
+
+        public ReadOnlyObjectProperty<Bounds> boundsInLocalProperty() {
+            return boundsInLocal.getReadOnlyProperty();
+        }
+
+        public void setBoundsInLocal(Bounds boundsInLocal) {
+            this.boundsInLocal.set(boundsInLocal);
+        }
+
+        public Bounds getBoundsInCanvas() {
+            return boundsInCanvas.get();
+        }
+
+        public ReadOnlyObjectProperty<Bounds> boundsInCanvasProperty() {
+            return boundsInCanvas.getReadOnlyProperty();
+        }
+
+        public void setBoundsInCanvas(Bounds boundsInCanvas) {
+            this.boundsInCanvas.set(boundsInCanvas);
+        }
     }
 
     public class EdgeLayer extends LayerImpl<Edge> {
-
-        public static final double MIN_LINE_WIDTH = 1;
         public EdgeLayer(int priority) {
             super(priority);
         }
@@ -187,7 +287,7 @@ public class CanvasGraph extends Pane {
             double scale = dragContext.getScale();
             for(Edge each : this) {
                 gc.setStroke(each.getLineStroke());
-                gc.setLineWidth(Math.max(MIN_LINE_WIDTH, scale*each.getLineWidth()));
+                gc.setLineWidth(computeLineWidthToUse(each.getLineWidth(), scale));
                 Point2D aPos =  dragContext.localToCanvas(each.getA().getLocation()), bPos = dragContext.localToCanvas(each.getB().getLocation());
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
             }
@@ -196,8 +296,6 @@ public class CanvasGraph extends Pane {
     }
 
     public class OutlineEdgeLayer extends LayerImpl<Edge> {
-
-        public static final double MIN_LINE_WIDTH = EdgeLayer.MIN_LINE_WIDTH;
         public OutlineEdgeLayer(int priority) {
             super(priority);
         }
@@ -208,12 +306,13 @@ public class CanvasGraph extends Pane {
             gc.clearRect(0,0, getWidth(), getHeight());
             double scale = dragContext.getScale();
             for(Edge each : this) {
+                double lineWidthToUse = computeLineWidthToUse(each.getLineWidth(), scale);
                 Point2D aPos =  dragContext.localToCanvas(each.getA().getLocation()), bPos = dragContext.localToCanvas(each.getB().getLocation());
-                gc.setLineWidth(Math.max(2*MIN_LINE_WIDTH, scale*each.getLineWidth()*2));
+                gc.setLineWidth(2*lineWidthToUse);
                 gc.setStroke(each.getLineStroke());
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
                 gc.setStroke(backgroundColor);
-                gc.setLineWidth(Math.max(MIN_LINE_WIDTH, scale*each.getLineWidth()));
+                gc.setLineWidth(lineWidthToUse);
                 gc.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
             }
             requiresRedraw = false;
@@ -257,7 +356,6 @@ public class CanvasGraph extends Pane {
         );
 
         setBackgroundColor(Color.BLACK);
-        styleProperty().set("-fx-border-color:white;");
         requiresReordering = false;
 
         //automatically redraw when resized
