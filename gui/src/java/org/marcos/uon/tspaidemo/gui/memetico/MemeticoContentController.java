@@ -208,6 +208,7 @@ public class MemeticoContentController implements ContentController {
 
         ViewportGestures gestures = displayGraph.getGestures();
         graphContainer.addEventHandler(MouseEvent.MOUSE_PRESSED, gestures.getOnMousePressedEventHandler());
+        graphContainer.addEventHandler(MouseEvent.MOUSE_RELEASED, gestures.getOnMouseReleasedEventHandler());
         graphContainer.addEventHandler(MouseEvent.MOUSE_DRAGGED, gestures.getOnMouseDraggedEventHandler());
         graphContainer.addEventHandler(ScrollEvent.ANY, gestures.getOnScrollEventHandler());
 

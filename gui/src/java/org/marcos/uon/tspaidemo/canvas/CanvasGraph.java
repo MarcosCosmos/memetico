@@ -187,9 +187,9 @@ public class CanvasGraph extends Pane {
             for(Vertex each : this) {
                 double x = each.getLocation().getX();
                 double y = each.getLocation().getY();
-                double baseRadius = CanvasGraph.computeRadiusToUse(each.getDotRadius(), 1) + CanvasGraph.computeStrokeWidthToUse(each.getStrokeWidth(), 1)/2.0;
+                double baseRadius = CanvasGraph.computeRadiusToUse(each.getDotRadius(), 1) + CanvasGraph.computeStrokeWidthToUse(each.getStrokeWidth(), 1);
                 double mnX = x-baseRadius, mxX=x+baseRadius, mnY=y-baseRadius, mxY=y+baseRadius;
-                double appliedRadius = CanvasGraph.computeRadiusToUse(each.getDotRadius(), scale) + CanvasGraph.computeLineWidthToUse(each.getStrokeWidth(), scale)/2.0;
+                double appliedRadius = CanvasGraph.computeRadiusToUse(each.getDotRadius(), scale) + CanvasGraph.computeLineWidthToUse(each.getStrokeWidth(), scale);
                 double icX = (x+translationX)*scale, icY = (y+translationY)*scale;
                 double mnicX = icX-appliedRadius, mxicX = icX+appliedRadius, mnicY = icY-appliedRadius, mxicY = icY+appliedRadius;
                 

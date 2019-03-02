@@ -4,6 +4,7 @@ import com.fxgraph.graph.PannableCanvas;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 
@@ -30,19 +31,27 @@ public class ViewportGestures {
         return onScrollEventHandler;
     }
 
+    public EventHandler<MouseEvent> getOnMouseReleasedEventHandler() {
+        return onMouseReleasedEventHandler;
+    }
+
     private final EventHandler<MouseEvent> onMousePressedEventHandler = new EventHandler<MouseEvent>() {
 
         @Override
         public void handle(MouseEvent event) {
-
-            // right mouse button => panning
-            if(!event.isSecondaryButtonDown()) {
-                return;
+            if (event.isPrimaryButtonDown()) {
+                sceneDragContext.setMouseAnchor(event.getX(), event.getY());
             }
-
-            sceneDragContext.setMouseAnchor(event.getX(), event.getY());
         }
+    };
 
+    private final EventHandler<MouseEvent> onMouseReleasedEventHandler = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+            if(event.getButton() == MouseButton.PRIMARY) {
+                sceneDragContext.santiseTranslation();
+            }
+        }
     };
 
     private final EventHandler<MouseEvent> onMouseDraggedEventHandler = new EventHandler<MouseEvent>() {
@@ -50,7 +59,7 @@ public class ViewportGestures {
         public void handle(MouseEvent event) {
 
             // right mouse button => panning
-            if(!event.isSecondaryButtonDown()) {
+            if(!event.isPrimaryButtonDown()) {
                 return;
             }
 
@@ -59,8 +68,7 @@ public class ViewportGestures {
             sceneDragContext.translate((event.getX() - sceneDragContext.getMouseAnchorX())/sceneDragContext.getScale(), (event.getY() - sceneDragContext.getMouseAnchorY())/sceneDragContext.getScale());
 
             sceneDragContext.setMouseAnchor(event.getX(), event.getY());
-
-            sceneDragContext.santiseTranslation();
+//            sceneDragContext.santiseTranslation();
             event.consume();
         }
     };

@@ -305,11 +305,28 @@ public class DragContext {
         Point2D mouseAnchor = getMouseAnchor();
         Bounds boundsInCanvas = getBoundsInCanvas();
         Point2D minInCanvas = new Point2D(boundsInCanvas.getMinX(), boundsInCanvas.getMinY());
+
+
+
         if(boundsInCanvas.contains(mouseAnchor)) {
             originForScale = mouseAnchor;
         } else {
-            Point2D sizeInCanvas = new Point2D(boundsInCanvas.getWidth(), boundsInCanvas.getHeight());
-            originForScale = minInCanvas.midpoint(sizeInCanvas); //if the mouse is outside the box, use the center of the box
+            //use the closest point on the bounding box to the anchor as the origin
+            double originX = mouseAnchor.getX(), originY = mouseAnchor.getY();
+            
+            if(mouseAnchor.getX() < boundsInCanvas.getMinX()) {
+                originX = boundsInCanvas.getMinX();
+            } else if (mouseAnchor.getX() > boundsInCanvas.getMaxX()) {
+                originX = boundsInCanvas.getMaxX();
+            }
+
+            if(mouseAnchor.getY() < boundsInCanvas.getMinY()) {
+                originY = boundsInCanvas.getMinY();
+            } else if (mouseAnchor.getY() > boundsInCanvas.getMaxY()) {
+                originY = boundsInCanvas.getMaxY();
+            }
+
+            originForScale = new Point2D(originX, originY);
         }
         Point2D positionInCanvas = localToCanvas(0,0);
         Point2D newTranslation = positionInCanvas.subtract(originForScale).multiply(scale/oldScale).add(originForScale).multiply(1/scale);
