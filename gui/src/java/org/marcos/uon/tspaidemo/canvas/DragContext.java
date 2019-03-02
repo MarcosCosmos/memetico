@@ -81,18 +81,22 @@ public class DragContext {
         ));
 
         autoTranslationX.bind(Bindings.createDoubleBinding(() -> {
-                    Bounds canvasBounds = getCanvasBounds();
-                    Bounds boundsInLocal = getBoundsInLocal();
                     double scale = getScale();
-                    return ((canvasBounds.getWidth() - boundsInLocal.getWidth()*scale) / 2) / scale - boundsInLocal.getMinX();
+                    Bounds canvasBounds = getCanvasBounds();
+                    Bounds logicalBounds = getLogicalBounds();
+                    Bounds boundsInLocal = getBoundsInLocal();
+                    double baseDecorationPaddingX = boundsInLocal.getWidth()-logicalBounds.getWidth();
+                    return ((canvasBounds.getWidth() - (getLogicalBounds().getWidth()+baseDecorationPaddingX)*scale) / 2) / scale - getBoundsInLocal().getMinX();
                 },
                 canvasBounds, boundsInLocal, scale
         ));
         autoTranslationY.bind(Bindings.createDoubleBinding(() -> {
-                    Bounds canvasBounds = getCanvasBounds();
-                    Bounds boundsInLocal = getBoundsInLocal();
                     double scale = getScale();
-                    return ((canvasBounds.getHeight() - boundsInLocal.getHeight()*scale) / 2) / scale - boundsInLocal.getMinY();
+                    Bounds canvasBounds = getCanvasBounds();
+                    Bounds logicalBounds = getLogicalBounds();
+                    Bounds boundsInLocal = getBoundsInLocal();
+                    double baseDecorationPaddingY = boundsInLocal.getHeight()-logicalBounds.getHeight();
+                    return ((canvasBounds.getHeight() - (getLogicalBounds().getHeight()+baseDecorationPaddingY)*scale) / 2) / scale - getBoundsInLocal().getMinY();
                 },
                 canvasBounds, boundsInLocal, scale
         ));
