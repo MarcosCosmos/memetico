@@ -6,3 +6,7 @@
     -fx-spacing: 5;
     -fx-alignment: center;
 }
+
+.flwCenter {
+    -fx-text-alignment: center;
+}

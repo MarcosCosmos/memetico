@@ -35,7 +35,8 @@ public class PlaybackController implements Initializable {
     @FXML
     private Button btnPlayPause;
     @FXML
-    private Text txtCurFrame, txtMinFrame, txtMaxFrame, txtTest;
+    //txtMinFrame,
+    private Text txtCurFrame, txtMaxFrame, txtTest;
 
     private boolean wasPlaying = false;
 
@@ -66,7 +67,7 @@ public class PlaybackController implements Initializable {
 
 
         txtCurFrame.textProperty().bind(Bindings.createIntegerBinding(() -> (int)sldrFrameIndex.valueProperty().get(), sldrFrameIndex.valueProperty()).asString());
-        txtMinFrame.textProperty().bind(Bindings.createIntegerBinding(() -> (int)sldrFrameIndex.minProperty().get(), sldrFrameIndex.minProperty()).asString());
+//        txtMinFrame.textProperty().bind(Bindings.createIntegerBinding(() -> (int)sldrFrameIndex.minProperty().get(), sldrFrameIndex.minProperty()).asString());
         txtMaxFrame.textProperty().bind(Bindings.createIntegerBinding(() -> (int)sldrFrameIndex.maxProperty().get(), sldrFrameIndex.maxProperty()).asString());
 
         sldrFrameIndex.valueProperty().bindBidirectional(frameIndex);

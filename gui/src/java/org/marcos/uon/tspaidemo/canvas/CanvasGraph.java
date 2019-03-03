@@ -27,8 +27,6 @@ import java.util.List;
  * (todo: rename? this is probably more generalised than it was before)
  */
 public class CanvasGraph extends Pane {
-    public static final double MIN_RADIUS = CanvasTSPGraph.DEFAULT_DOT_RADIUS;
-    public static final double MIN_LINE_WIDTH = CanvasTSPGraph.DEFAULT_STROKE_WIDTH;
     public static final double MIN_DECORATION_SCALE = 1, MAX_DECORATION_SCALE = 5;
 
     public static double computeDecorationScale(double requestedScale) {

@@ -9,21 +9,12 @@
     <BorderPane fx:id="sliderWrapper" HBox.hgrow="ALWAYS">
         <left>
             <TextFlow>
-                <Text fx:id="txtMinFrame"/>
+                <Text fx:id="txtCurFrame"/>
             </TextFlow>
         </left>
-        <center>
-            <BorderPane>
-                <center>
-                    <TextFlow>
-                        <Text fx:id="txtCurFrame"/>
-                    </TextFlow>
-                </center>
-                <bottom>
-                    <Slider fx:id="sldrFrameIndex"/>
-                </bottom>
-            </BorderPane>
-        </center>
+        <bottom>
+            <Slider fx:id="sldrFrameIndex"/>
+        </bottom>
         <right>
             <TextFlow>
                 <Text fx:id="txtMaxFrame"/>
