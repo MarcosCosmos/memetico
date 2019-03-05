@@ -88,12 +88,13 @@ public class MemeticoSnapshot {
     public final long logTime;
     public final LightTour bestSolution;
     public final List<AgentSnapshot> agents;
+    public final boolean isFinal;
 
     /**
      * Note: the cost value (in the SolutionStructure class) is expected to be already computed for all srcs
      * @param src
      */
-    public MemeticoSnapshot(String instanceName, Population src, int generation, long logTime) {
+    public MemeticoSnapshot(String instanceName, Population src, int generation, long logTime, boolean isFinal) {
         this(instanceName, generation, src.n_ary, logTime, new LightTour((DiCycle)src.bestSolution),
                 Collections.unmodifiableList(
                         IntStream.range(0,src.popSize).mapToObj(i -> {
@@ -101,24 +102,25 @@ public class MemeticoSnapshot {
                                 return new AgentSnapshot(i, (DiCycle)each.pocket, (DiCycle)each.current);
                             }
                             ).collect(Collectors.toList())
-                        )
+                        ), isFinal
         );
     }
 
-    public MemeticoSnapshot(String instanceName, int generation, int nAry, long logTime, LightTour bestSolution, List<AgentSnapshot> agents) {
+    public MemeticoSnapshot(String instanceName, int generation, int nAry, long logTime, LightTour bestSolution, List<AgentSnapshot> agents, boolean isFinal) {
         this.instanceName = instanceName;
         this.generation = generation;
         this.nAry = nAry;
         this.logTime = logTime;
         this.bestSolution = bestSolution;
         this.agents = agents;
+        this.isFinal = isFinal;
     }
 
     public static class Deserializer implements JsonDeserializer<MemeticoSnapshot> {
         @Override
         public MemeticoSnapshot deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject jsonObject = json.getAsJsonObject();
-            return new MemeticoSnapshot(jsonObject.get("instanceName").getAsString(), jsonObject.get("generation").getAsInt(), jsonObject.get("nAry").getAsInt(), jsonObject.get("logTime").getAsLong(), context.deserialize(jsonObject.get("pocket"), LightTour.class), context.deserialize(jsonObject.get("current"), LightTour.class));
+            return new MemeticoSnapshot(jsonObject.get("instanceName").getAsString(), jsonObject.get("generation").getAsInt(), jsonObject.get("nAry").getAsInt(), jsonObject.get("logTime").getAsLong(), context.deserialize(jsonObject.get("pocket"), LightTour.class), context.deserialize(jsonObject.get("current"), LightTour.class), context.deserialize(jsonObject.get("isFinal"), Double.class));
         }
     }
 }

@@ -67,28 +67,28 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
     /**
      * force log regardless of interval (e.g. because it's the end state)
      */
-    protected void _log(String instanceName, Population population, int generation) throws InterruptedException {
-        _log(new MemeticoSnapshot(instanceName, population, generation, System.nanoTime()));
+    protected void _log(String instanceName, Population population, int generation, boolean isFinal) throws InterruptedException {
+        _log(new MemeticoSnapshot(instanceName, population, generation, System.nanoTime(), isFinal));
     }
 
 
-    public void log(String instanceName, Population population, int generation) throws InterruptedException {
-        log(new MemeticoSnapshot(instanceName, population, generation, System.nanoTime())); //we only need the lock after creating the new object;
+    public void log(String instanceName, Population population, int generation, boolean isFinal) throws InterruptedException {
+        log(new MemeticoSnapshot(instanceName, population, generation, System.nanoTime(), isFinal)); //we only need the lock after creating the new object;
     }
 
     /**
      * log, only stored if at the correct generation
      */
-    protected void _tryLog(String instanceName, Population population, int generation) throws InterruptedException {
+    protected void _tryLog(String instanceName, Population population, int generation, boolean isFinal) throws InterruptedException {
         if (generation % logFrequency == 0) {
-            _log(instanceName, population, generation);
+            _log(instanceName, population, generation, isFinal);
         }
     }
 
-    public void tryLog(String instanceName, Population population, int generation) throws InterruptedException {
+    public void tryLog(String instanceName, Population population, int generation, boolean isFinal) throws InterruptedException {
         //for this we actually need the lock the whole time, in case the frequency changes
         lock.acquireWriteLock();
-        _tryLog(instanceName,population,generation);
+        _tryLog(instanceName,population,generation,isFinal);
         lock.releaseWriteLock();
     }
 

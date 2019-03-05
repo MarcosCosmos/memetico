@@ -21,9 +21,15 @@
         </BorderPane>
         <VBox styleClass="statisticsBox" VBox.vgrow="ALWAYS" alignment="CENTER" spacing="5">
             <HBox>
-                <TextFlow>
-                    <Text fx:id="lblTeneration">Generation:</Text>
+                <TextFlow textAlignment="LEFT" HBox.hgrow="ALWAYS">
+                    <Text fx:id="lblTeneration">Showing Generation:&#160;</Text>
                     <Text fx:id="txtGeneration"/>
+                    <Text>&#160;of&#160;</Text>
+                    <Text fx:id="txtGenerationCount"/>
+                </TextFlow>
+                <TextFlow textAlignment="RIGHT" HBox.hgrow="ALWAYS">
+                    <Text>Search Status:&#160;</Text>
+                    <Text fx:id="txtRunningStatus"/>
                 </TextFlow>
             </HBox>
             <BorderPane>
@@ -54,8 +60,6 @@
                         </TextFlow>
                         <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="1">
                             <Text fx:id="txtTimeGeneration" textAlignment="RIGHT"/>
-                        </TextFlow>
-                        <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="2">
                             <Text>s</Text>
                         </TextFlow>
                         <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="0">
@@ -63,8 +67,6 @@
                         </TextFlow>
                         <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="1">
                             <Text fx:id="txtTimeTotal" textAlignment="RIGHT"/>
-                        </TextFlow>
-                        <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="2">
                             <Text>s</Text>
                         </TextFlow>
                     </GridPane>

@@ -13,7 +13,7 @@ public interface IPCLogger extends ILogger<MemeticoSnapshot> {
      */
     @Override
     View newView() throws InterruptedException;
-    void log(String instanceName, Population population, int generation) throws InterruptedException;
+    void log(String instanceName, Population population, int generation, boolean isFinal) throws InterruptedException;
 
-    void tryLog(String instanceName, Population population, int generation) throws InterruptedException;
+    void tryLog(String instanceName, Population population, int generation, boolean isFinal) throws InterruptedException;
 }

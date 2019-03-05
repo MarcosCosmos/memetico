@@ -70,3 +70,13 @@
 .colorPadding {
     -fx-min-width: 5px;
 }
+
+.successStatus {
+    -fx-fill: lime;
+}
+.failStatus {
+    -fx-fill: red;
+}
+.successStatus, .failedStatus {
+    -fx-font-weight: bold;
+}

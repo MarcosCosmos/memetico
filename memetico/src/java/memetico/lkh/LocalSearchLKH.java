@@ -9,9 +9,11 @@ import org.jorlib.io.tspLibReader.TSPLibTour;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.Buffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -24,6 +26,8 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
     private File paramFile;
     private File initialTourFile;
     private File resultTourFile;
+    private File candidateFile;
+    private File piFile;
 //    private String baseParams;
 //
     public LocalSearchLKH(@NotNull URL problemResource) throws IOException {
@@ -36,12 +40,15 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
         paramFile = File.createTempFile("lhkConfig", ".par");
         initialTourFile = File.createTempFile("initialSolution", ".tsp");
         resultTourFile = File.createTempFile("resultSolution", ".tsp");
-
+        candidateFile = new File(String.format("candidates%s.lkhdat", UUID.randomUUID()));
+        piFile = new File(String.format("pi%s.lkhdat", UUID.randomUUID()));
 //        StringWriter tmpWriter = new StringWriter();
         PrintWriter paramOutlet = new PrintWriter(new FileWriter(paramFile));
         paramOutlet.printf("PROBLEM_FILE = %s%n", problemFile.getPath());
         paramOutlet.printf("INITIAL_TOUR_FILE = %s%n", initialTourFile.getPath());
-        paramOutlet.printf("OUTPUT_TOUR_FILE = %s%n", resultTourFile.getPath());
+        paramOutlet.printf("TOUR_FILE = %s%n", resultTourFile.getPath());
+        paramOutlet.printf("CANDIDATE_FILE = %s%n", candidateFile.getPath());
+        paramOutlet.printf("PI_FILE = %s%n", piFile.getPath());
         paramOutlet.printf("MAX_TRIALS = %s%n", 1);
         paramOutlet.println("RUNS = 1");
 //        paramOutlet.println("STOP_AT_OPTIMUM = YES");
@@ -54,7 +61,8 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
         paramFile.deleteOnExit();
         initialTourFile.deleteOnExit();
         resultTourFile.deleteOnExit();
-
+        candidateFile.deleteOnExit();
+        piFile.deleteOnExit();
     }
 
     public void runLocalSearch(SolutionStructure soln, Instance inst) {
@@ -64,6 +72,23 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
             Runtime r = Runtime.getRuntime();
             Process p = r.exec(new String[]{"LKH", paramFile.getPath()});
             p.waitFor();
+            if(p.exitValue() != 0) {
+                System.err.println("Error: LKH Failed - printing stdout and stderr outputs..");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String eachLine = reader.readLine();
+                while (eachLine != null) {
+                    System.out.println(eachLine);
+                    eachLine = reader.readLine();
+                }
+                reader.close();
+                reader = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                eachLine = reader.readLine();
+                while (eachLine != null) {
+                    System.err.println(eachLine);
+                    eachLine = reader.readLine();
+                }
+                reader.close();
+            }
 
             TSPLibInstance tmpInst = new TSPLibInstance(resultTourFile);
             TSPLibTour theTour = tmpInst.getTours().get(0);

@@ -53,11 +53,11 @@ public class AgentDisplay extends Pane {
 
         txtAgentId.textProperty().bind(Bindings.createStringBinding(() -> snapShot.get() == null ? "?" : String.valueOf(snapShot.get().id), snapShot));
         txtPocketCost.textProperty().bind(Bindings.createStringBinding(
-                () -> String.valueOf(snapShot.get() == null ? "Uknown" : snapShot.get().pocket.cost),
+                () -> String.valueOf(snapShot.get() == null ? "Unknown" : snapShot.get().pocket.cost),
                 snapShot
         ));
         txtCurrentCost.textProperty().bind(Bindings.createStringBinding(
-                () -> String.valueOf(snapShot.get() == null ? "Uknown" : snapShot.get().current.cost),
+                () -> String.valueOf(snapShot.get() == null ? "Unknown" : snapShot.get().current.cost),
                 snapShot
         ));
 

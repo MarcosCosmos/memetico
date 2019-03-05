@@ -94,6 +94,7 @@ public class Memetico {
 
 //      refAgent 		= selectAgentStruct(refAgent);
 
+            logger.reset();
             memePop = new Population(inst, TamPop, Agent.POKET_CURRENT, SolutionStructure.DICYCLE_TYPE);
             pocCurPop = (PocCurAgent[]) memePop.pop;
 
@@ -106,7 +107,6 @@ public class Memetico {
 
 
 //            TotalTime = System.currentTimeMillis();
-            logger.reset();
             // we initialize the population of agents
             // with a method based on the nearest neighbour heuristic for the TSP
             NNInicializePop(refConstr, 0, (int) (Math.random() * ((GraphInstance) inst).dimension),
@@ -204,7 +204,7 @@ public class Memetico {
                 }
 
                 /* This seems to be the correct point at which to log since it's above the break? */
-                logger.tryLog(problem.getName(), memePop, GenNum);
+                logger.tryLog(problem.getName(), memePop, GenNum, false);
 
 //	  memePop.orderChildren();
 
@@ -300,7 +300,7 @@ public class Memetico {
 
             } // end of while, exiting the generations loop.
             //force a log since this is the end of the run
-            logger.log(problem.getName(), memePop, GenNum);
+            logger.log(problem.getName(), memePop, GenNum, true);
 //            TotalTime = (System.currentTimeMillis() - TotalTime);
 
 //      if (count==0)                                 //?

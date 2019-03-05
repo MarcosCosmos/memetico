@@ -87,6 +87,13 @@ public class CanvasTSPGraph {
         predictionLayer.clear();
         predictionLayer.requestRedraw();
     }
+
+    public void clearInstance() {
+        vertexLayer.clear();
+        vertexLayer.requestRedraw();
+        clearTargets();
+        clearPredictions();
+    }
 //
     private void addEdges(CanvasGraph.Layer<Edge> edgeCategory, List<int[]> newEdges, Color strokeColour) {
         for (int i = 0; i < newEdges.size(); i++) {

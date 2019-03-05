@@ -554,6 +554,7 @@ public class OptionsBoxController implements Initializable {
             currentMemeticoContinuePermission.invalidate();
         }
         try {
+            logger.reset();
             logger.setLogFrequency(Integer.parseInt(fldMemeticoLogInterval.getText()));
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -166,10 +166,10 @@ public class NullPCLogger extends NullLogger<MemeticoSnapshot> implements IPCLog
     };
 
     @Override
-    public void log(String instanceName, Population population, int generation) {
+    public void log(String instanceName, Population population, int generation, boolean isFinal) {
     }
 
     @Override
-    public void tryLog(String instanceName, Population population, int generation) {
+    public void tryLog(String instanceName, Population population, int generation, boolean isFinal) {
     }
 }
