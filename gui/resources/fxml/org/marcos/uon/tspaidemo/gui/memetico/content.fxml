@@ -56,14 +56,14 @@
                 <right>
                     <GridPane styleClass="metaGrid">
                         <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="0" fx:id="lblTimeGeneration">
-                            <Text>Time (Generation):&#160;</Text>
+                            <Text>CPU time per generation (average):&#160;</Text>
                         </TextFlow>
                         <TextFlow GridPane.rowIndex="0" GridPane.columnIndex="1">
-                            <Text fx:id="txtTimeGeneration" textAlignment="RIGHT"/>
+                            <Text fx:id="txtAvgGenTime" textAlignment="RIGHT"/>
                             <Text>s</Text>
                         </TextFlow>
                         <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="0">
-                            <Text fx:id="lblTimeTotal">Time (Total):&#160;</Text>
+                            <Text fx:id="lblTimeTotal">Total CPU time:&#160;</Text>
                         </TextFlow>
                         <TextFlow GridPane.rowIndex="1" GridPane.columnIndex="1">
                             <Text fx:id="txtTimeTotal" textAlignment="RIGHT"/>

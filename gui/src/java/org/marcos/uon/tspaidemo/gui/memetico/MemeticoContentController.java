@@ -6,8 +6,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -26,7 +24,6 @@ import memetico.logging.NullPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
-import org.marcos.uon.tspaidemo.canvas.DragContext;
 import org.marcos.uon.tspaidemo.canvas.ViewportGestures;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
@@ -38,9 +35,7 @@ import java.io.*;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class MemeticoContentController implements ContentController {
 
@@ -61,7 +56,7 @@ public class MemeticoContentController implements ContentController {
     @FXML
     private VBox contentRoot;
     @FXML
-    private Text txtGeneration, txtProblemName, txtTargetCost, txtBestCost, txtTimeGeneration, txtTimeTotal, txtGenerationCount, txtRunningStatus;
+    private Text txtGeneration, txtProblemName, txtTargetCost, txtBestCost, txtAvgGenTime, txtTimeTotal, txtGenerationCount, txtRunningStatus;
     @FXML
     private Label lblTargetColor, lblBestColor;
     @FXML
@@ -89,7 +84,6 @@ public class MemeticoContentController implements ContentController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        NumberFormat elapsedTimeFormatter = new DecimalFormat("#0.0000");
         contentRoot.getStylesheets().addAll(
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/content.css").toExternalForm(),
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()
@@ -141,15 +135,6 @@ public class MemeticoContentController implements ContentController {
         txtGeneration.textProperty()
                 .bind(generationValue.asString());
         currentInstance.bind(optionsBoxController.chosenProblemInstanceProperty());
-
-        txtTimeGeneration.textProperty().bind(Bindings.createStringBinding(
-                () -> currentSnapshot.get() == null ? "Unknown" : elapsedTimeFormatter.format((currentSnapshot.get().logTime - (selectedFrameIndex.get() == 0 ? theView.getStartTime() : theView.get(selectedFrameIndex.get()-1).logTime)) / 1_000_000_000.0),
-                currentSnapshot
-        ));
-        txtTimeTotal.textProperty().bind(Bindings.createStringBinding(
-                () -> currentSnapshot.get() == null ? "Unknown" : elapsedTimeFormatter.format((currentSnapshot.get().logTime - theView.getStartTime()) / 1_000_000_000.0),
-                currentSnapshot
-        ));
 
         txtBestCost.textProperty().bind(
                 Bindings.createStringBinding(
@@ -326,27 +311,42 @@ public class MemeticoContentController implements ContentController {
     public void contentUpdate() {
         if(!theView.isEmpty()) {
             currentSnapshot.set(theView.get(selectedFrameIndex.get()));
-            MemeticoSnapshot mostRecent = theView.get(theView.size()-1);
-            if(mostRecent.isFinal) {
-                if(mostRecent.bestSolution.cost <= currentInstance.get().getTargetCost()) {
-                    txtRunningStatus.setText("Success");
-                    txtRunningStatus.getStyleClass().setAll("successStatus");
-                } else {
-                    txtRunningStatus.setText("Failure");
-                    txtRunningStatus.getStyleClass().setAll("failStatus");
-                }
-            } else {
-                txtRunningStatus.setText("Unfinished");
-                txtRunningStatus.getStyleClass().clear();
-            }
-        } else {
-            txtRunningStatus.setText("Unfinished");
-            txtRunningStatus.getStyleClass().clear();
         }
+
+
         MemeticoSnapshot currentValue = currentSnapshot.get();
 //        agentsTree.setCellFactory(p -> new AgentTreeCell());
         //only check the complex logic if we can draw a currentSnapshot
         if(contentOutdated) {
+            //first update the information on the search status
+            if(!theView.isEmpty()) {
+                MemeticoSnapshot mostRecent = theView.get(theView.size() - 1);
+                if(mostRecent.isFinal) {
+                    if(mostRecent.bestSolution.cost <= currentInstance.get().getTargetCost()) {
+                        txtRunningStatus.setText("Success");
+                        txtRunningStatus.getStyleClass().setAll("successStatus");
+                    } else {
+                        txtRunningStatus.setText("Failure");
+                        txtRunningStatus.getStyleClass().setAll("failStatus");
+                    }
+                } else {
+                    txtRunningStatus.setText("Unfinished");
+                    txtRunningStatus.getStyleClass().clear();
+                }
+                NumberFormat elapsedTimeFormatter = new DecimalFormat("#0.0000");
+                long totalCPUTime = mostRecent.logTime - theView.getStartTime();
+                txtTimeTotal.setText(elapsedTimeFormatter.format((totalCPUTime / 1_000_000_000.0)));
+                txtAvgGenTime.setText(elapsedTimeFormatter.format((totalCPUTime/Math.max(1.0, (double)mostRecent.generation)) / 1_000_000_000.0));
+            } else {
+                txtRunningStatus.setText("Unfinished");
+                txtRunningStatus.getStyleClass().clear();
+                txtTimeTotal.setText("Unknown");
+                txtAvgGenTime.setText("Unknown");
+                agentControllers.clear();
+                agentsGrid.getChildren().clear();
+                optionsBoxController.adjustAgentOptionsDisplay(optionsBoxController.getSolutionDisplayToggles().size(), 0);
+            }
+
             toursOutdated = true;
             txtGenerationCount.textProperty().set(String.valueOf(!theView.isEmpty() ? theView.get(theView.size()-1).generation : 0));
             if (currentValue != null) {

@@ -285,14 +285,19 @@ public class Memetico {
                 if(includeLKH) {
                     //apply LKH to all currents
                     for (PocCurAgent agent : pocCurPop) {
-                        DiCycle tmp = (DiCycle)agent.current.deepCopy();
-                        lkh.runLocalSearch(tmp, inst);
-                        tmp.calculateCost(inst);
-                        if (memePop.isNewSolutionStructure(tmp.cost) || memePop.pop[0].testValues(getSameValues(tmp))) {
-                            agent.insertSolutionStructure(tmp);
-                            agent.updateAgent(inst); //note that there is a redundant call to calculateCost since it was already run above/for the pocket still in the agent at the beginning of the call
+                        if (agent.noChangeCounter > 1) {
+                            DiCycle tmp = (DiCycle) agent.current.deepCopy();
+                            lkh.runLocalSearch(tmp, inst);
+                            tmp.calculateCost(inst);
+                            if (memePop.isNewSolutionStructure(tmp.cost) || memePop.pop[0].testValues(getSameValues(tmp))) {
+                                agent.insertSolutionStructure(tmp);
+                                agent.updateAgent(inst); //note that there is a redundant call to calculateCost since it was already run above/for the pocket still in the agent at the beginning of the call
+//                                //don't increase the no change counter
+//                                agent.noChangeCounter = 1;
+                            }
                         }
                     }
+//                    gensSinceNewBestOrRestart = 0; //disable restart
                 }
 
                 //may as well update the generation at the end of the loop, so that gen 0 reflects the state of the initial population reordered etc but before local search/recombination
