@@ -348,8 +348,8 @@ public class MemeticoContentController implements ContentController {
         //only check the complex logic if we can draw a currentSnapshot
         if(contentOutdated) {
             toursOutdated = true;
-            txtGenerationCount.textProperty().set(String.valueOf(theView.size()-1));
-            if (currentSnapshot.get() != null) {
+            txtGenerationCount.textProperty().set(String.valueOf(!theView.isEmpty() ? theView.get(theView.size()-1).generation : 0));
+            if (currentValue != null) {
                 TSPLibInstance tspLibInstance = currentInstance.get().getTspLibInstance();
                 ObservableList<Node> agentNodes = agentsGrid.getChildren();
 
