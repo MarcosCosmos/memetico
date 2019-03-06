@@ -26,3 +26,8 @@
 #memeticoOptionsBoxRoot {
     -fx-padding: 5px;
 }
+
+.formError Text {
+    -fx-font-weight: bold;
+    -fx-fill: red;
+}

@@ -514,7 +514,7 @@ public class Memetico {
 //                if (Reduction.NONE != Reduction.NONE)
 //                    inst = reduction.runReduction(inst);
 
-                ProblemInstance problem = new ProblemInstance(new ProblemConfiguration(Memetico.class.getResource("/problems/tsp/tsp225.tsp"), Memetico.class.getResource("/problems/tsp/tsp225.opt.tour")));
+                ProblemInstance problem = ProblemInstance.create(new ProblemConfiguration(Memetico.class.getResource("/problems/tsp/tsp225.tsp"), Memetico.class.getResource("/problems/tsp/tsp225.opt.tour")));
                 MaxGenNum = (int) (5 * 13 * Math.log(13) * Math.sqrt(problem.getTspLibInstance().getDimension()));
 //          if(MaxGenNum < 200) MaxGenNum = 200;
 

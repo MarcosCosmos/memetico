@@ -11,44 +11,15 @@ public class ProblemInstance {
     private String name;
     private long targetCost; //note that this isn't garaunteed to match the config (if for example, the config is based on a template, and wants a custom cost,
 
-    public ProblemInstance(ProblemConfiguration config) throws IOException {
-        configuration = config;
-        InputStream tmp;
-        tmp = configuration.problemFile.openStream();
-        tspLibInstance = new TSPLibInstance(tmp);
-        tmp.close();
-        name = tspLibInstance.getName();
-        switch (configuration.solutionType) {
-            case TOUR:
-                tmp = configuration.tourFile.openStream();
-                tspLibInstance.addTour(tmp);
-                tmp.close();
-                targetCost = (long)tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
-                break;
-            case COST:
-                targetCost = config.targetCost;
-                break;
-            default:
-                targetCost = 0;
-        }
-    }
+//    public ProblemInstance(ProblemConfiguration config) {
+//
+//    }
 
-    public ProblemInstance(ProblemConfiguration config, TSPLibInstance tspLibInstance, String name) throws IOException {
+    public ProblemInstance(ProblemConfiguration config, TSPLibInstance tspLibInstance, String name, long targetCost) {
         configuration = config;
-        InputStream tmp;
-        tmp = configuration.problemFile.openStream();
-        tspLibInstance = new TSPLibInstance(tmp);
+        this.tspLibInstance = tspLibInstance;
         this.name = name;
-        switch (configuration.solutionType) {
-            case TOUR:
-                targetCost = (long)tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
-                break;
-            case COST:
-                targetCost = config.targetCost;
-                break;
-            default:
-                targetCost = 0;
-        }
+        this.targetCost = targetCost;
     }
 
     public ProblemInstance(ProblemInstance src) {
@@ -88,5 +59,41 @@ public class ProblemInstance {
 
     public void setTargetCost(long targetCost) {
         this.targetCost = targetCost;
+    }
+
+    public static ProblemInstance create(ProblemConfiguration config) {
+        ProblemInstance result;
+        TSPLibInstance tspLibInstance;
+        long targetCost;
+        try {
+            InputStream tmp;
+            tmp = config.problemFile.openStream();
+            tspLibInstance = new TSPLibInstance(tmp);
+            tmp.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            tspLibInstance = null;
+        }
+        switch (config.solutionType) {
+            case TOUR:
+                try {
+                    InputStream tmp;
+                    tmp = config.tourFile.openStream();
+                    tspLibInstance.addTour(tmp);
+                    tmp.close();
+                    targetCost = (long) tspLibInstance.getTours().get(tspLibInstance.getTours().size()-1).distance(tspLibInstance);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    targetCost = -1;
+                }
+                break;
+            case COST:
+                targetCost = config.targetCost;
+                break;
+            default:
+                targetCost = 0;
+        }
+
+        return new ProblemInstance(config, tspLibInstance, tspLibInstance != null ? tspLibInstance.getName() : null, targetCost);
     }
 }

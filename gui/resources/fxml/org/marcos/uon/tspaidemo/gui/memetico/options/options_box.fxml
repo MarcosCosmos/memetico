@@ -20,20 +20,30 @@
                 <Label GridPane.rowIndex="1" GridPane.columnIndex="0" >Template:</Label>
                 <ChoiceBox fx:id="choiceMemeticoProblemTemplate" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                 <Label GridPane.rowIndex="2" GridPane.columnIndex="0" labelFor="$btnMemeticoSelectProblem">Problem Instance:</Label>
-                <HBox GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
-                    <Label fx:id="lblMemeticoProblemFile" styleClass="fileNameDisplay" HBox.hgrow="ALWAYS" labelFor="$btnMemeticoSelectProblem"/>
-                    <Button fx:id="btnMemeticoSelectProblem" onAction="#openProblemSelectionDialog">Choose File</Button>
-                </HBox>
+                <VBox GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
+                    <HBox>
+                        <Label fx:id="lblMemeticoProblemFile" styleClass="fileNameDisplay" HBox.hgrow="ALWAYS" labelFor="$btnMemeticoSelectProblem"/>
+                        <Button fx:id="btnMemeticoSelectProblem" onAction="#openProblemSelectionDialog">Choose File</Button>
+                    </HBox>
+                    <TextFlow styleClass="formError">
+                        <Text fx:id="txtMemeticoProblemFileError"></Text>
+                    </TextFlow>
+                </VBox>
                 <Label labelFor="$choiceMemeticoSolutionType" GridPane.rowIndex="3" GridPane.columnIndex="0">Solution Type:</Label>
                 <ChoiceBox fx:id="choiceMemeticoSolutionType" GridPane.rowIndex="3" GridPane.columnIndex="1">
                     <String fx:value="Tour"/>
                     <String fx:value="Cost"/>
                 </ChoiceBox>
                 <Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="lblMemeticoTourFileDesc" labelFor="$btnMemeticoSelectTour">Tour File:</Label>
-                <HBox GridPane.rowIndex="4" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
-                    <Label fx:id="lblMemeticoTourFile" styleClass="fileNameDisplay" labelFor="$btnMemeticoSelectTour"/>
-                    <Button fx:id="btnMemeticoSelectTour" onAction="#openTourSelectionDialog">Choose File</Button>
-                </HBox>
+                <VBox GridPane.rowIndex="4" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
+                    <HBox>
+                        <Label fx:id="lblMemeticoTourFile" styleClass="fileNameDisplay" labelFor="$btnMemeticoSelectTour"/>
+                        <Button fx:id="btnMemeticoSelectTour" onAction="#openTourSelectionDialog">Choose File</Button>
+                    </HBox>
+                    <TextFlow styleClass="formError">
+                        <Text fx:id="txtMemeticoTourFileError"/>
+                    </TextFlow>
+                </VBox>
                 <Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="lblMemeticoTourCost" labelFor="$fldMemeticoTourCost">Tour Cost:</Label>
                 <TextField GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="fldMemeticoTourCost" styleClass="intField"/>
 
@@ -59,7 +69,7 @@
                 <TextField GridPane.rowIndex="13" GridPane.columnIndex="1" fx:id="fldMemeticoReignLimit" styleClass="intField"/>
             </GridPane>
             <TextFlow styleClass="h1" GridPane.columnSpan="2">
-                <Text fx:id="txtMemeticoLogSettingsTitle" >Log Settings</Text>
+                <Text fx:id="txtMemeticoLogSettingsTitle"/>
             </TextFlow>
             <GridPane styleClass="optionGrid">
                 <Label GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblLogInterval" labelFor="$fldMemeticoTourCost">Generations between log entries:</Label>
@@ -69,11 +79,16 @@
             <TextFlow styleClass="h1">
                 <Text fx:id="txtMemeticoDisplayOptionsTitle" styleClass="sectionTitle">Display Options</Text>
             </TextFlow>
-            <HBox spacing="5">
-                <Button fx:id="btnMemeticoSaveLog" onAction="#saveLog">Save Log</Button>
-                <Button fx:id="btnMemeticoLoadLog" onAction="#loadLog">Load Log</Button>
-                <Button fx:id="btnMemeticoSaveTour" onAction="#saveTour">Save Final Tour Found as TSPLib</Button>
-            </HBox>
+            <VBox>
+                <HBox spacing="5">
+                    <Button fx:id="btnMemeticoSaveLog" onAction="#saveLog">Save Log</Button>
+                    <Button fx:id="btnMemeticoLoadLog" onAction="#loadLog">Load Log</Button>
+                    <Button fx:id="btnMemeticoSaveTour" onAction="#saveTour">Save Final Tour Found as TSPLib</Button>
+                </HBox>
+                <TextFlow styleClass="formError">
+                    <Text fx:id="txtMemeticoLogFileError"/>
+                </TextFlow>
+            </VBox>
             <GridPane styleClass="optionGrid">
                 <!--display options-->
                 <TextFlow styleClass="h2" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">

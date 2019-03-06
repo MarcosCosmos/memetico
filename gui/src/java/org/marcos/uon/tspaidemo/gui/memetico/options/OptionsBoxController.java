@@ -3,8 +3,6 @@ package org.marcos.uon.tspaidemo.gui.memetico.options;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -34,10 +32,13 @@ import memetico.util.ProblemInstance;
 import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 //TODO: possiblt separate the problem/evolutionary param config from the display options and possibly create a seperate box for them (which isn't subsiduary to the content controller)
@@ -45,6 +46,9 @@ public class OptionsBoxController implements Initializable {
     public static final List<ProblemConfiguration> INCLUDED_PROBLEMS;
     public static final MemeticoConfiguration DEFAULT_CONFIG = new MemeticoConfiguration(13, 5, LocalSearchOpName.RAI.toString(), CrossoverOpName.SAX.toString(), RestartOpName.INSERTION.toString());
     public static final int DEFAULT_LOG_INTERVAL = 1;
+    public static final Pattern INTEGER_TEST_REGEX = Pattern.compile("\\d*");
+    public static final Pattern INTEGER_REPLACE_REGEX = Pattern.compile("[^\\d]");
+    public static final Pattern DOUBLE_TEST_REGEX = Pattern.compile("\\d*|\\d+\\,\\d*");
 
     static {
         Function<String, ProblemConfiguration> newToured = (filePrefix) -> new ProblemConfiguration(
@@ -101,6 +105,8 @@ public class OptionsBoxController implements Initializable {
 
     @FXML
     private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget, lblMemeticoIncludeLKH;
+    @FXML
+    private Text txtMemeticoProblemFileError, txtMemeticoTourFileError, txtMemeticoLogFileError;
 
     private transient final ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
 
@@ -164,9 +170,10 @@ public class OptionsBoxController implements Initializable {
                 data.add("settings", gson.toJsonTree(chosenMemeticoConfiguration.get()));
                 gson.toJson(data, writer);
                 writer.close();
-
+                txtMemeticoLogFileError.setText("");
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
+                txtMemeticoLogFileError.setText("Notice: failed to save the log.");
             }
         }
     }
@@ -177,41 +184,63 @@ public class OptionsBoxController implements Initializable {
         File selection = fileChooser.showOpenDialog(new Stage());
         if (selection != null) {
             try {
+                ProblemInstance intendedInstance;
                 Gson gson = new Gson();
                 Reader reader = new FileReader(selection);
                 JsonParser parser = new JsonParser();
                 JsonObject data = parser.parse(reader).getAsJsonObject();
                 currentMemeticoContinuePermission.invalidate();
                 logger.loadJson(data);
-                if(data.has("problem")) {
-                    ProblemConfiguration tmp = gson.fromJson(data.get("problem"), ProblemConfiguration.class);
-                    URL problemFile = tmp.problemFile;
+                if (data.has("problem")) {
+                    ProblemConfiguration intendedConfig = gson.fromJson(data.get("problem"), ProblemConfiguration.class);
+                    URL problemFile = intendedConfig.problemFile;
                     String problemText = problemFile.getPath();
-                    if(problemText.contains("!")) {
+                    if (problemText.contains("!")) {
                         problemFile = getClass().getResource(problemText.split("!")[1]);
                     } else {
                         problemFile = new File(problemText).toURI().toURL();
                     }
-                    if(tmp.solutionType == ProblemConfiguration.SolutionType.TOUR) {
+                    if (intendedConfig.solutionType == ProblemConfiguration.SolutionType.TOUR) {
                         URL tourFile;
-                        String tourText = tmp.tourFile.getPath();
-                        if(tourText.contains("!")) {
+                        String tourText = intendedConfig.tourFile.getPath();
+                        if (tourText.contains("!")) {
                             tourFile = getClass().getResource(tourText.split("!")[1]);
                         } else {
                             tourFile = new File(tourText).toURI().toURL();
                         }
-                        tmp = new ProblemConfiguration(problemFile, tourFile);
+                        intendedConfig = new ProblemConfiguration(problemFile, tourFile);
                     } else {
-                        tmp = new ProblemConfiguration(problemFile, tmp.targetCost);
+                        intendedConfig = new ProblemConfiguration(problemFile, intendedConfig.targetCost);
                     }
-                    chosenProblemInstance.set(new ProblemInstance(tmp));
-                    instances.put(chosenProblemInstance.get().getName(), chosenProblemInstance.get());
+                    intendedInstance = ProblemInstance.create(intendedConfig);
+                    ;
+                } else {
+                    intendedInstance = chosenProblemInstance.get();
                 }
-                if(data.has("settings")) {
+                if (intendedInstance != null) {
+                    if (intendedInstance.getTspLibInstance() == null) {
+                        //bad instance file; complain
+                        txtMemeticoProblemFileError.setText("Notice: could not read the problem file.");
+                        txtMemeticoTourFileError.setText("");
+                    } else {
+                        txtMemeticoProblemFileError.setText("");
+                        if (intendedInstance.getTargetCost() < 0) {
+                            //bad problem file; complain
+                            txtMemeticoTourFileError.setText("Notice: could not read the tour file.");
+                        } else {
+                            txtMemeticoTourFileError.setText("");
+                            chosenProblemInstance.set(intendedInstance);
+                            instances.put(chosenProblemInstance.get().getName(), chosenProblemInstance.get());
+                        }
+                    }
+                }
+                if (data.has("settings")) {
                     chosenMemeticoConfiguration.set(gson.fromJson(data.get("settings"), MemeticoConfiguration.class));
                 }
-            } catch (IOException | InterruptedException e) {
+                txtMemeticoLogFileError.setText("");
+            } catch (InterruptedException | FileNotFoundException | MalformedURLException e) {
                 e.printStackTrace();
+                txtMemeticoLogFileError.setText("Notice: failed to save the tour.");
             }
         }
     }
@@ -305,11 +334,17 @@ public class OptionsBoxController implements Initializable {
 //    }
 
 
-    private static void attachIntFieldFixer(TextField target) {
+    private static void attachIntegerFieldFixer(TextField target, long min, long max) {
+        target.setTextFormatter(new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> INTEGER_TEST_REGEX.matcher(change.getControlNewText()).matches() ? change : null));
         ChangeListener<String> fixer = (observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                target.setText(newValue.replaceAll("[^\\d]", ""));
+            long candidateNumber;
+            if (!newValue.isEmpty()) {
+                candidateNumber = Long.parseLong(newValue);
+            } else {
+                candidateNumber = min;
             }
+
+            target.setText(String.valueOf(Math.max(min, Math.min(max, candidateNumber))));
         };
         target.textProperty().addListener(fixer);
     }
@@ -377,8 +412,12 @@ public class OptionsBoxController implements Initializable {
         lblMemeticoTourFile.textProperty().addListener(new TemplateSelectionListener<>());
         fldMemeticoTourCost.textProperty().addListener(new TemplateSelectionListener<>());
 
-        Arrays.asList(fldMemeticoTourCost,fldMemeticoPopDepth,fldMemeticoMutRate,fldMemeticoMaxGen,fldMemeticoReignLimit,fldMemeticoLogInterval)
-                .forEach(OptionsBoxController::attachIntFieldFixer);
+        attachIntegerFieldFixer(fldMemeticoTourCost, 0, Long.MAX_VALUE);
+        attachIntegerFieldFixer(fldMemeticoPopDepth, 1, Long.MAX_VALUE);
+        attachIntegerFieldFixer(fldMemeticoMutRate, 0, 100);
+        attachIntegerFieldFixer(fldMemeticoMaxGen, 0, Long.MAX_VALUE);
+        attachIntegerFieldFixer(fldMemeticoReignLimit, 0, Long.MAX_VALUE);
+        attachIntegerFieldFixer(fldMemeticoLogInterval, 1, Long.MAX_VALUE);
 
 
 
@@ -465,28 +504,24 @@ public class OptionsBoxController implements Initializable {
 //
         fldMemeticoLogInterval.setText(String.valueOf(DEFAULT_LOG_INTERVAL));
 
-
-
-        theStage = new Stage();
-        Scene newScane = new Scene(memeticoOptionsBoxRoot, 300, 200);
-        theStage.setScene(newScane);
+        txtMemeticoProblemFileError.visibleProperty().bind(txtMemeticoProblemFileError.textProperty().isNotEmpty());
+        txtMemeticoTourFileError.visibleProperty().bind(txtMemeticoTourFileError.textProperty().isNotEmpty());
+        txtMemeticoLogFileError.visibleProperty().bind(txtMemeticoLogFileError.textProperty().isNotEmpty());
 
         //setup template selection
         choiceMemeticoProblemTemplate.getItems().add("Custom");
         //load all the base instances into the map and template list for the options boz
-        try {
-            for (ProblemConfiguration eachProblem : OptionsBoxController.INCLUDED_PROBLEMS) {
-                ProblemInstance theInstance = new ProblemInstance(eachProblem);
-                instances.put(theInstance.getName(), theInstance);
-                choiceMemeticoProblemTemplate.getItems().add(theInstance.getName());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (ProblemConfiguration eachProblem : OptionsBoxController.INCLUDED_PROBLEMS) {
+            ProblemInstance theInstance = ProblemInstance.create(eachProblem);
+            instances.put(theInstance.getName(), theInstance);
+            choiceMemeticoProblemTemplate.getItems().add(theInstance.getName());
         }
-
-
         //now select the first of our included instances and memetico will be ready to run whenever it may be needed
         choiceMemeticoProblemTemplate.getSelectionModel().select(1);//since "Custom" is first,  we'll want to select the second entry
+
+        theStage = new Stage();
+        Scene newScane = new Scene(memeticoOptionsBoxRoot, 300, 200);
+        theStage.setScene(newScane);
     }
 
     public PCLogger getLogger() {
@@ -496,55 +531,69 @@ public class OptionsBoxController implements Initializable {
     public void applyConfiguration() {
         try {
             ProblemInstance targetInstance;
-            switch (choiceMemeticoProblemTemplate.getValue()) {
-                case "Custom":
-                    URL problemFile;
-                    String problemText = lblMemeticoProblemFile.getText();
-                    if(problemText.contains("!")) {
-                        problemFile = getClass().getResource(problemText.split("!")[1]);
-                    } else {
-                     problemFile = new File(problemText).toURI().toURL();
-                    }
-                    ProblemConfiguration configuration;
-                    switch (choiceMemeticoSolutionType.getValue()) {
-                        case "Tour":
-                            URL tourFile;
-                            String tourText = lblMemeticoTourFile.getText();
-                            if(tourText.contains("!")) {
-                                tourFile = getClass().getResource(tourText.split("!")[1]);
-                            } else {
-                                tourFile = new File(lblMemeticoTourFile.getText()).toURI().toURL();
-                            }
-                            configuration = new ProblemConfiguration(problemFile, tourFile);
-                            break;
-                        case "Cost":
-                            int targetCost = Integer.parseInt(fldMemeticoTourCost.getText());
-                            configuration = new ProblemConfiguration(problemFile, targetCost);
-                            break;
-                        default:
-                            configuration = new ProblemConfiguration(problemFile, 0);
-                    }
+            if ("Custom".equals(choiceMemeticoProblemTemplate.getValue())) {
+                URL problemFile;
+                String problemText = lblMemeticoProblemFile.getText();
+                if (problemText.contains("!")) {
+                    problemFile = getClass().getResource(problemText.split("!")[1]);
+                } else {
+                    problemFile = new File(problemText).toURI().toURL();
+                }
+                ProblemConfiguration configuration;
+                switch (choiceMemeticoSolutionType.getValue()) {
+                    case "Tour":
+                        URL tourFile;
+                        String tourText = lblMemeticoTourFile.getText();
+                        if (tourText.contains("!")) {
+                            tourFile = getClass().getResource(tourText.split("!")[1]);
+                        } else {
+                            tourFile = new File(lblMemeticoTourFile.getText()).toURI().toURL();
+                        }
+                        configuration = new ProblemConfiguration(problemFile, tourFile);
+                        break;
+                    case "Cost":
+                        int targetCost = Integer.parseInt(fldMemeticoTourCost.getText());
+                        configuration = new ProblemConfiguration(problemFile, targetCost);
+                        break;
+                    default:
+                        configuration = new ProblemConfiguration(problemFile, 0);
+                }
 
-                    targetInstance = new ProblemInstance(configuration);
-                    //if the raw from-file name is taken - add custom to it
-                    if(instances.containsKey(targetInstance.getName())) {
-                        targetInstance.setName(targetInstance.getName() + " (Custom)");
-                    }
-                    instances.put(targetInstance.getName(), targetInstance);
-                    break;
-                default:
-                    targetInstance = new ProblemInstance(instances.get(choiceMemeticoProblemTemplate.getValue())); //create a clone to prevent external modification of the original
+                targetInstance = ProblemInstance.create(configuration);
+                //if the raw from-file name is taken - add custom to it
+                if (instances.containsKey(targetInstance.getName())) {
+                    targetInstance.setName(targetInstance.getName() + " (Custom)");
+                }
+                instances.put(targetInstance.getName(), targetInstance);
+            } else {
+                targetInstance = new ProblemInstance(instances.get(choiceMemeticoProblemTemplate.getValue())); //create a clone to prevent external modification of the original
             }
-            chosenProblemInstance.set(targetInstance);
-            int populationHeight = Integer.parseInt(fldMemeticoPopDepth.textProperty().get());
-            int populationSize = (int) ((Math.pow(3, populationHeight + 1) - 1) / 2.0);
-            int mutationRate = Integer.parseInt(fldMemeticoMutRate.textProperty().get());
-            int maxGenerations = Integer.parseInt(fldMemeticoMaxGen.textProperty().get());
-            int reignLimit = Integer.parseInt(fldMemeticoReignLimit.textProperty().get());
-            chosenMemeticoConfiguration.set(new MemeticoConfiguration(populationSize, mutationRate, choiceMemeticoLocalSearch.getValue(), choiceMemeticoCrossover.getValue(), choiceMemeticoRestart.getValue(), maxGenerations, reignLimit));
-            launchMemetico();
+            if(targetInstance.getTspLibInstance() == null) {
+                //bad instance file; complain
+                txtMemeticoProblemFileError.setText("Notice: failed to read the problem file.");
+                txtMemeticoTourFileError.setText("");
+            } else {
+                txtMemeticoProblemFileError.setText("");
+                if(targetInstance.getTargetCost() < 0) {
+                    //bad problem file; complain
+                    txtMemeticoTourFileError.setText("Notice: failed to read the tour file.");
+                } else {
+                    txtMemeticoTourFileError.setText("");
+                    //now we know the data is correct we can safely apply it
+                    chosenProblemInstance.set(targetInstance);
+                    int populationHeight = Integer.parseInt(fldMemeticoPopDepth.textProperty().get());
+                    int populationSize = (int) ((Math.pow(3, populationHeight + 1) - 1) / 2.0);
+                    int mutationRate = Integer.parseInt(fldMemeticoMutRate.textProperty().get());
+                    int maxGenerations = Integer.parseInt(fldMemeticoMaxGen.textProperty().get());
+                    int reignLimit = Integer.parseInt(fldMemeticoReignLimit.textProperty().get());
+                    chosenMemeticoConfiguration.set(new MemeticoConfiguration(populationSize, mutationRate, choiceMemeticoLocalSearch.getValue(), choiceMemeticoCrossover.getValue(), choiceMemeticoRestart.getValue(), maxGenerations, reignLimit));
+                    launchMemetico();
+                }
+            }
+            txtMemeticoLogFileError.setText("");
         } catch (IOException e) {
             e.printStackTrace();
+            txtMemeticoLogFileError.setText("Notice: failed to read the log file.");
         }
     }
 
