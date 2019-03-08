@@ -14,6 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import org.marcos.uon.tspaidemo.gui.main.playback.PlaybackController;
 
 import java.io.IOException;
 import java.net.URL;

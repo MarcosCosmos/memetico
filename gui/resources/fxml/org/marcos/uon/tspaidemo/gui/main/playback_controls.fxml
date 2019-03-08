@@ -4,7 +4,8 @@
 <?import javafx.scene.text.Text?>
 <?import java.lang.*?>
 <?import javafx.scene.text.TextFlow?>
-<HBox fx:id="playbackControlsRoot" styleClass="controlBox" fx:controller="org.marcos.uon.tspaidemo.gui.main.PlaybackController"
+<?import org.marcos.uon.tspaidemo.gui.main.playback.speed.*?>
+<HBox fx:id="playbackControlsRoot" styleClass="controlBox" fx:controller="org.marcos.uon.tspaidemo.gui.main.playback.PlaybackController"
       xmlns:fx="http://javafx.com/fxml">
     <BorderPane fx:id="sliderWrapper" HBox.hgrow="ALWAYS">
         <left>
@@ -29,22 +30,31 @@
                 <Label fx:id="lblSpeed">Speed:</Label>
             </TextFlow>
             <ChoiceBox fx:id="cbSpeed">
-                <Double fx:value="0.00138888888"/>
-                <Double fx:value="0.015" />
-                <Double fx:value="0.033" />
-                <Double fx:value="0.1" />
-                <Double fx:value="0.2" />
-                <Double fx:value="0.5" />
-                <Double fx:value="1" />
-                <Double fx:value="2" />
-                <Double fx:value="5" />
-                <Double fx:value="10" />
-                <Double fx:value="30" />
-                <Double fx:value="60" />
-                <Double fx:value="120" />
-                <Double fx:value="240" />
-                <Double fx:value="480" />
-                <Double fx:value="960" />
+                <Divider factor="580" />
+                <Divider factor="240" />
+                <Divider factor="120" />
+                <Divider factor="60" />
+                <Divider factor="50" />
+                <Divider factor="30" />
+                <Divider factor="20" />
+                <Divider factor="10" />
+                <Divider factor="5" />
+                <Divider factor="4" />
+                <Divider factor="3" />
+                <Divider factor="2" />
+                <Multiplier factor="1" />
+                <Multiplier factor="2" />
+                <Multiplier factor="3" />
+                <Multiplier factor="4" />
+                <Multiplier factor="5" />
+                <Multiplier factor="10" />
+                <Multiplier factor="20" />
+                <Multiplier factor="30" />
+                <Multiplier factor="50" />
+                <Multiplier factor="60" />
+                <Multiplier factor="120" />
+                <Multiplier factor="240" />
+                <Multiplier factor="580" />
             </ChoiceBox>
         </HBox>
             <Text fx:id="txtTest"/>
