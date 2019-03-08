@@ -15,6 +15,7 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
@@ -40,13 +41,15 @@ public class PlaybackController implements Initializable {
 
     private boolean wasPlaying = false;
 
-    private double leftOverFrames = 0;
     private long lastUpdateTime;
+    private long totalTime = 0;
 
-    private final DoubleProperty speedInterval = new SimpleDoubleProperty(1000/1.0);
+//    private final DoubleProperty speedCoefficient = new SimpleDoubleProperty(1.0);
+    private final ObjectProperty<Optional<java.time.Duration>> currentFrameDuration = new SimpleObjectProperty<>(null);
+    private java.time.Duration leftOverNano = java.time.Duration.ZERO;
 
     /**
-     * Values are measured as FPS
+     * Values are used a multiplier against the CPU time between generations etc
      */
     @FXML
     private ChoiceBox<Double> cbSpeed;
@@ -81,6 +84,7 @@ public class PlaybackController implements Initializable {
         sldrFrameIndex.setOnMouseReleased((event) -> {
             if(wasPlaying) {
                 isPlaying.set(true);
+                leftOverNano = java.time.Duration.ZERO;
             }
         });
 
@@ -94,24 +98,14 @@ public class PlaybackController implements Initializable {
 
         isPlaying.addListener((obvs, old, newVal) -> {
             if(!old && newVal) {
-                lastUpdateTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-                leftOverFrames = 0;
+                lastUpdateTime = System.nanoTime();
             }
         });
 
 
         cbSpeed.setValue(1.0);
-        speedInterval.bind(Bindings.createDoubleBinding(
-                () -> 1000/cbSpeed.getValue(),
-                cbSpeed.valueProperty()
-        ));
 
-        //reset to frame 0 if the framecount ever drops (since this indicates some kind of reset)
-        frameCount.addListener((observable, oldValue, newValue) -> {
-            if(newValue.intValue() < oldValue.intValue()) {
-
-            }
-        });
+        lastUpdateTime = System.nanoTime();
     }
 
     public ReadOnlyIntegerProperty frameIndexProperty() {
@@ -119,8 +113,10 @@ public class PlaybackController implements Initializable {
     }
 
     public void stopPlayback() {
+        leftOverNano = java.time.Duration.ZERO;
         isPlaying.set(false);
         frameIndex.set(0);
+        totalTime = 0;
     }
 
     public void togglePlayState() {
@@ -138,17 +134,43 @@ public class PlaybackController implements Initializable {
         frameCount.unbind();
     }
 
+    public void bindCurrentFrameDuration(ObservableValue<Optional<java.time.Duration>> source) {
+        currentFrameDuration.bind(source);
+    }
+
+    public void unbindCurrentFrameDuration() {
+        currentFrameDuration.unbind();
+    }
+
     public void frameUpdate() {
         if(isPlaying.get()) {
+            long currentUpdateTime = System.nanoTime();
             int curIndex = frameIndex.get();
-            if (curIndex < frameCount.get() - 1) {
-                long currentUpdateTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-                long elapsed = currentUpdateTime-lastUpdateTime;
-                double framesPassed = Duration.millis(elapsed).divide(speedInterval.get()).toMillis()+leftOverFrames;
-                int framesToJump = (int)framesPassed;
-                frameIndex.set(Math.min(curIndex + framesToJump, frameCount.get()-1));
-                leftOverFrames = framesPassed-framesToJump;
+
+            Optional<java.time.Duration> frameDuration = currentFrameDuration.get();
+            if(frameDuration.isPresent()) {
+                java.time.Duration elapsed;
+                elapsed = java.time.Duration.ofNanos(currentUpdateTime-lastUpdateTime);
+                double multiplier = cbSpeed.getValue();
+                if(multiplier > 1) {
+                    elapsed = elapsed.multipliedBy((long)multiplier);
+                } else {
+                    elapsed = elapsed.dividedBy((long)(1/multiplier));
+                }
+                elapsed = elapsed.plus(leftOverNano);
+                while (frameDuration.isPresent() && frameDuration.get().compareTo(elapsed) < 0) {
+                    elapsed = elapsed.minus(frameDuration.get());
+                    curIndex = Math.min(curIndex + 1, frameCount.get() - 1);
+                    System.out.println(frameDuration.get().toString());
+                    frameIndex.set(curIndex);
+                    frameDuration = currentFrameDuration.get();
+                }
+
+                totalTime += currentUpdateTime-lastUpdateTime;
+                System.out.println(java.time.Duration.ofNanos(totalTime).toString());
+                leftOverNano = elapsed;
                 lastUpdateTime = currentUpdateTime;
+
             }
         }
     }

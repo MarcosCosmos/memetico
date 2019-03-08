@@ -17,6 +17,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
@@ -30,6 +31,7 @@ public class VisualisationController implements Initializable {
 
     public static final ContentController PLACEHOLDER_CONTENT = new ContentController() {
         ReadOnlyIntegerProperty numberOfFrames = new ReadOnlyIntegerWrapper(0);
+        ReadOnlyObjectProperty<Optional<java.time.Duration>> frameDuration = new ReadOnlyObjectWrapper<>(Optional.empty());
         Parent emptyBox = new Pane();
         @Override
         public ReadOnlyIntegerProperty numberOfFramesProperty() {
@@ -56,13 +58,19 @@ public class VisualisationController implements Initializable {
         }
 
         @Override
+        public ReadOnlyObjectProperty<Optional<java.time.Duration>> currentFrameDurationProperty() {
+            return frameDuration;
+        }
+
+
+        @Override
         public void initialize(URL location, ResourceBundle resources) {
         }
     };
 
     private PlaybackController playbackController;
 
-    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(100/60.0));
+    private final ObjectProperty<Duration> frameInterval = new SimpleObjectProperty<>(Duration.millis(1000/60.0));
     private final transient Timeline redrawTimeline = new Timeline();
 
     /**
@@ -80,6 +88,7 @@ public class VisualisationController implements Initializable {
         VBox.setVgrow(contentRoot, Priority.ALWAYS);
         contentController.bindSelectedFrameIndex(playbackController.frameIndexProperty());
         playbackController.bindFrameCount(contentController.numberOfFramesProperty());
+        playbackController.bindCurrentFrameDuration(contentController.currentFrameDurationProperty());
     }
 
     @Override

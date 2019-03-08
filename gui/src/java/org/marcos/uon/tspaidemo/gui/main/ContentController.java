@@ -1,9 +1,13 @@
 package org.marcos.uon.tspaidemo.gui.main;
 
 import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+
+import java.time.Duration;
+import java.util.Optional;
 
 public interface ContentController extends Initializable {
     /**
@@ -29,4 +33,6 @@ public interface ContentController extends Initializable {
      * Updates the displayed content to match the selected frame (call this after frame-selection logic)
      */
     void contentUpdate();
+
+    ReadOnlyObjectProperty<Optional<Duration>> currentFrameDurationProperty();
 }

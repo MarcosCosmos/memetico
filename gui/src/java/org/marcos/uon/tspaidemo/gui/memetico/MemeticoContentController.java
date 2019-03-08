@@ -35,6 +35,7 @@ import java.io.*;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.util.*;
 
 public class MemeticoContentController implements ContentController {
@@ -74,6 +75,7 @@ public class MemeticoContentController implements ContentController {
     private transient ObjectProperty<ProblemInstance> currentInstance = new SimpleObjectProperty<>();
     private transient IPCLogger.View theView = NullPCLogger.NULL_VIEW;
     private transient ReadOnlyIntegerWrapper numberOfFrames = new ReadOnlyIntegerWrapper(0);
+    private transient ReadOnlyObjectWrapper<Optional<Duration>> currentFrameDuration = new ReadOnlyObjectWrapper<>(null);
     private transient IntegerProperty selectedFrameIndex = new SimpleIntegerProperty(0);
     private IntegerProperty generationValue = new SimpleIntegerProperty();
 
@@ -201,6 +203,18 @@ public class MemeticoContentController implements ContentController {
         graphContainer.addEventHandler(MouseEvent.MOUSE_DRAGGED, gestures.getOnMouseDraggedEventHandler());
         graphContainer.addEventHandler(ScrollEvent.ANY, gestures.getOnScrollEventHandler());
 
+        currentFrameDuration.bind(Bindings.createObjectBinding(
+                () -> {
+                    int selectedFrameIndex = this.selectedFrameIndex.get();
+                    int numberOfFrames = this.numberOfFrames.get();
+                    if(selectedFrameIndex >= numberOfFrames-1) {
+                        return Optional.empty();
+                    } else {
+                        return Optional.of(Duration.ofNanos(theView.get(selectedFrameIndex+1).logTime-theView.get(selectedFrameIndex).logTime));
+                    }
+                }, selectedFrameIndex, numberOfFrames
+        ));
+
     }
 
     public int getNumberOfFrames() {
@@ -320,9 +334,8 @@ public class MemeticoContentController implements ContentController {
         if(contentOutdated) {
             //first update the information on the search status
             if(!theView.isEmpty()) {
-                MemeticoSnapshot mostRecent = theView.get(theView.size() - 1);
-                if(mostRecent.isFinal) {
-                    if(mostRecent.bestSolution.cost <= currentInstance.get().getTargetCost()) {
+                if(currentValue.isFinal) {
+                    if(currentValue.bestSolution.cost <= currentInstance.get().getTargetCost()) {
                         txtRunningStatus.setText("Success");
                         txtRunningStatus.getStyleClass().setAll("successStatus");
                     } else {
@@ -334,9 +347,9 @@ public class MemeticoContentController implements ContentController {
                     txtRunningStatus.getStyleClass().clear();
                 }
                 NumberFormat elapsedTimeFormatter = new DecimalFormat("#0.0000");
-                long totalCPUTime = mostRecent.logTime - theView.getStartTime();
+                long totalCPUTime = currentValue.logTime - theView.getStartTime();
                 txtTimeTotal.setText(elapsedTimeFormatter.format((totalCPUTime / 1_000_000_000.0)));
-                txtAvgGenTime.setText(elapsedTimeFormatter.format((totalCPUTime/Math.max(1.0, (double)mostRecent.generation)) / 1_000_000_000.0));
+                txtAvgGenTime.setText(elapsedTimeFormatter.format((totalCPUTime/Math.max(1.0, (double)currentValue.generation)) / 1_000_000_000.0));
             } else {
                 txtRunningStatus.setText("Unfinished");
                 txtRunningStatus.getStyleClass().clear();
@@ -572,6 +585,11 @@ public class MemeticoContentController implements ContentController {
             updateTours();
         }
         displayGraph.draw(); //the display graph knows if it has updates to consider other than the data we give it
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Optional<Duration>> currentFrameDurationProperty() {
+        return currentFrameDuration.getReadOnlyProperty();
     }
 
     public void showOptionsBox() {
