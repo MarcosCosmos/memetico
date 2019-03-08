@@ -115,7 +115,6 @@ public class PlaybackController implements Initializable {
         leftOverNano = Duration.ZERO;
         isPlaying.set(false);
         frameIndex.set(0);
-        totalTime = 0;
     }
 
     public void togglePlayState() {
