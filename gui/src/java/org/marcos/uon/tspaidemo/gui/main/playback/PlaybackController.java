@@ -153,7 +153,6 @@ public class PlaybackController implements Initializable {
                 while (frameDuration.isPresent() && frameDuration.get().compareTo(elapsed) < 0) {
                     elapsed = elapsed.minus(frameDuration.get());
                     curIndex = Math.min(curIndex + 1, frameCount.get() - 1);
-                    System.out.println(frameDuration.get().toString());
                     frameIndex.set(curIndex);
                     frameDuration = currentFrameDuration.get();
                 }
