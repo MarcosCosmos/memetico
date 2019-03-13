@@ -262,13 +262,13 @@ public class MemeticoContentController implements ContentController {
             displayGraph.clearPredictions();
 
             TSPLibInstance theInstance = currentInstance.get().getTspLibInstance();
-            if(runConfigurationController.getTargetDisplayToggle().get()) {
+            if(displayOptionsController.getTargetDisplayToggle().get()) {
                 displayGraph.showTargets();
             } else {
                 displayGraph.hideTargets();
             }
             MemeticoSnapshot theSnapshot = currentSnapshot.get();
-            if (runConfigurationController.getBestDisplayToggle().get()) {
+            if (displayOptionsController.getBestDisplayToggle().get()) {
                 List<int[]> edgesToAdd = new ArrayList<>(theInstance.getDimension());
                 List<Integer> bestTour = theSnapshot.bestSolution.tour;
                 for(int j = 0; j<bestTour.size(); ++j) {
@@ -280,7 +280,7 @@ public class MemeticoContentController implements ContentController {
                 );
             }
 
-            List<BooleanProperty[]> toggles = runConfigurationController.getSolutionDisplayToggles();
+            List<BooleanProperty[]> toggles = displayOptionsController.getSolutionDisplayToggles();
             for (int i = 0; i < toggles.size(); ++i) {
                 BooleanProperty[] eachToggles = toggles.get(i);
                 AgentDisplay eachAgentController = agentControllers.get(i);
@@ -368,7 +368,7 @@ public class MemeticoContentController implements ContentController {
                 txtAvgGenTime.setText("Unknown");
                 agentControllers.clear();
                 agentsGrid.getChildren().clear();
-                runConfigurationController.adjustAgentOptionsDisplay(runConfigurationController.getSolutionDisplayToggles().size(), 0);
+                displayOptionsController.adjustAgentOptionsDisplay(displayOptionsController.getSolutionDisplayToggles().size(), 0);
             }
 
             toursOutdated = true;
@@ -384,8 +384,8 @@ public class MemeticoContentController implements ContentController {
                     lastDrawnGraphName = currentValue.instanceName;
                 }
 
-                int oldCount = runConfigurationController.getSolutionDisplayToggles().size(), newCount = currentValue.agents.size();
-                runConfigurationController.adjustAgentOptionsDisplay(oldCount, newCount);
+                int oldCount = displayOptionsController.getSolutionDisplayToggles().size(), newCount = currentValue.agents.size();
+                displayOptionsController.adjustAgentOptionsDisplay(oldCount, newCount);
                 if (newCount != oldCount) {
                     listUpdated = true;
                 }
@@ -404,7 +404,7 @@ public class MemeticoContentController implements ContentController {
                         //add the data to the lists
                         agentNodes.add(newNode);
                     }
-                    List<BooleanProperty[]> displayToggles = runConfigurationController.getSolutionDisplayToggles();
+                    List<BooleanProperty[]> displayToggles = displayOptionsController.getSolutionDisplayToggles();
                     //addListeners for all the display toggles so that we still get graph display updates even when the playback is paused
                     displayToggles.subList(oldCount, newCount).forEach(each -> {
                         for (BooleanProperty eachToggle : each) {
@@ -603,8 +603,12 @@ public class MemeticoContentController implements ContentController {
         return currentFrameDuration.getReadOnlyProperty();
     }
 
-    public void showOptionsBox() {
+    public void showConfiguration() {
         runConfigurationController.open();
+    }
+
+    public void showDisplayOptions() {
+        displayOptionsController.open();
     }
 
     /**

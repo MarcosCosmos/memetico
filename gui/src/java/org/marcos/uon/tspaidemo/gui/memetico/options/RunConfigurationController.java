@@ -311,7 +311,6 @@ public class RunConfigurationController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
 //        memeticoConfigurationBoxRoot.setFitToWidth(true);
 
-        //todo: add an option for changing the log frequency through the UI/clean up save/load buttons
         memeticoConfigurationBoxRoot.getStylesheets().addAll(
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.css").toExternalForm(),
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()

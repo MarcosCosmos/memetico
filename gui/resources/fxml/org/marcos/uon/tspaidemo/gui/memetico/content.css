@@ -80,3 +80,7 @@
 .successStatus, .failedStatus {
     -fx-font-weight: bold;
 }
+
+.spaced {
+    -fx-spacing: 5px;
+}

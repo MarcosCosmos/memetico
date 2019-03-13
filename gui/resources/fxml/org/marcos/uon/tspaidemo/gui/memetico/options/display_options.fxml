@@ -11,8 +11,7 @@
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.marcos.uon.tspaidemo.gui.memetico.options.DisplayOptionsController"
-            prefHeight="400.0" prefWidth="600.0"
-            fx:id="memeticoDisplayOptionsRoot"
+            fx:id="memeticoDisplayOptionsRoot" styleClass="root"
 >
     <VBox>
         <TextFlow styleClass="h1">

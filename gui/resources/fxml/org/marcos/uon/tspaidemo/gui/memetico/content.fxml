@@ -16,7 +16,10 @@
                 </TextFlow>
             </left>
             <right>
-                <Button fx:id="btnOpenOptions" onAction="#showOptionsBox">Options</Button>
+                <HBox styleClass="spaced">
+                    <Button fx:id="btnOpenConfiguration" onAction="#showConfiguration">Configuration</Button>
+                    <Button fx:id="btnOpenDisplayOptions" onAction="#showDisplayOptions">Display Options</Button>
+                </HBox>
             </right>
         </BorderPane>
         <VBox styleClass="statisticsBox" VBox.vgrow="ALWAYS" alignment="CENTER" spacing="5">

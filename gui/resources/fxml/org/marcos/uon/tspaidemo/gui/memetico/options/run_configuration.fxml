@@ -78,12 +78,12 @@
             <TextField GridPane.rowIndex="13" GridPane.columnIndex="1" fx:id="fldMemeticoReignLimit" styleClass="intField"/>
         </GridPane>
         <TextFlow styleClass="h1" GridPane.columnSpan="2">
-            <Text fx:id="txtMemeticoLogSettingsTitle"/>
+            <Text fx:id="txtMemeticoLogSettingsTitle">Log Settings</Text>
         </TextFlow>
         <GridPane styleClass="optionGrid">
-            <Label GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblLogInterval" labelFor="$fldMemeticoTourCost">Generations between log entries:</Label>
-            <TextField GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="fldMemeticoLogInterval" styleClass="intField"/>
-            <Button fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
+            <Label GridPane.rowIndex="0" GridPane.columnIndex="0" fx:id="lblLogInterval" labelFor="$fldMemeticoTourCost">Generations between log entries:</Label>
+            <TextField GridPane.rowIndex="0" GridPane.columnIndex="1" fx:id="fldMemeticoLogInterval" styleClass="intField"/>
+            <Button GridPane.rowIndex="1" fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
         </GridPane>
     </VBox>
 </ScrollPane>

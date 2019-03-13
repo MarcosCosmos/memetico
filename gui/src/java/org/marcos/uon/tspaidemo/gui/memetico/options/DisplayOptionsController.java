@@ -43,7 +43,7 @@ public class DisplayOptionsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        memeticoDisplayOptionsRoot.getStyleClass().addAll(
+        memeticoDisplayOptionsRoot.getStylesheets().addAll(
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.css").toExternalForm(),
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()
         );
@@ -53,6 +53,10 @@ public class DisplayOptionsController implements Initializable {
                     cbMemeticoToggleTarget.setVisible(newValue);
                 }
         );
+
+        theStage = new Stage();
+        Scene newScane = new Scene(memeticoDisplayOptionsRoot, 300, 200);
+        theStage.setScene(newScane);
     }
 
     public void bindIsTargetAvailable(ObservableValue<Boolean> isTargetAvailable) {
@@ -88,10 +92,6 @@ public class DisplayOptionsController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        theStage = new Stage();
-        Scene newScane = new Scene(memeticoDisplayOptionsRoot, 300, 200);
-        theStage.setScene(newScane);
     }
 
     public BooleanProperty getTargetDisplayToggle() {
