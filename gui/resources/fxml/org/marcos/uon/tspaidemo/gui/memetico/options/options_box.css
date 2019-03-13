@@ -23,7 +23,7 @@
     -fx-alignment: center-left;
 }
 
-#memeticoOptionsBoxRoot {
+.root {
     -fx-padding: 5px;
 }
 

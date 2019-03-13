@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.String?>
+<ScrollPane fx:id="memeticoConfigurationBoxRoot" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.marcos.uon.tspaidemo.gui.memetico.options.RunConfigurationController" styleClass="root">
+    <VBox>
+        <TextFlow styleClass="h1">
+            <Text fx:id="txtMemeticoConfigTitle">Memetico TSP Solver Configuration</Text>
+        </TextFlow>
+        <VBox>
+            <HBox spacing="5">
+                <Button fx:id="btnMemeticoSaveLog" onAction="#saveLog">Save Log</Button>
+                <Button fx:id="btnMemeticoLoadLog" onAction="#loadLog">Load Log</Button>
+                <Button fx:id="btnMemeticoSaveTour" onAction="#saveTour">Save Final Tour Found as TSPLib</Button>
+            </HBox>
+            <TextFlow styleClass="formError">
+                <Text fx:id="txtMemeticoLogFileError"/>
+            </TextFlow>
+        </VBox>
+        <GridPane fx:id="gpMemeticoConfig" styleClass="optionGrid">
+            <!--problem options-->
+            <TextFlow styleClass="h2" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                <Text fx:id="memeticoProblemOptionsTitle">Problem Instance</Text>
+            </TextFlow>
+            <Label GridPane.rowIndex="1" GridPane.columnIndex="0" >Template:</Label>
+            <ChoiceBox fx:id="choiceMemeticoProblemTemplate" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label GridPane.rowIndex="2" GridPane.columnIndex="0" labelFor="$btnMemeticoSelectProblem">Problem Instance:</Label>
+            <VBox GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
+                <HBox>
+                    <Label fx:id="lblMemeticoProblemFile" styleClass="fileNameDisplay" HBox.hgrow="ALWAYS" labelFor="$btnMemeticoSelectProblem"/>
+                    <Button fx:id="btnMemeticoSelectProblem" onAction="#openProblemSelectionDialog">Choose File</Button>
+                </HBox>
+                <TextFlow styleClass="formError">
+                    <Text fx:id="txtMemeticoProblemFileError"></Text>
+                </TextFlow>
+            </VBox>
+            <Label labelFor="$choiceMemeticoSolutionType" GridPane.rowIndex="3" GridPane.columnIndex="0">Solution Type:</Label>
+            <ChoiceBox fx:id="choiceMemeticoSolutionType" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                <String fx:value="Tour"/>
+                <String fx:value="Cost"/>
+            </ChoiceBox>
+            <Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="lblMemeticoTourFileDesc" labelFor="$btnMemeticoSelectTour">Tour File:</Label>
+            <VBox GridPane.rowIndex="4" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
+                <HBox>
+                    <Label fx:id="lblMemeticoTourFile" styleClass="fileNameDisplay" labelFor="$btnMemeticoSelectTour"/>
+                    <Button fx:id="btnMemeticoSelectTour" onAction="#openTourSelectionDialog">Choose File</Button>
+                </HBox>
+                <TextFlow styleClass="formError">
+                    <Text fx:id="txtMemeticoTourFileError"/>
+                </TextFlow>
+            </VBox>
+            <Label GridPane.rowIndex="4" GridPane.columnIndex="0" fx:id="lblMemeticoTourCost" labelFor="$fldMemeticoTourCost">Tour Cost:</Label>
+            <TextField GridPane.rowIndex="4" GridPane.columnIndex="1" fx:id="fldMemeticoTourCost" styleClass="intField"/>
+
+            <!--evolutionary parameters-->
+            <TextFlow styleClass="h2" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                <Text fx:id="txtMemeticoEvolutionaryParamsTitle" >Evolutionary Parameters</Text>
+            </TextFlow>
+            <Label GridPane.rowIndex="6" GridPane.columnIndex="0" fx:id="lblMemeticoPopDepth" labelFor="$fldMemeticoPopDepth">Population depth (Excl root):</Label>
+            <TextField GridPane.rowIndex="6" GridPane.columnIndex="1" fx:id="fldMemeticoPopDepth" styleClass="intField"/>
+            <Label GridPane.rowIndex="7" GridPane.columnIndex="0" fx:id="lblMemeticoMutRate" labelFor="$fldMemeticoMutRate">Mutation rate (%):</Label>
+            <TextField GridPane.rowIndex="7" GridPane.columnIndex="1" fx:id="fldMemeticoMutRate" styleClass="intField"/>
+            <Label GridPane.rowIndex="8" GridPane.columnIndex="0" fx:id="lblMemeticoMaxGen" labelFor="$fldMemeticoMaxGen">Max generations:</Label>
+            <TextField GridPane.rowIndex="8" GridPane.columnIndex="1" fx:id="fldMemeticoMaxGen" styleClass="intField"/>
+            <Label GridPane.rowIndex="9" GridPane.columnIndex="0" fx:id="lblMemeticoLocalSearch" labelFor="$choiceMemeticoLocalSearch">Local search operation:</Label>
+            <ChoiceBox fx:id="choiceMemeticoLocalSearch" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+            <Label GridPane.rowIndex="10" GridPane.columnIndex="0" fx:id="lblMemeticoCrossover" labelFor="$choiceMemeticoCrossover">Crossover operation:</Label>
+            <ChoiceBox fx:id="choiceMemeticoCrossover" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
+            <Label GridPane.rowIndex="11" GridPane.columnIndex="0" fx:id="lblMemeticoRestart" labelFor="$choiceMemeticoRestart">Restart operation:</Label>
+            <ChoiceBox fx:id="choiceMemeticoRestart" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
+            <Label fx:id="lblMemeticoIncludeLKH" GridPane.rowIndex="12" GridPane.columnIndex="0" labelFor="$cbMemeticoIncludeLKH">Use Lin-Kernighan heuristic?</Label>
+            <CheckBox GridPane.rowIndex="12" GridPane.columnIndex="1" fx:id="cbMemeticoIncludeLKH"/>
+            <Label GridPane.rowIndex="13" GridPane.columnIndex="0" fx:id="lblMemeticoReignLimit" labelFor="$fldMemeticoMaxGen">Refresh root after N generations (0 = never):</Label>
+            <TextField GridPane.rowIndex="13" GridPane.columnIndex="1" fx:id="fldMemeticoReignLimit" styleClass="intField"/>
+        </GridPane>
+        <TextFlow styleClass="h1" GridPane.columnSpan="2">
+            <Text fx:id="txtMemeticoLogSettingsTitle"/>
+        </TextFlow>
+        <GridPane styleClass="optionGrid">
+            <Label GridPane.rowIndex="1" GridPane.columnIndex="0" fx:id="lblLogInterval" labelFor="$fldMemeticoTourCost">Generations between log entries:</Label>
+            <TextField GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="fldMemeticoLogInterval" styleClass="intField"/>
+            <Button fx:id="btnMemeticoApplyConfiguration" onAction="#applyConfiguration">Apply (Restarts Memetico)</Button>
+        </GridPane>
+    </VBox>
+</ScrollPane>

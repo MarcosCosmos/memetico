@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.marcos.uon.tspaidemo.gui.memetico.options.DisplayOptionsController"
+            prefHeight="400.0" prefWidth="600.0"
+            fx:id="memeticoDisplayOptionsRoot"
+>
+    <VBox>
+        <TextFlow styleClass="h1">
+            <Text fx:id="txtMemeticoDisplayOptionsTitle" styleClass="sectionTitle">Display Options</Text>
+        </TextFlow>
+        <TextFlow styleClass="h2">
+            <Text fx:id="memeticoGeneralDisplayOptionsTitle">General</Text>
+        </TextFlow>
+        <GridPane styleClass="optionGrid">
+            <Label fx:id="lblMemeticoToggleTarget" GridPane.rowIndex="1" GridPane.columnIndex="0" labelFor="$cbMemeticoToggleTarget">Show Target?</Label>
+            <CheckBox GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="cbMemeticoToggleTarget"/>
+            <Label fx:id="lblMemeticoToggleBest" GridPane.rowIndex="2" GridPane.columnIndex="0" labelFor="$cbMemeticoToggleTarget">Show Best Found?</Label>
+            <CheckBox GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="cbMemeticoToggleBest"/>
+            <TextFlow styleClass="h2" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                <Text fx:id="memeticoAgentDisplayOptionsTitle">Agents</Text>
+            </TextFlow>
+            <Button GridPane.rowIndex="4" GridPane.columnIndex="0" onAction="#showAllPredictions">Show All</Button>
+            <Button GridPane.rowIndex="4" GridPane.columnIndex="1" onAction="#hideAllPredictions">Hide All</Button>
+            <Button GridPane.rowIndex="5" GridPane.columnIndex="0" onAction="#showAllPockets">Show All (Pockets)</Button>
+            <Button GridPane.rowIndex="5" GridPane.columnIndex="1" onAction="#hideAllPockets">Hide All (Pockets)</Button>
+            <Button GridPane.rowIndex="6" GridPane.columnIndex="0" onAction="#showAllCurrents">Show All (Current)</Button>
+            <Button GridPane.rowIndex="6" GridPane.columnIndex="1" onAction="#hideAllCurrents">Hide All (Currents)</Button>
+            <VBox fx:id="memeticoAgentOptionsWrapper" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.hgrow="ALWAYS"/>
+        </GridPane>
+    </VBox>
+
+</ScrollPane>
