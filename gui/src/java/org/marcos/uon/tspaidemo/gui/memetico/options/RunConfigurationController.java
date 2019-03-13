@@ -565,7 +565,7 @@ public class RunConfigurationController implements Initializable {
         currentMemeticoContinuePermission = new ValidityFlag.Synchronised();
         final ProblemInstance finalizedProblem = chosenProblemInstance.get();
         final MemeticoConfiguration finalizedConfig = chosenMemeticoConfiguration.get();
-        final ValidityFlag.ReadOnly finalizedContinuePermission = currentMemeticoContinuePermission.getReadOnly();
+        final ValidityFlag finalizedContinuePermission = currentMemeticoContinuePermission;
         try {
             TSPLibInstance tspLibInstance = finalizedProblem.getTspLibInstance();
             long maxGenerations = finalizedConfig.maxGenerations != 0 ? finalizedConfig.maxGenerations : (int) (5 * 13 * Math.log(13) * Math.sqrt(tspLibInstance.getDimension()));
@@ -582,13 +582,13 @@ public class RunConfigurationController implements Initializable {
                     } catch (InterruptedException e) {
                         e.printStackTrace(); //we don't mind if that thread was interrupted, as long as it's dead
                     }
-                    Memetico meme = new Memetico(logger, finalizedContinuePermission, finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
+                    Memetico meme = new Memetico(logger, finalizedContinuePermission.getReadOnly(), finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
                             finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp, finalizedLKHInclusion,
                             finalizedConfig.maxTime, maxGenerations, finalizedConfig.reignLimit, finalizedConfig.numReplications);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                currentMemeticoContinuePermission.invalidate();
+                finalizedContinuePermission.invalidate();
             });
             memeticoThread.start();
         } catch (Exception e) {
