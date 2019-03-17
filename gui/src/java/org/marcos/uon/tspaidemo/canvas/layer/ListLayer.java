@@ -1,7 +1,7 @@
-package org.marcos.uon.tspaidemo.canvas.test.layer;
+package org.marcos.uon.tspaidemo.canvas.layer;
 
 import javafx.scene.canvas.GraphicsContext;
-import org.marcos.uon.tspaidemo.canvas.test.drawable.Drawable;
+import org.marcos.uon.tspaidemo.canvas.drawable.Drawable;
 
 import java.util.*;
 

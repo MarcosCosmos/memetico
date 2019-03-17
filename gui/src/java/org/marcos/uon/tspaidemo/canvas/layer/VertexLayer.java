@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.canvas.test.layer;
+package org.marcos.uon.tspaidemo.canvas.layer;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -6,7 +6,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
-import org.marcos.uon.tspaidemo.canvas.test.drawable.Vertex;
+import org.marcos.uon.tspaidemo.canvas.drawable.Vertex;
 
 public class VertexLayer extends ListLayer<Vertex> {
 

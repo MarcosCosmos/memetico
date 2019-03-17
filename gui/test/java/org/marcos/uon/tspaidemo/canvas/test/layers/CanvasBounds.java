@@ -4,8 +4,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import org.marcos.uon.tspaidemo.canvas.test.TransformationContext;
-import org.marcos.uon.tspaidemo.canvas.test.layer.LayerBase;
+import org.marcos.uon.tspaidemo.canvas.TransformationContext;
+import org.marcos.uon.tspaidemo.canvas.layer.LayerBase;
 
 public class CanvasBounds extends LayerBase {
     ChangeListener<Bounds> changeListener;

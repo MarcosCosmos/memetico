@@ -1,8 +1,8 @@
-package org.marcos.uon.tspaidemo.canvas.test.layer;
+package org.marcos.uon.tspaidemo.canvas.layer;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.scene.canvas.Canvas;
-import org.marcos.uon.tspaidemo.canvas.test.TransformationContext;
+import org.marcos.uon.tspaidemo.canvas.TransformationContext;
 
 /**
  * Publically exposed interface; hides the
