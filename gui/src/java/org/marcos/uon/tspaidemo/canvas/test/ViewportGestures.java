@@ -1,6 +1,5 @@
-package org.marcos.uon.tspaidemo.canvas;
+package org.marcos.uon.tspaidemo.canvas.test;
 
-import com.fxgraph.graph.PannableCanvas;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
@@ -17,7 +16,7 @@ public class ViewportGestures {
     //todo: finish me
 
     private final DoubleProperty zoomSpeedProperty = new SimpleDoubleProperty(1.2d);
-    private final DragContext sceneDragContext;
+    private final TransformationContext transformationContext;
 
     public EventHandler<MouseEvent> getOnMousePressedEventHandler() {
         return onMousePressedEventHandler;
@@ -40,7 +39,7 @@ public class ViewportGestures {
         @Override
         public void handle(MouseEvent event) {
             if (event.isPrimaryButtonDown()) {
-                sceneDragContext.setMouseAnchor(event.getX(), event.getY());
+                transformationContext.setMouseAnchor(event.getX(), event.getY());
             }
         }
     };
@@ -49,7 +48,7 @@ public class ViewportGestures {
         @Override
         public void handle(MouseEvent event) {
             if(event.getButton() == MouseButton.PRIMARY) {
-                sceneDragContext.santiseTranslation();
+                transformationContext.santiseTranslation();
             }
         }
     };
@@ -62,13 +61,9 @@ public class ViewportGestures {
             if(!event.isPrimaryButtonDown()) {
                 return;
             }
+            transformationContext.translate((event.getX() - transformationContext.getMouseAnchorX())/ transformationContext.getScale(), (event.getY() - transformationContext.getMouseAnchorY())/ transformationContext.getScale());
 
-//            sceneDragContext.setTranslationX(sceneDragContext.getTranslationX() + (event.getX() - sceneDragContext.getMouseAnchorX())/sceneDragContext.getScale());
-//            sceneDragContext.setTranslationY(sceneDragContext.getTranslationY() + (event.getY() - sceneDragContext.getMouseAnchorY())/sceneDragContext.getScale());
-            sceneDragContext.translate((event.getX() - sceneDragContext.getMouseAnchorX())/sceneDragContext.getScale(), (event.getY() - sceneDragContext.getMouseAnchorY())/sceneDragContext.getScale());
-
-            sceneDragContext.setMouseAnchor(event.getX(), event.getY());
-//            sceneDragContext.santiseTranslation();
+            transformationContext.setMouseAnchor(event.getX(), event.getY());
             event.consume();
         }
     };
@@ -80,29 +75,16 @@ public class ViewportGestures {
 
         @Override
         public void handle(ScrollEvent event) {
-            sceneDragContext.setMouseAnchor(event.getX(), event.getY());
-            sceneDragContext.zoom(event.getDeltaY() < 0 ? 1/getZoomSpeed() : getZoomSpeed());
-//            sceneDragContext.santiseTranslation();
+            transformationContext.setMouseAnchor(event.getX(), event.getY());
+            transformationContext.zoom(event.getDeltaY() < 0 ? 1/getZoomSpeed() : getZoomSpeed());
             event.consume();
         }
 
     };
 
-    public ViewportGestures(DragContext sceneDragContext) {
-        this.sceneDragContext = sceneDragContext;
+    public ViewportGestures(TransformationContext sceneTransformationContext) {
+        this.transformationContext = sceneTransformationContext;
     }
-
-//    public static double clamp(double value, double min, double max) {
-//        if(Double.compare(value, min) < 0) {
-//            return min;
-//        }
-//
-//        if(Double.compare(value, max) > 0) {
-//            return max;
-//        }
-//
-//        return value;
-//    }
 
     public double getZoomSpeed() {
         return zoomSpeedProperty.get();

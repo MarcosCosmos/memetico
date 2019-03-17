@@ -23,11 +23,12 @@ import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
-import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
-import org.marcos.uon.tspaidemo.canvas.ViewportGestures;
+import org.marcos.uon.tspaidemo.canvas.test.CanvasTSPGraph;
+import org.marcos.uon.tspaidemo.canvas.test.ViewportGestures;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
-import org.marcos.uon.tspaidemo.gui.memetico.options.OptionsBoxController;
+import org.marcos.uon.tspaidemo.gui.memetico.options.DisplayOptionsController;
+import org.marcos.uon.tspaidemo.gui.memetico.options.RunConfigurationController;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
 import memetico.util.ProblemInstance;
 
@@ -69,7 +70,9 @@ public class MemeticoContentController implements ContentController {
 
     private List<AgentDisplay> agentControllers = new ArrayList<>();
 
-    private OptionsBoxController optionsBoxController;
+    private RunConfigurationController runConfigurationController;
+
+    private DisplayOptionsController displayOptionsController;
 
     private transient ObjectProperty<MemeticoSnapshot> currentSnapshot = new SimpleObjectProperty<>();
     private transient ObjectProperty<ProblemInstance> currentInstance = new SimpleObjectProperty<>();
@@ -100,25 +103,36 @@ public class MemeticoContentController implements ContentController {
         displayGraph.getGraphic().prefHeightProperty().bind(graphContainer.heightProperty());
         infoPane.prefViewportHeightProperty().bind(agentsGrid.heightProperty());
         infoPane.prefViewportWidthProperty().bind(agentsGrid.widthProperty());
-        infoStack.minWidthProperty().bind(Bindings.createDoubleBinding(() ->
-                infoPane.getViewportBounds().getWidth(), infoPane.viewportBoundsProperty()));
-            try {
+        infoStack.minWidthProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> infoPane.getViewportBounds().getWidth(), infoPane.viewportBoundsProperty()
+                )
+        );
+        try {
 
-                //set up the content display with an observable reference to the current currentSnapshot to display.
-                FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource(
-                                "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.fxml"
-                        )
-                );
-                loader.load();
-                optionsBoxController = loader.getController();
+            //set up the options controllers
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource(
+                            "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/run_configuration.fxml"
+                    )
+            );
+            loader.load();
+            runConfigurationController = loader.getController();
+
+            loader = new FXMLLoader(
+                    getClass().getResource(
+                            "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/display_options.fxml"
+                    )
+            );
+            loader.load();
+            displayOptionsController = loader.getController();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
-            theView = optionsBoxController.getLogger().newView();
+            theView = runConfigurationController.getLogger().newView();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -136,7 +150,7 @@ public class MemeticoContentController implements ContentController {
 
         txtGeneration.textProperty()
                 .bind(generationValue.asString());
-        currentInstance.bind(optionsBoxController.chosenProblemInstanceProperty());
+        currentInstance.bind(runConfigurationController.chosenProblemInstanceProperty());
 
         txtBestCost.textProperty().bind(
                 Bindings.createStringBinding(
@@ -161,13 +175,13 @@ public class MemeticoContentController implements ContentController {
 
 
 
-        optionsBoxController.getTargetDisplayToggle().addListener((e,o,n) -> toursOutdated = true);
-        optionsBoxController.getTargetDisplayToggle().set(true);
-        optionsBoxController.getBestDisplayToggle().addListener((e,o,n) -> toursOutdated = true);
-        optionsBoxController.getBestDisplayToggle().set(true);
+        displayOptionsController.getTargetDisplayToggle().addListener((e, o, n) -> toursOutdated = true);
+        displayOptionsController.getTargetDisplayToggle().set(true);
+        displayOptionsController.getBestDisplayToggle().addListener((e, o, n) -> toursOutdated = true);
+        displayOptionsController.getBestDisplayToggle().set(true);
 
         //tell the options box we are ready to go
-        optionsBoxController.applyConfiguration();
+        runConfigurationController.applyConfiguration();
 
 //        currentInstance.addListener((observable, oldValue, newValue) -> contentOutdated = true);
         currentSnapshot.addListener((observable, oldValue, newValue) -> contentOutdated = true);
@@ -251,13 +265,13 @@ public class MemeticoContentController implements ContentController {
             displayGraph.clearPredictions();
 
             TSPLibInstance theInstance = currentInstance.get().getTspLibInstance();
-            if(optionsBoxController.getTargetDisplayToggle().get()) {
+            if(displayOptionsController.getTargetDisplayToggle().get()) {
                 displayGraph.showTargets();
             } else {
                 displayGraph.hideTargets();
             }
             MemeticoSnapshot theSnapshot = currentSnapshot.get();
-            if (optionsBoxController.getBestDisplayToggle().get()) {
+            if (displayOptionsController.getBestDisplayToggle().get()) {
                 List<int[]> edgesToAdd = new ArrayList<>(theInstance.getDimension());
                 List<Integer> bestTour = theSnapshot.bestSolution.tour;
                 for(int j = 0; j<bestTour.size(); ++j) {
@@ -269,7 +283,7 @@ public class MemeticoContentController implements ContentController {
                 );
             }
 
-            List<BooleanProperty[]> toggles = optionsBoxController.getSolutionDisplayToggles();
+            List<BooleanProperty[]> toggles = displayOptionsController.getSolutionDisplayToggles();
             for (int i = 0; i < toggles.size(); ++i) {
                 BooleanProperty[] eachToggles = toggles.get(i);
                 AgentDisplay eachAgentController = agentControllers.get(i);
@@ -311,7 +325,7 @@ public class MemeticoContentController implements ContentController {
         try {
             if(!theView.isValid()) {
                 //the view we want it future could be attached to a separate logger (so we can start a new run without waiting for the old run to terminate, for example)
-                theView = optionsBoxController.getLogger().newView();
+                theView = runConfigurationController.getLogger().newView();
                 currentSnapshot.set(null);
                 numberOfFrames.set(0); //set it to zero at least once so that the frame index moves to zero
             }
@@ -357,7 +371,7 @@ public class MemeticoContentController implements ContentController {
                 txtAvgGenTime.setText("Unknown");
                 agentControllers.clear();
                 agentsGrid.getChildren().clear();
-                optionsBoxController.adjustAgentOptionsDisplay(optionsBoxController.getSolutionDisplayToggles().size(), 0);
+                displayOptionsController.adjustAgentOptionsDisplay(displayOptionsController.getSolutionDisplayToggles().size(), 0);
             }
 
             toursOutdated = true;
@@ -373,8 +387,8 @@ public class MemeticoContentController implements ContentController {
                     lastDrawnGraphName = currentValue.instanceName;
                 }
 
-                int oldCount = optionsBoxController.getSolutionDisplayToggles().size(), newCount = currentValue.agents.size();
-                optionsBoxController.adjustAgentOptionsDisplay(oldCount, newCount);
+                int oldCount = displayOptionsController.getSolutionDisplayToggles().size(), newCount = currentValue.agents.size();
+                displayOptionsController.adjustAgentOptionsDisplay(oldCount, newCount);
                 if (newCount != oldCount) {
                     listUpdated = true;
                 }
@@ -393,7 +407,7 @@ public class MemeticoContentController implements ContentController {
                         //add the data to the lists
                         agentNodes.add(newNode);
                     }
-                    List<BooleanProperty[]> displayToggles = optionsBoxController.getSolutionDisplayToggles();
+                    List<BooleanProperty[]> displayToggles = displayOptionsController.getSolutionDisplayToggles();
                     //addListeners for all the display toggles so that we still get graph display updates even when the playback is paused
                     displayToggles.subList(oldCount, newCount).forEach(each -> {
                         for (BooleanProperty eachToggle : each) {
@@ -592,8 +606,12 @@ public class MemeticoContentController implements ContentController {
         return currentFrameDuration.getReadOnlyProperty();
     }
 
-    public void showOptionsBox() {
-        optionsBoxController.open();
+    public void showConfiguration() {
+        runConfigurationController.open();
+    }
+
+    public void showDisplayOptions() {
+        displayOptionsController.open();
     }
 
     /**

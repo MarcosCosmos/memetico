@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 //TODO: possiblt separate the problem/evolutionary param config from the display options and possibly create a seperate box for them (which isn't subsiduary to the content controller)
-public class OptionsBoxController implements Initializable {
+public class RunConfigurationController implements Initializable {
     public static final List<ProblemConfiguration> INCLUDED_PROBLEMS;
     public static final MemeticoConfiguration DEFAULT_CONFIG = new MemeticoConfiguration(13, 5, LocalSearchOpName.RAI.toString(), CrossoverOpName.SAX.toString(), RestartOpName.INSERTION.toString());
     public static final int DEFAULT_LOG_INTERVAL = 1;
@@ -52,11 +52,11 @@ public class OptionsBoxController implements Initializable {
 
     static {
         Function<String, ProblemConfiguration> newToured = (filePrefix) -> new ProblemConfiguration(
-                OptionsBoxController.class.getResource(String.format("/problems/tsp/%s.tsp", filePrefix)),
-                OptionsBoxController.class.getResource(String.format("/problems/tsp/%s.opt.tour", filePrefix))
+                RunConfigurationController.class.getResource(String.format("/problems/tsp/%s.tsp", filePrefix)),
+                RunConfigurationController.class.getResource(String.format("/problems/tsp/%s.opt.tour", filePrefix))
         );
         BiFunction<String, Long, ProblemConfiguration> newCosted = (filePrefix, cost) -> new ProblemConfiguration(
-                OptionsBoxController.class.getResource(String.format("/problems/tsp/%s.tsp", filePrefix)),
+                RunConfigurationController.class.getResource(String.format("/problems/tsp/%s.tsp", filePrefix)),
                 cost
         );
         INCLUDED_PROBLEMS = Arrays.asList(
@@ -91,24 +91,21 @@ public class OptionsBoxController implements Initializable {
     private Stage theStage;
 
     @FXML
-    private ScrollPane memeticoOptionsBoxRoot;
+    private ScrollPane memeticoConfigurationBoxRoot;
     @FXML
     private Button btnMemeticoSelectProblem, btnMemeticoSelectTour;
     @FXML
-    private CheckBox cbMemeticoToggleTarget, cbMemeticoToggleBest, cbMemeticoIncludeLKH;
-    @FXML
-    private VBox memeticoAgentOptionsWrapper;
+    private CheckBox cbMemeticoIncludeLKH;
+
     @FXML
     private TextField fldMemeticoTourCost, fldMemeticoPopDepth, fldMemeticoMutRate,fldMemeticoMaxGen,fldMemeticoLogInterval,fldMemeticoReignLimit;
     @FXML
     private ChoiceBox<String> choiceMemeticoProblemTemplate, choiceMemeticoSolutionType, choiceMemeticoLocalSearch, choiceMemeticoCrossover, choiceMemeticoRestart;
 
     @FXML
-    private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoToggleTarget, lblMemeticoIncludeLKH;
+    private Label lblMemeticoProblemFile, lblMemeticoTourFile, lblMemeticoTourFileDesc, lblMemeticoTourCost, lblMemeticoIncludeLKH;
     @FXML
     private Text txtMemeticoProblemFileError, txtMemeticoTourFileError, txtMemeticoLogFileError;
-
-    private transient final ObservableList<BooleanProperty[]> solutionDisplayToggles = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private transient final ReadOnlyObjectWrapper<ProblemInstance> chosenProblemInstance = new ReadOnlyObjectWrapper<>();
 
@@ -270,45 +267,6 @@ public class OptionsBoxController implements Initializable {
         }
     }
 
-
-    public void adjustAgentOptionsDisplay(int oldCount, int newCount) {
-        List<Node> children = memeticoAgentOptionsWrapper.getChildren();
-        try {
-            if (newCount < oldCount) {
-                //delete unneeded agent displays and states; todo: possibly just hide them for performance?
-                children.subList(newCount, oldCount).clear();
-                solutionDisplayToggles.subList(newCount, oldCount).clear();
-            } else if (newCount > oldCount) {
-                for (int i = oldCount; i < newCount; ++i) {
-                    Node eachSubBox;
-
-                    eachSubBox = FXMLLoader.load(getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/agent_solution_toggles.fxml"));
-
-                    ((Text)eachSubBox.lookup(".txtAgentId")).setText(String.valueOf(i));
-                    BooleanProperty[] toggles = new BooleanProperty[]{
-                            ((CheckBox)eachSubBox.lookup(".cbTogglePocket")).selectedProperty(),
-                            ((CheckBox)eachSubBox.lookup(".cbToggleCurrent")).selectedProperty()
-                    };
-                    children.add(eachSubBox);
-                    solutionDisplayToggles.add(toggles);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public BooleanProperty getTargetDisplayToggle() {
-        return cbMemeticoToggleTarget.selectedProperty();
-    }
-
-    public BooleanProperty getBestDisplayToggle() {
-        return cbMemeticoToggleBest.selectedProperty();
-    }
-    public ObservableList<BooleanProperty[]> getSolutionDisplayToggles() {
-        return solutionDisplayToggles;
-    }
-
     public ProblemInstance getChosenProblemInstance() {
         return chosenProblemInstance.get();
     }
@@ -351,10 +309,9 @@ public class OptionsBoxController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        memeticoOptionsBoxRoot.setFitToWidth(true);
+//        memeticoConfigurationBoxRoot.setFitToWidth(true);
 
-        //todo: add an option for changing the log frequency through the UI/clean up save/load buttons
-        memeticoOptionsBoxRoot.getStylesheets().addAll(
+        memeticoConfigurationBoxRoot.getStylesheets().addAll(
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/options_box.css").toExternalForm(),
                 getClass().getResource("/fxml/org/marcos/uon/tspaidemo/gui/main/common.css").toExternalForm()
         );
@@ -458,13 +415,9 @@ public class OptionsBoxController implements Initializable {
                     switch (newValue.getConfiguration().solutionType) {
                         case TOUR:
                             lblMemeticoTourFile.setText(newValue.getConfiguration().tourFile.getPath());
-                            lblMemeticoToggleTarget.setVisible(true);
-                            cbMemeticoToggleTarget.setVisible(true);
                             break;
                         case COST:
                             fldMemeticoTourCost.setText(String.valueOf(newValue.getTargetCost()));
-                            lblMemeticoToggleTarget.setVisible(false);
-                            cbMemeticoToggleTarget.setVisible(false);
                             break;
                     }
                 }
@@ -511,7 +464,7 @@ public class OptionsBoxController implements Initializable {
         //setup template selection
         choiceMemeticoProblemTemplate.getItems().add("Custom");
         //load all the base instances into the map and template list for the options boz
-        for (ProblemConfiguration eachProblem : OptionsBoxController.INCLUDED_PROBLEMS) {
+        for (ProblemConfiguration eachProblem : RunConfigurationController.INCLUDED_PROBLEMS) {
             ProblemInstance theInstance = ProblemInstance.create(eachProblem);
             instances.put(theInstance.getName(), theInstance);
             choiceMemeticoProblemTemplate.getItems().add(theInstance.getName());
@@ -520,7 +473,7 @@ public class OptionsBoxController implements Initializable {
         choiceMemeticoProblemTemplate.getSelectionModel().select(1);//since "Custom" is first,  we'll want to select the second entry
 
         theStage = new Stage();
-        Scene newScane = new Scene(memeticoOptionsBoxRoot, 300, 200);
+        Scene newScane = new Scene(memeticoConfigurationBoxRoot, 300, 200);
         theStage.setScene(newScane);
     }
 
@@ -612,7 +565,7 @@ public class OptionsBoxController implements Initializable {
         currentMemeticoContinuePermission = new ValidityFlag.Synchronised();
         final ProblemInstance finalizedProblem = chosenProblemInstance.get();
         final MemeticoConfiguration finalizedConfig = chosenMemeticoConfiguration.get();
-        final ValidityFlag.ReadOnly finalizedContinuePermission = currentMemeticoContinuePermission.getReadOnly();
+        final ValidityFlag finalizedContinuePermission = currentMemeticoContinuePermission;
         try {
             TSPLibInstance tspLibInstance = finalizedProblem.getTspLibInstance();
             long maxGenerations = finalizedConfig.maxGenerations != 0 ? finalizedConfig.maxGenerations : (int) (5 * 13 * Math.log(13) * Math.sqrt(tspLibInstance.getDimension()));
@@ -629,12 +582,13 @@ public class OptionsBoxController implements Initializable {
                     } catch (InterruptedException e) {
                         e.printStackTrace(); //we don't mind if that thread was interrupted, as long as it's dead
                     }
-                    Memetico meme = new Memetico(logger, finalizedContinuePermission, finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
+                    Memetico meme = new Memetico(logger, finalizedContinuePermission.getReadOnly(), finalizedProblem, finalizedConfig.solutionStructure, finalizedConfig.populationStructure, finalizedConfig.constructionAlgorithm,
                             finalizedConfig.populationSize, finalizedConfig.mutationRate, finalizedConfig.localSearchOp, finalizedConfig.crossoverOp, finalizedConfig.restartOp, finalizedConfig.mutationOp, finalizedLKHInclusion,
                             finalizedConfig.maxTime, maxGenerations, finalizedConfig.reignLimit, finalizedConfig.numReplications);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                finalizedContinuePermission.invalidate();
             });
             memeticoThread.start();
         } catch (Exception e) {
@@ -648,46 +602,6 @@ public class OptionsBoxController implements Initializable {
 
     public void close() {
         theStage.close();
-    }
-
-    public void showAllPredictions() {
-        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
-            for (BooleanProperty eachToggle : eachToggles) {
-                eachToggle.set(true);
-            }
-        }
-    }
-
-    public void hideAllPredictions() {
-        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
-            for (BooleanProperty eachToggle : eachToggles) {
-                eachToggle.set(false);
-            }
-        }
-    }
-
-    public void showAllPockets() {
-        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
-            eachToggles[0].set(true);
-        }
-    }
-
-    public void hideAllPockets() {
-        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
-            eachToggles[0].set(false);
-        }
-    }
-
-    public void showAllCurrents() {
-        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
-            eachToggles[1].set(true);
-        }
-    }
-
-    public void hideAllCurrents() {
-        for (BooleanProperty[] eachToggles : solutionDisplayToggles) {
-            eachToggles[1].set(false);
-        }
     }
 
     public Map<String, ProblemInstance> getInstances() {

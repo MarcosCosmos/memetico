@@ -51,7 +51,7 @@ public interface Graph<V extends Graph.Vertex, D extends Number, E extends Graph
 
     /**
      * Tests whether or not a particular vertex exists
-     * @param vertex a vertex to test for (tested on id basis)
+     * @param vertex a vertex to tests for (tested on id basis)
      * @return true if there is a vertex {@code v} such that {@code v.getId() == id}
      */
     default boolean contains(V vertex) {
@@ -78,7 +78,7 @@ public interface Graph<V extends Graph.Vertex, D extends Number, E extends Graph
 
     /**
      * Tests whether or not a particular edge exists
-     * @param edge an edge to test for
+     * @param edge an edge to tests for
      * @return true if the graph contains some edge {@code other} for which {@code other.equals(edge)} returns true
      */
     boolean contains( @NotNull E edge);
