@@ -23,8 +23,8 @@ import memetico.logging.IPCLogger;
 import memetico.logging.NullPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
-import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
-import org.marcos.uon.tspaidemo.canvas.ViewportGestures;
+import org.marcos.uon.tspaidemo.canvas.test.CanvasTSPGraph;
+import org.marcos.uon.tspaidemo.canvas.test.ViewportGestures;
 import org.marcos.uon.tspaidemo.gui.main.ContentController;
 import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
 import org.marcos.uon.tspaidemo.gui.memetico.options.DisplayOptionsController;
@@ -103,26 +103,29 @@ public class MemeticoContentController implements ContentController {
         displayGraph.getGraphic().prefHeightProperty().bind(graphContainer.heightProperty());
         infoPane.prefViewportHeightProperty().bind(agentsGrid.heightProperty());
         infoPane.prefViewportWidthProperty().bind(agentsGrid.widthProperty());
-        infoStack.minWidthProperty().bind(Bindings.createDoubleBinding(() ->
-                infoPane.getViewportBounds().getWidth(), infoPane.viewportBoundsProperty()));
-            try {
+        infoStack.minWidthProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> infoPane.getViewportBounds().getWidth(), infoPane.viewportBoundsProperty()
+                )
+        );
+        try {
 
-                //set up the options controllers
-                FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource(
-                                "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/run_configuration.fxml"
-                        )
-                );
-                loader.load();
-                runConfigurationController = loader.getController();
+            //set up the options controllers
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource(
+                            "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/run_configuration.fxml"
+                    )
+            );
+            loader.load();
+            runConfigurationController = loader.getController();
 
-                loader = new FXMLLoader(
-                        getClass().getResource(
-                                "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/display_options.fxml"
-                        )
-                );
-                loader.load();
-                displayOptionsController = loader.getController();
+            loader = new FXMLLoader(
+                    getClass().getResource(
+                            "/fxml/org/marcos/uon/tspaidemo/gui/memetico/options/display_options.fxml"
+                    )
+            );
+            loader.load();
+            displayOptionsController = loader.getController();
 
         } catch (IOException e) {
             e.printStackTrace();

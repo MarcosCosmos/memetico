@@ -1,11 +1,19 @@
-package org.marcos.uon.tspaidemo.canvas;
+package org.marcos.uon.tspaidemo.canvas.test;
 
 import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
+import org.marcos.uon.tspaidemo.canvas.test.drawable.Edge;
+import org.marcos.uon.tspaidemo.canvas.test.drawable.OutlineEdge;
+import org.marcos.uon.tspaidemo.canvas.test.drawable.Vertex;
+import org.marcos.uon.tspaidemo.canvas.test.layer.ListLayer;
+import org.marcos.uon.tspaidemo.canvas.test.layer.VertexLayer;
+import org.marcos.uon.tspaidemo.canvas.test.layers.BoundsInCanvas;
+import org.marcos.uon.tspaidemo.canvas.test.layers.BoundsInLocal;
+import org.marcos.uon.tspaidemo.canvas.test.layers.CanvasBounds;
+import org.marcos.uon.tspaidemo.canvas.test.layers.LogicalBounds;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,47 +21,37 @@ import java.util.stream.Collectors;
 
 public class CanvasTSPGraph {
 
-    private CanvasGraph internalGraphic;
-    private CanvasGraph.VertexLayer vertexLayer;
-    private CanvasGraph.OutlineEdgeLayer targetLayer;
-    private CanvasGraph.EdgeLayer predictionLayer;
+    private LayeredCanvas internalGraphic;
+    private VertexLayer vertexLayer;
+    private ListLayer<OutlineEdge> targetLayer;
+    private ListLayer<Edge> predictionLayer;
 
     private ViewportGestures gestures;
 
     public static final double DEFAULT_DOT_RADIUS = 2;
     public static final double DEFAULT_STROKE_WIDTH = 1;
     public static final Color DEFAULT_BACKGROUND_COLOR = Color.web("#26262b");
-//    public static final Color DEFAULT_DOT_FILL = Color.BLACK;
-//    public static final Color DEFAULT_EDGE_COLOR = Color.BLACK;
-//    public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
-//    public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
-//    public static final Color DEFAULT_LABEL_COLOR = null;
-//    public static final Color DEFAULT_DOT_FILL = Color.YELLOW;
-
     public static final Color DEFAULT_DOT_FILL = DEFAULT_BACKGROUND_COLOR;
     public static final Color DEFAULT_DOT_STROKE = Color.WHITE;
-    public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;//Color.rgb(255, 255, 0);
+    public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;
     public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
     public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
     public static final Color DEFAULT_LABEL_COLOR = null;
-//    public static final Color DEFAULT_DOT_FILL = Color.WHITE;
-//    public static final Color DEFAULT_EDGE_COLOR = Color.rgb(255, 255, 0);
-//    public static final Color DEFAULT_TARGET_EDGE_COLOR = Color.LIME;
-//    public static final Color DEFAULT_PREDICTION_COLOR = DEFAULT_EDGE_COLOR;
-//    public static final Color DEFAULT_LABEL_COLOR = null;
 
     public CanvasTSPGraph() {
-        internalGraphic = new CanvasGraph();
+        internalGraphic = new LayeredCanvas();
         internalGraphic.setBackgroundColor(DEFAULT_BACKGROUND_COLOR);
         //layer showing edges explicitly listed for the intstance? ("fixed edges"?)
-        targetLayer = internalGraphic.addOutlineEdgeLayer(0);
-        predictionLayer = internalGraphic.addEdgeLayer(10);
-        vertexLayer = internalGraphic.addVertexLayer(100);
-        DragContext dragContext = getDragContext();
-        dragContext.logicalBoundsProperty().bind(vertexLayer.logicalBoundsProperty());
-        dragContext.boundsInLocalProperty().bind(vertexLayer.boundsInLocalProperty());
-        dragContext.boundsInCanvasProperty().bind(vertexLayer.boundsInCanvasProperty());
-        gestures = new ViewportGestures(dragContext);
+        predictionLayer = new ListLayer<>(0);
+        targetLayer = new ListLayer<>(50);
+        vertexLayer = new VertexLayer(100);
+        internalGraphic.getLayers().addAll(vertexLayer, targetLayer, predictionLayer);
+        TransformationContext transformationContext = getDragContext();
+        transformationContext.logicalBoundsProperty().bind(vertexLayer.logicalBoundsProperty());
+        transformationContext.boundsInLocalProperty().bind(vertexLayer.boundsInLocalProperty());
+        gestures = new ViewportGestures(transformationContext);
+
+        internalGraphic.getLayers().addAll(new LogicalBounds(200), new BoundsInLocal(300), new BoundsInCanvas(400), new CanvasBounds(500));
     }
 
     /**
@@ -94,25 +92,29 @@ public class CanvasTSPGraph {
         clearTargets();
         clearPredictions();
     }
-//
-    private void addEdges(CanvasGraph.Layer<Edge> edgeCategory, List<int[]> newEdges, Color strokeColour) {
-        for (int i = 0; i < newEdges.size(); i++) {
-            int[] eachEdge = newEdges.get(i);
+
+    public void addTargetEdges(List<int[]> edges) {
+        for (int i = 0; i < edges.size(); i++) {
+            int[] eachEdge = edges.get(i);
             Vertex a = vertexLayer.get(eachEdge[0]),
                     b = vertexLayer.get(eachEdge[1])
                             ;
-            Edge eachResult = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), strokeColour, DEFAULT_LABEL_COLOR);
-            edgeCategory.add(eachResult);
+            OutlineEdge eachResult = new OutlineEdge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), DEFAULT_TARGET_EDGE_COLOR, DEFAULT_LABEL_COLOR);
+            targetLayer.add(eachResult);
         }
-        edgeCategory.requestRedraw();
-    }
-
-    public void addTargetEdges(List<int[]> edges) {
-        addEdges(targetLayer, edges, DEFAULT_TARGET_EDGE_COLOR);
+        targetLayer.requestRedraw();
     }
 
     public void addPredictionEdges(List<int[]> edges, Color stroke) {
-        addEdges(predictionLayer, edges, stroke);
+        for (int i = 0; i < edges.size(); i++) {
+            int[] eachEdge = edges.get(i);
+            Vertex a = vertexLayer.get(eachEdge[0]),
+                    b = vertexLayer.get(eachEdge[1])
+                            ;
+            Edge eachResult = new Edge(a,b, String.valueOf(a.getLocation().distance(b.getLocation())), stroke, DEFAULT_LABEL_COLOR);
+            predictionLayer.add(eachResult);
+        }
+        predictionLayer.requestRedraw();
     }
 
     public void addPredictionEdges(List<int[]> edges) {
@@ -169,41 +171,6 @@ public class CanvasTSPGraph {
         }
 
         setVertices(Arrays.stream(nodeData.listNodes()).mapToObj(i -> nodeData.get(i).getPosition()).collect(Collectors.toList()));
-//
-//        //clip the logical bounds to remove excess min x/y (Note: this only offsets against the logical location and doesn't remove any radial padding etc)
-//        Bounds logicalBounds = getLogicalBounds();
-//
-//        //upscale everything so that points are at least far enough to only not directly touch (including outlines) at /some/ scale;
-//
-//        //todo: use a kdtree for this
-//        //first find the minimum current distance in logical space
-//        double requiredScaling = 1;
-//        for (int i = 0; i < vertexLayer.size(); i++) {
-//            for (int k = i+1; k < vertexLayer.size(); k++) {
-//                Vertex eachA = vertexLayer.get(i);
-//                Vertex eachB = vertexLayer.get(k);
-//                double eachDist = eachA.getLocation().distance(vertexLayer.get(k).getLocation());
-//                double aDisplayRadius = eachA.getDotRadius() + eachA.getStrokeWidth()/2.0;
-//                double bDisplayRadius = eachB.getDotRadius() + eachB.getStrokeWidth()/2.0;
-//                double totalDisplayRadius = aDisplayRadius+bDisplayRadius;
-//                double minExpectedDist = 2*totalDisplayRadius;
-//                double eachRequiredScaling = minExpectedDist/(eachDist > 0 ? eachDist : 1);
-//                if(eachRequiredScaling > requiredScaling) {
-//                    requiredScaling = eachRequiredScaling;
-//                }
-//            }
-//        }
-//
-//        //also translate everything so that the logical minX is 0,0
-//        for (Vertex each: vertexLayer) {
-//            each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
-//        }
-//
-//        if(requiredScaling > 1) {
-//            for (Vertex each: vertexLayer) {
-//                each.setLocation(each.getLocation().multiply(requiredScaling));
-//            }
-//        }
 
         vertexLayer.requestRedraw();
 
@@ -222,8 +189,8 @@ public class CanvasTSPGraph {
         getDragContext().setTransformAutomatically(true);
     }
 
-    public DragContext getDragContext() {
-        return internalGraphic.getDragContext();
+    public TransformationContext getDragContext() {
+        return internalGraphic.getTransformationContext();
     }
 
     public ViewportGestures getGestures() {

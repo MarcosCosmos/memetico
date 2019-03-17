@@ -1,9 +1,11 @@
-package org.marcos.uon.tspaidemo.canvas;
+package org.marcos.uon.tspaidemo.canvas.test.drawable;
 
 import javafx.geometry.Point2D;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.marcos.uon.tspaidemo.canvas.test.TransformationContext;
 
-public class Vertex {
+public class Vertex implements Drawable {
     private Point2D location;
     private double dotRadius;
     private double strokeWidth;
@@ -80,5 +82,17 @@ public class Vertex {
 
     public void setDotStroke(Color dotStroke) {
         this.dotStroke = dotStroke;
+    }
+
+    @Override
+    public void drawOnto(GraphicsContext graphicsContext, TransformationContext transformationContext) {
+        double lineWidthToUse = transformationContext.computeStrokeWidthToUse(strokeWidth);
+        double radiusToUse = transformationContext.computeRadiusToUse(dotRadius);
+        graphicsContext.setFill(dotFill);
+        Point2D minCorner = transformationContext.localToCanvas(location).subtract(new Point2D(radiusToUse, radiusToUse));
+        graphicsContext.fillOval(minCorner.getX(), minCorner.getY(), radiusToUse*2, radiusToUse*2);
+        graphicsContext.setLineWidth(lineWidthToUse);
+        graphicsContext.setStroke(dotStroke);
+        graphicsContext.strokeOval(minCorner.getX(), minCorner.getY(), radiusToUse*2, radiusToUse*2);
     }
 }

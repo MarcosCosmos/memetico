@@ -1,8 +1,11 @@
-package org.marcos.uon.tspaidemo.canvas;
+package org.marcos.uon.tspaidemo.canvas.test.drawable;
 
+import javafx.geometry.Point2D;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.marcos.uon.tspaidemo.canvas.test.TransformationContext;
 
-public class Edge {
+public class Edge implements Drawable {
     private Vertex a;
     private Vertex b;
     private String label;
@@ -70,5 +73,14 @@ public class Edge {
 
     public void setLineWidth(double lineWidth) {
         this.lineWidth = lineWidth;
+    }
+
+    @Override
+    public void drawOnto(GraphicsContext graphicsContext, TransformationContext transformationContext) {
+        graphicsContext.setStroke(lineStroke);
+        graphicsContext.setLineWidth(transformationContext.computeLineWidthToUse(lineWidth));
+        Point2D aPos = transformationContext.localToCanvas(a.getLocation());
+        Point2D bPos = transformationContext.localToCanvas(b.getLocation());
+        graphicsContext.strokeLine(aPos.getX(), aPos.getY(), bPos.getX(), bPos.getY());
     }
 }
