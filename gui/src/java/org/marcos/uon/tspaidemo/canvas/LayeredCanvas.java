@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.canvas.test;
+package org.marcos.uon.tspaidemo.canvas;
 
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -14,7 +14,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import org.marcos.uon.tspaidemo.canvas.test.layer.Layer;
+import org.marcos.uon.tspaidemo.canvas.layer.Layer;
 
 import java.util.*;
 

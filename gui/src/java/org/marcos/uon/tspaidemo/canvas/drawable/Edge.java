@@ -1,9 +1,9 @@
-package org.marcos.uon.tspaidemo.canvas.test.drawable;
+package org.marcos.uon.tspaidemo.canvas.drawable;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import org.marcos.uon.tspaidemo.canvas.test.TransformationContext;
+import org.marcos.uon.tspaidemo.canvas.TransformationContext;
 
 public class Edge implements Drawable {
     private Vertex a;

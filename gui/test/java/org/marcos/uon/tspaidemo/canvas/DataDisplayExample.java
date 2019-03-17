@@ -1,12 +1,12 @@
-package org.marcos.uon.tspaidemo.canvas.test;
+package org.marcos.uon.tspaidemo.canvas;
 
 import javafx.application.Application;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
-import org.marcos.uon.tspaidemo.canvas.test.drawable.Edge;
-import org.marcos.uon.tspaidemo.canvas.test.drawable.Vertex;
-import org.marcos.uon.tspaidemo.canvas.test.layer.ListLayer;
-import org.marcos.uon.tspaidemo.canvas.test.layer.VertexLayer;
+import org.marcos.uon.tspaidemo.canvas.drawable.Edge;
+import org.marcos.uon.tspaidemo.canvas.drawable.Vertex;
+import org.marcos.uon.tspaidemo.canvas.layer.ListLayer;
+import org.marcos.uon.tspaidemo.canvas.layer.VertexLayer;
 import org.marcos.uon.tspaidemo.canvas.test.util.Display;
 
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.canvas.test;
+package org.marcos.uon.tspaidemo.canvas;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;

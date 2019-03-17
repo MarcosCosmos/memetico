@@ -1,20 +1,15 @@
-package org.marcos.uon.tspaidemo.canvas.test;
+package org.marcos.uon.tspaidemo.canvas;
 
 import javafx.geometry.Bounds;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.jorlib.io.tspLibReader.TSPLibInstance;
 import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
-import org.marcos.uon.tspaidemo.canvas.test.drawable.Edge;
-import org.marcos.uon.tspaidemo.canvas.test.drawable.OutlineEdge;
-import org.marcos.uon.tspaidemo.canvas.test.drawable.Vertex;
-import org.marcos.uon.tspaidemo.canvas.test.layer.ListLayer;
-import org.marcos.uon.tspaidemo.canvas.test.layer.VertexLayer;
-import org.marcos.uon.tspaidemo.canvas.test.layers.BoundsInCanvas;
-import org.marcos.uon.tspaidemo.canvas.test.layers.BoundsInLocal;
-import org.marcos.uon.tspaidemo.canvas.test.layers.CanvasBounds;
-import org.marcos.uon.tspaidemo.canvas.test.layers.LogicalBounds;
-
+import org.marcos.uon.tspaidemo.canvas.drawable.Edge;
+import org.marcos.uon.tspaidemo.canvas.drawable.OutlineEdge;
+import org.marcos.uon.tspaidemo.canvas.drawable.Vertex;
+import org.marcos.uon.tspaidemo.canvas.layer.ListLayer;
+import org.marcos.uon.tspaidemo.canvas.layer.VertexLayer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,8 +45,6 @@ public class CanvasTSPGraph {
         transformationContext.logicalBoundsProperty().bind(vertexLayer.logicalBoundsProperty());
         transformationContext.boundsInLocalProperty().bind(vertexLayer.boundsInLocalProperty());
         gestures = new ViewportGestures(transformationContext);
-
-        internalGraphic.getLayers().addAll(new LogicalBounds(200), new BoundsInLocal(300), new BoundsInCanvas(400), new CanvasBounds(500));
     }
 
     /**
