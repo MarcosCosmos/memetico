@@ -51,9 +51,9 @@ public class MatrixNeigh {
     /**
      * <p> Sort the neighbors for a given city.</p>
      *
-     * @param Instance:GraphInstance The problem instance
-     * @param Solution:DiCycle       Solution structure that contains the cities.
-     * @param City:int               The city for each the neighbors matrix will sorted.
+     * @param inst The problem instance
+     * @param solution       Solution structure that contains the cities.
+     * @param city               The city for each the neighbors matrix will sorted.
      */
     private void sortNeighbors(GraphInstance inst, DiCycle solution, int city) {
         int k, j, aux;
@@ -118,9 +118,9 @@ public class MatrixNeigh {
      * <p> Find the nearest neighbors for a given city in a given solution.</p>
      * <p> It fills the neighbors matrix for that city.</p>
      *
-     * @param Instance:GraphInstance The problem instance
-     * @param Solution:DiCycle       Solution structure that contains the cities
-     * @param City:int               The city for each the neighbors matrix will be filled with.
+     * @param inst The problem instance
+     * @param solution       Solution structure that contains the cities
+     * @param city               The city for each the neighbors matrix will be filled with.
      */
     public void fillWithNeighbors(GraphInstance inst, DiCycle solution, int city) {
         int i, j, cont_suc, cont_pred = 0;
@@ -285,11 +285,11 @@ public class MatrixNeigh {
     /**
      * <p> Returns the greatest neighbor in vector.</p>
      *
-     * @param PredSuc:int            it is as sucessor or predecessor vector.
-     * @param Solution:DiCycle       Solution structure that contains the cities.
-     * @param City:int               The city that will be used to get the neighbor.
-     * @param Vector:int[]           List of neighbors
-     * @param Instance:GraphInstance The problem instance
+     * @param Pred_or_Suc           it is as sucessor or predecessor vector.
+     * @param solution      Solution structure that contains the cities.
+     * @param i            The city that will be used to get the neighbor.
+     * @param vector          List of neighbors
+     * @param inst The problem instance
      */
     private double maxNeighbor(int Pred_or_Suc, DiCycle solution, int i, int vector[], GraphInstance inst) {
         int j;
@@ -382,12 +382,12 @@ public class MatrixNeigh {
     /**
      * <p> Remove the greatest cost neighbor in vector as given by cost.</p>
      *
-     * @param PredSuc:int            it is as sucessor or predecessor vector.
-     * @param Solution:DiCycle       Solution structure that contains the cities.
-     * @param Vector:int[]           List of neighbors
-     * @param Instance:GraphInstance The problem instance
+     * @param Pre_or_Suc          it is as sucessor or predecessor vector.
+     * @param solution       Solution structure that contains the cities.
+     * @param vector         List of neighbors
+     * @param inst The problem instance
      */
-    private void removeNeighbor(int Pre_or_Suc, DiCycle solution, int City_aux1, int City_aux2, int count, double cost, int Vetor[], GraphInstance inst) {
+    private void removeNeighbor(int Pre_or_Suc, DiCycle solution, int City_aux1, int City_aux2, int count, double cost, int vector[], GraphInstance inst) {
         int i, cont_aux = count, aux, aux1, City2 = City_aux2, City1 = City_aux1;
         double distance;
 
@@ -397,7 +397,7 @@ public class MatrixNeigh {
         i = 0;
         while (i <= count) {
             if (Pre_or_Suc == PREDECESSOR) {
-                City1 = Vetor[i];
+                City1 = vector[i];
                 //Predecessor distance
                 if (inst.graphType == inst.ATSP_TYPE) {
                     if (((ATSPRTInstance) inst).subproblemType == ATSPRTInstance.ATSP_RT_TYPE) {
@@ -412,7 +412,7 @@ public class MatrixNeigh {
                     distance = inst.matDist[City1][City2];
                 }
             } else {
-                City2 = Vetor[i];
+                City2 = vector[i];
                 //Successor distance
                 if (inst.graphType == inst.ATSP_TYPE) {
                     if (((ATSPRTInstance) inst).subproblemType == ATSPRTInstance.ATSP_RT_TYPE) {
@@ -428,9 +428,9 @@ public class MatrixNeigh {
             }
 
             if (distance == cost) {
-                aux = Vetor[i];
-                Vetor[i] = Vetor[count];
-                Vetor[count] = aux;
+                aux = vector[i];
+                vector[i] = vector[count];
+                vector[count] = aux;
                 count--;
                 i--;
             }
@@ -440,17 +440,17 @@ public class MatrixNeigh {
         count++;
         while (count < nrNeighbors) {
             aux1 = (int) (Math.random() * (cont_aux - count)) + count;
-            aux = Vetor[count];
-            Vetor[count] = Vetor[aux1];
-            Vetor[aux1] = aux;
+            aux = vector[count];
+            vector[count] = vector[aux1];
+            vector[aux1] = aux;
             count++;
         }
 
         if (City_aux2 != -1 && City_aux1 != -1) {
             if (Pre_or_Suc == PREDECESSOR)
-                Vetor[nrNeighbors - 1] = City_aux1;
+                vector[nrNeighbors - 1] = City_aux1;
             else
-                Vetor[nrNeighbors - 1] = City_aux2;
+                vector[nrNeighbors - 1] = City_aux2;
         }
     }
 

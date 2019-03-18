@@ -11,7 +11,6 @@ package memetico;/*
 
 /**
  * A class for representing an arc of a directed graph.
- * </p>Here is the <a href="../graph/Arc.java">source</a>.
  *
  * @author Luciana Buriol and Pablo Moscato
  **/

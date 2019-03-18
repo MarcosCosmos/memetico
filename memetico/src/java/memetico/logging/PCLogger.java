@@ -101,10 +101,6 @@ public class PCLogger extends BasicLogger<MemeticoSnapshot> implements IPCLogger
         startTime=System.nanoTime();
     }
 
-    /**
-     *
-     * @return The new start time
-     */
     public void reset() throws InterruptedException {
         lock.withWriteLock(this::_reset);
     }

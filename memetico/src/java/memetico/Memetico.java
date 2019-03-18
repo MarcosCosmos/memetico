@@ -43,7 +43,6 @@ public class Memetico {
     /**
      * @param structSol: struct of the Solution
      * @param structPop: struct of the Population
-     * @return Kmax = max value to be add to each distance in the lower diagonal.
      */
     public Memetico(IPCLogger logger, ValidityFlag.ReadOnly continuePermission, ProblemInstance problem, String structSol, String structPop, String ConstAlg, int TamPop, int TxMut, String BuscaLocal, String OPCrossover, String OPRestart, String OPMutation, boolean includeLKH, long MaxTime, long MaxGenNum, long reignLimit, long numReplications/*, DataOutputStream fileOut, DataOutputStream compact_fileOut*/) throws Exception {
         this.problem = problem;

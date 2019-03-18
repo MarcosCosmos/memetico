@@ -3,7 +3,6 @@ package org.marcos.uon.tspaidemo.fxgraph;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.Model;
 import com.fxgraph.graph.PannableCanvas;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -100,9 +99,8 @@ public class Euc2DTSPFXGraph {
     /**
      *
      * @param instance A tsp instance,with main data already loaded from file;
-     * @throws InvalidArgumentException if the instance is not Euclidean 2D
      */
-    public Euc2DTSPFXGraph(TSPLibInstance instance) throws InvalidArgumentException {
+    public Euc2DTSPFXGraph(TSPLibInstance instance) {
         fxGraph = new Graph();
         targets = new ArrayList<>();
         predictions = new ArrayList<>();

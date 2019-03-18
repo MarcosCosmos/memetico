@@ -17,7 +17,6 @@ package memetico;/*
  * It also contains reference to the Guiding Function
  * value which, is this case, is the objective function
  * value.
- * </p>The <a href="../AgentTypes/PocCurAgent.java">source</a>.
  *
  * @author Luciana Buriol and Pablo Moscato
  **/

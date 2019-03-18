@@ -6,42 +6,258 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 
+/**
+ * A utility class which manages the calculation and sanitation of translation and and scaling transformations which allow the user to perform panning and zooming, respectively, on a {@link LayeredCanvas}
+ * <b>Computed Properties & Dependencies:</b> Some properties are bound to functions, rather than being set to individual values. These properties are dependant on other properties, and their values are recomputed whenever one of their dependencies change. This ensures that whenever they are accessed, the value will reflect their intended logic, whilst eliminating redundant recalculation, and associated boilerplate.
+ * <br/>
+ * <b>Neutral Values:</b> note that some properties are documented to have neutral values. Where applicable, this means the value should have no effect. In other words, result of a mathematical operation using the value (in the usage documented for that property) should have no effect, and be equivalent to simply omitting the operation.
+ */
 public class TransformationContext {
 
     public static final double DEFAULT_MIN_DECORATION_SCALE = 1, DEFAULT_MAX_DECORATION_SCALE = 5;
 
+    /**
+     * The x-coordinate of the position of the mouse when the most recent gesture was triggered.
+     * <br/>
+     * Used to control the point about which scaling is performed.
+     * @see #mouseAnchorY
+     * @see #setScale(double)
+     */
     private DoubleProperty mouseAnchorX;
+
+    /**
+     * The y-coordinate of the position of the mouse when the most recent gesture was triggered.
+     * <br/>
+     * Used to control the point about which scaling is performed.
+     * @see #mouseAnchorY
+     * @see #setScale(double)
+     */
     private DoubleProperty mouseAnchorY;
 
+    /**
+     * The amount by which to translate coordinates (with respect to the x axis) when transforming from local space to canvas space.
+     * <br/>
+     * May be bound to to {@link #autoTranslationX} during calls to {@link #considerAutoTransform()} (under the conditions detailed in that method)
+     * <br/>
+     * <b>Neutral value</b>: 0.0; Neutral when used in scalar addition and as an x coordinate in vector addition
+     * @see #localToCanvas(Point2D)
+     * @see #localToCanvas(double, double)
+     */
     private DoubleProperty translationX;
-    private DoubleProperty translationY;
-    private DoubleProperty scale;
-    private ObjectProperty<Bounds> logicalBounds, boundsInLocal, canvasBounds;
 
+    /**
+     * The amount by which to translate coordinates (with respect to the y axis) when transforming from local space to canvas space.
+     * <br/>
+     * May be bound to to {@link #autoTranslationY} during calls to {@link #considerAutoTransform()} (under the conditions detailed in that method)
+     * <br/>
+     * <b>Neutral value</b>: 0.0; Neutral when used in scalar addition and as a y coordinate in vector addition
+     * @see #localToCanvas(Point2D)
+     * @see #localToCanvas(double, double)
+     */
+    private DoubleProperty translationY;
+
+    /**
+     * The factor by which to scale coordinates when transforming from local space to canvas space.
+     * <br/>
+     * The value is always between {@link #minScale} and {@link #maxScale}, inclusive.
+     * <br/>
+     * Note that this property may not always be equal to {@link #decorationScale}, as the two properties have independent minimums and maximum
+     * <br/>
+     * May be bound to to {@link #autoScale} by calls to {@link #considerAutoTransform()} (under the conditions detailed in that method)
+     * <br/>
+     * <b>Neutral value</b>: 1.0; Neutral when used in both scalar-scalar and vector-scalar multiplication
+     * @see #minScale
+     * @see #maxScale
+     * @see #decorationScale
+     * @see #localToCanvas(Point2D)
+     * @see #localToCanvas(double, double)
+     * @see #considerAutoTransform()
+     */
+    private DoubleProperty scale;
+
+    /**
+     * The boundaries of the contents of a canvas in logical-space (that is, local space, but without any decoration)
+     * @see #boundsInLocal
+     * @see #decorationPaddingInLocal
+     */
+    private ObjectProperty<Bounds> logicalBounds;
+
+    /**
+     * The boundaries of the contents of a canvas in local-space.
+     * <br/>
+     * That is, the boundaries including decoration when {@link #translationX}, {@link #translationY}, {@link #scale}, and {@link #decorationScale} all have neutral values)
+     * <br/>
+     * {@link #boundsInCanvas} should be equivalent to this when the aforementioned properties are neutral.
+     * @see #boundsInCanvas
+     */
+    private ObjectProperty<Bounds> boundsInLocal;
+
+    /**
+     * The boundaries of the canvas in which content should be drawn.
+     * <br/>
+     * Used along with {@link #logicalBounds} and {@link #decorationPaddingInLocal} to compute automatic transformations.
+     * @see #logicalBounds
+     * @see #decorationPaddingInLocal
+     * @see #autoScale
+     * @see #autoTranslation
+     */
+    private ObjectProperty<Bounds> canvasBounds;
+
+    /**
+     * The boundaries of the contents of the canvas in canvas space.
+     * <br/>
+     * The resulting bounds reflect the bounding box of content after applying {@link #localToCanvas(Point2D)} to the location of content elements, and applying {@link #decorationScale} to their decorations.
+     * <br/>
+     * This should correspond to the boundaries of the content when it is actually drawn on the canvas
+     * <br/>
+     * <b>Computed:</b> via {@link #computeBoundsInCanvas()}
+     * <br/>
+     * <b>Dependencies:</b> {@link #logicalBounds}, {@link #boundsInLocal}, {@link #scale}
+     * @see #logicalBounds
+     * @see #boundsInLocal
+     * @see #scale
+     * @see #decorationScale
+     * @see #computeBoundsInCanvas()
+     * @see #localToCanvas(Point2D)
+     * @see #localToCanvas(double, double)
+     */
     private ReadOnlyObjectWrapper<Bounds> boundsInCanvas;
 
+    /**
+     * The amount of padding space required around {@link #logicalBounds} to cater for/fit the content decoration.
+     * <br/>
+     * E.g. a circle drawn to identify a vertex, a line between vertices.
+     * <br/>
+     * The x-coordinate specifies the left padding and the right padding whilst the y-coordinate specifies the top and bottom padding
+     * <br/>
+     * <b>Computed:</b> via {@link #computeDecorationPaddingInLocal()}
+     * <br/>
+     * <b>Dependencies:</b> {@link #logicalBounds}, {@link #boundsInLocal}, {@link #scale}
+     * @see #logicalBounds
+     * @see #boundsInLocal
+     * @see #scale
+     * @see #computeDecorationPaddingInLocal()
+     */
     private ReadOnlyObjectWrapper<Point2D> decorationPaddingInLocal;
+
+    /**
+     * The scale to apply to content decorations (e.g. a circle drawn to identify a vertex, a line between vertices).
+     * <br/>
+     * The value is computed by clamping {@link #scale} to be between {@link #minDecorationScale} and {@link #maxDecorationScale}.
+     * <br/>
+     * Note that this property may not always be equal to {@link #scale} as the two properties have independent minimums and maximum
+     * <br/>
+     * <b>Computed:</b> via {@link #estimateDecorationScale(double)} (with {@link #scale} as the {@code requestedScale} parameter)
+     * <br/>
+     * <b>Dependencies:</b> {@link #scale}, {@link #minDecorationScale}, {@link #maxDecorationScale}
+     * @see #minDecorationScale
+     * @see #maxDecorationScale
+     * @see #scale
+     * @see #estimateDecorationScale(double)
+     * @see #computeRadiusToUse(double)
+     * @see #computeStrokeWidthToUse(double)
+     * @see #computeLineWidthToUse(double)
+     */
     private ReadOnlyDoubleWrapper decorationScale;
 
-    //track the targeted "ideal" scale - the largest scale that shows everything
+    /**
+     * A flag identifying whether or not transformations should be applied automatically.
+     * <br/>
+     * Whenever this property is true, {@link #scale} is be bound to {@link #autoScale}, {@link #translationX} is bound to {@link #autoTranslationX}, and {@link #translationX} is bound to {@link #autoTranslationY}.
+     * <br/>
+     * Whenever this property is not true, none of the aforementioned bindings should be in effect.
+     * @see #scale
+     * @see #translationX
+     * @see #translationY
+     * @see #autoScale
+     * @see #autoTranslation
+     * @see #autoTranslationX
+     * @see #autoTranslationY
+     */
     private BooleanProperty transformAutomatically;
+
+    /**
+     * An automatically calculated scale which should always match the maximum scale whereby the content fits entirely within the canvas.
+     * <br/>
+     * <b>Computed:</b> via {@link #computeAutoScale()}
+     * <br/>
+     * <b>Dependencies:</b> {@link #boundsInLocal}, {@link #canvasBounds}
+     * @see #boundsInLocal
+     * @see #canvasBounds
+     * @see #computeAutoScale()
+     */
     private ReadOnlyDoubleWrapper autoScale;
+
+    /**
+     * Automatically computed translation coordinates which center the content within the canvas (based on it's bounds)
+     * <br/>
+     * <b>Computed:</b> via {@link #computeAutoTranslation()}
+     * <br/>
+     * <b>Dependencies:</b> {@link #logicalBounds}, {@link #boundsInLocal}, {@link #canvasBounds}, {@link #scale}
+     *
+     */
     private ReadOnlyObjectWrapper<Point2D> autoTranslation;
+
+    /**
+     * Bound to always reflect the x coordinate of {@link #autoTranslation}
+     * @see #autoTranslation
+     */
     private ReadOnlyDoubleWrapper autoTranslationX;
+
+    /**
+     * Bound to always reflect the y coordinate of {@link #autoTranslation}
+     * @see #autoTranslation
+     */
     private ReadOnlyDoubleWrapper autoTranslationY;
 
+    /**
+     * The minimum allowed {@link #scale}
+     * <br/>
+     * Having a defined minimum and maximum scale ensures that {@link #zoom(double)} always has some effect (rather than, for example, the user being stuck with an invisible and irrecoverable graph as a result of a zero scale)
+     * @see #scale
+     * @see #maxScale
+     */
     private DoubleProperty minScale;
+
+    /**
+     * The maximum allowed {@link #scale}
+     * <br/>
+     * Having a defined minimum and maximum {@link #scale} ensures that {@link #zoom(double)} always has some effect (rather than, for example, the user being stuck with an invisible and irrecoverable graph as a result of a zero scale)
+     * @see #scale
+     * @see #minScale
+     */
     private DoubleProperty maxScale;
 
+    /**
+     * The minimum allowed {@link #decorationScale}
+     * <br/>
+     * Having a defined minimum and maximum {@link #decorationScale} ensures that decorations (and therefore content elements) are always visible, at any valid scale, and that there exists some scale large enough such that space between any two distinct elements can be seen (within the limitations of floating-point calculations)
+     * @see #decorationScale
+     * @see #minDecorationScale
+     */
     private DoubleProperty minDecorationScale;
+
+    /**
+     * The maximum allowed {@link #decorationScale}
+     * <br/>
+     * Having a defined minimum and maximum {@link #decorationScale} ensures that decorations (and therefore content elements) are always visible, at any valid scale, and that there exists some scale large enough such that space between any two distinct elements can be seen (within the limitations of floating-point calculations)
+     * @see #decorationScale
+     * @see #minDecorationScale
+     */
     private DoubleProperty maxDecorationScale;
 
 
     //setup the permanent/read-only bindings and irremovable listeners
+
+
+    /**
+     * Assigns bindings to <b>computed properties</b>.
+     * @see TransformationContext
+     */
     private void setup() {
         decorationScale.bind(
                 Bindings.createDoubleBinding(
-                        () -> computeDecorationScale(scale.get()),
+                        () -> estimateDecorationScale(scale.get()),
                         scale, minDecorationScale, maxDecorationScale
                 )
         );
@@ -49,7 +265,7 @@ public class TransformationContext {
         decorationPaddingInLocal.bind(
                 Bindings.createObjectBinding(
                         this::computeDecorationPaddingInLocal,
-                        logicalBounds, boundsInLocal, decorationScale
+                        logicalBounds, boundsInLocal, scale
                 )
         );
 
@@ -57,21 +273,21 @@ public class TransformationContext {
         boundsInCanvas.bind(
                 Bindings.createObjectBinding(
                         this::computeBoundsInCanvas,
-                        boundsInLocal, scale, translationX, translationY
+                        logicalBounds, boundsInLocal, scale, translationX, translationY
                 )
         );
 
         autoScale.bind(
                 Bindings.createDoubleBinding(
                         this::computeAutoScale,
-                        canvasBounds, boundsInLocal
+                         boundsInLocal, canvasBounds
                 )
         );
 
         autoTranslation.bind(
                 Bindings.createObjectBinding(
                         this::computeAutoTranslation,
-                        logicalBounds, boundsInLocal, decorationScale, canvasBounds, scale
+                        logicalBounds, boundsInLocal, canvasBounds, scale
                 )
         );
 
@@ -93,14 +309,23 @@ public class TransformationContext {
         );
     }
 
-    //BINDING COMPUTATION
-
+    /**
+     * Computes an updated value for {@link #decorationPaddingInLocal}
+     * @return an updated value for {@link #decorationPaddingInLocal}
+     * @see #decorationPaddingInLocal
+     */
     public Point2D computeDecorationPaddingInLocal() {
         Bounds logicalBounds = getLogicalBounds();
         Bounds boundsInLocal = getBoundsInLocal();
         return new Point2D((boundsInLocal.getWidth() - logicalBounds.getWidth())/2.0, (boundsInLocal.getHeight() - logicalBounds.getHeight())/2.0);
     }
 
+
+    /**
+     * Computes an updated value for {@link #boundsInCanvas}
+     * @return an updated value for {@link #boundsInCanvas}
+     * @see #boundsInCanvas
+     */
     public Bounds computeBoundsInCanvas() {
         Bounds logicalBounds = getLogicalBounds();
         Point2D decorationPaddingInCanvas = getDecorationPaddingInLocal().multiply(getDecorationScale());
@@ -109,11 +334,16 @@ public class TransformationContext {
         return new BoundingBox(minInCanvas.getX(), minInCanvas.getY(), sizeInCanvas.getX(), sizeInCanvas.getY());
     }
 
+    /**
+     * Computes an updated value for {@link #autoScale}
+     * @return an updated value for {@link #autoScale}
+     * @see #autoScale
+     */
     public double computeAutoScale() {
         Bounds canvasBounds = getCanvasBounds();
         Bounds boundsInLocal = getBoundsInLocal();
         double naiveScale = Math.min(canvasBounds.getWidth()/boundsInLocal.getWidth(), canvasBounds.getHeight()/boundsInLocal.getHeight());
-        double decorationScale = computeDecorationScale(naiveScale);
+        double decorationScale = estimateDecorationScale(naiveScale);
         //if we are trying to scale outside of the normal decoration scale range, we will need to factor in the clamped decoration padding
         if(naiveScale == decorationScale) {
             return naiveScale;
@@ -124,6 +354,11 @@ public class TransformationContext {
         }
     }
 
+    /**
+     * Computes an updated value for {@link #autoTranslation}
+     * @return an updated value for {@link #autoTranslation}
+     * @see #autoTranslation
+     */
     public Point2D computeAutoTranslation() {
         double scale = getScale();
         double decorationScale = getDecorationScale();
@@ -147,8 +382,12 @@ public class TransformationContext {
 
     }
 
-    //OTHER FUNCTIONS
-
+    /**
+     * Conditionally enables {@link #transformAutomatically}
+     * <br/>
+     * Automatic transformations will be enabled if the content is small enough to entirely fit into the canvas (i.e. if the size of {@link #boundsInCanvas} is less than the size of {@link #canvasBounds} in both width and height).
+     * @see #transformAutomatically
+     */
     public void considerAutoTransform() {
         Bounds boundsInCanvas = getBoundsInCanvas();
         Bounds canvasBounds = getCanvasBounds();
@@ -157,7 +396,14 @@ public class TransformationContext {
         }
     }
 
-    public double computeDecorationScale(double requestedScale) {
+    /**
+     * Computes a potential {@link #decorationScale}
+     * @param requestedScale a candidate {@link #scale} value (not necessarily the <i>current</i> value)
+     * @return the value that {@link #decorationScale} would take if {@link #scale} was {@code requestedScale}
+     * @see #decorationScale
+     * @see #scale
+     */
+    public double estimateDecorationScale(double requestedScale) {
         double minDecorationScale = getMinDecorationScale();
         double maxDecorationScale = getMaxDecorationScale();
         if(requestedScale < minDecorationScale) {
@@ -195,43 +441,115 @@ public class TransformationContext {
         return  preferredWidth*getDecorationScale();
     }
 
-    public Point2D localToCanvas(Point2D point) {
+    /**
+     * Transforms the supplied coordinates ({@code coords}) from local space to canvas space.
+     * <br/>
+     * The transformation is achieved by translating the coordinates by {@link #translationX} and {@link #translationY}, then multiplying them by {@link #scale}
+     * @param coords
+     * @return coordinates in canvas space corresponding to {@code coords}
+     * @see #localToCanvas(double, double)
+     * @see #canvasToLocal(Point2D)
+     */
+    public Point2D localToCanvas(Point2D coords) {
         double scale = getScale();
         if(scale == 0) {
             return new Point2D(0,0);
         } else {
-            return point.add(translationX.get(), translationY.get()).multiply(scale);
+            return coords.add(translationX.get(), translationY.get()).multiply(scale);
         }
     }
 
+    /**
+     * Transforms the supplied coordinates ({@code x} and {@code y}) from local space to canvas space.
+     * <br/>
+     * The transformation is achieved by translating the coordinates by {@link #translationX} and {@link #translationY}, then multiplying them by {@link #scale}
+     * @param x
+     * @param y
+     * @return coordinates in canvas space corresponding to the coordinates {@code coords} from local space
+     * @see #localToCanvas(Point2D)
+     * @see #canvasToLocal(double, double)
+     */
     public Point2D localToCanvas(double x, double y) {
         return localToCanvas(new Point2D(x,y));
     }
 
-    public Point2D canvasToLocal(Point2D point) {
+    /**
+     * Transforms the supplied coordinates ({@code coords}) from canvas space to local space.
+     * <br/>
+     * This is the inverse of {@link #localToCanvas(Point2D)}.
+     * <br/><br/>
+     * The transformation is achieved by dividing the coordinates by {@link #scale} and then translating them by translating them by -{@link #translationX} and -{@link #translationY}
+     * @param coords
+     * @return coordinates in local space corresponding to the coordinates {@code coords} from canvas space
+     * @see #canvasToLocal(double, double)
+     * @see #localToCanvas(Point2D)
+     */
+    public Point2D canvasToLocal(Point2D coords) {
         double scale = getScale();
         if (scale == 0) {
-            return point.subtract(translationX.get(), translationY.get());
+            return coords.subtract(translationX.get(), translationY.get());
         } else {
-            return point.multiply(1 / scale).subtract(translationX.get(), translationY.get());
+            return coords.multiply(1 / scale).subtract(translationX.get(), translationY.get());
         }
     }
 
+    /**
+     * Transforms the supplied coordinates ({@code coords}) from canvas space to local space.
+     * <br/>
+     * This is the inverse of {@link #localToCanvas(Point2D)}.
+     * <br/><br/>
+     * The transformation is achieved by dividing the coordinates by {@link #scale} and then translating them by translating them by -{@link #translationX} and -{@link #translationY}
+     * @param x
+     * @return coordinates in local space corresponding to the coordinates {@code coords} from canvas space
+     * @see #canvasToLocal(Point2D)
+     * @see #localToCanvas(double, double)
+     */
     public Point2D canvasToLocal(double x, double y) {
         return canvasToLocal(new Point2D(x,y));
     }
 
+    /**
+     * Sets {@link #translationX} and disables {@link #transformAutomatically}
+     * @param translationX
+     */
     public void setTranslationX(double translationX) {
         setTransformAutomatically(false);
         this.translationX.set(translationX);
     }
 
+    /**
+     * Sets {@link #translationY} and disables {@link #transformAutomatically}
+     * @param translationY
+     */
     public void setTranslationY(double translationY) {
         setTransformAutomatically(false);
         this.translationY.set(translationY);
     }
 
-    //prevents the translation from leaving components unnecessarily out of bounds
+    /**
+     * Sets {@link #translationX} to {@code translation.getX()}, sets {@link #translationY} to {@code translation.getY()}, and disables {@link #transformAutomatically}
+     * @param translation
+     */
+    public void setTranslation(Point2D translation) {
+        setTranslation(translation.getX(), translation.getY());
+    }
+
+
+    /**
+     * Assesses and (potentially) modifies {@link #translationX} and {@link #translationY} for user convenience.
+     * <br/>
+     * More specificially, this method implements the following algorithms:
+     * <br/>
+     * 1. Call {@link #considerAutoTransform()} so that automatic transforms are applied (if appropriate).
+     * <br/>
+     * 2. If {@link #transformAutomatically}, stop.
+     * <br/>
+     * 3. Otherwise:
+     * <br/>
+     * 4. If the width of {@link #boundsInCanvas} <= the width of {@link #canvasBounds}, but some part of {@link #boundsInCanvas} lies to the left or right of any part of {@link #canvasBounds}, adjust {@link #translationX} such that the two bounding boxes are flush along the outlying side.
+     * <br/>
+     * 5. If the height of {@link #boundsInCanvas} <= the height of {@link #canvasBounds}, but some part of {@link #boundsInCanvas} lies above or below any part of {@link #canvasBounds}, adjust {@link #translationY} such that the two bounding boxes are flush along the outlying side.
+     */
     public void santiseTranslation() {
         considerAutoTransform();
         if (isTransformAutomatically()) {
@@ -373,10 +691,6 @@ public class TransformationContext {
 
     }
 
-    public void setTranslation(Point2D translation) {
-        setTranslation(translation.getX(), translation.getY());
-    }
-
     public void setTranslation(double x, double y) {
         setTranslationX(x);
         setTranslationY(y);
@@ -399,7 +713,7 @@ public class TransformationContext {
     }
 
     /**
-     * Note that it is almost always better to use the setters or {@code #translate(int x, int y)} then to set via properties, as this will ensure that objects don't move entirely off-screen
+     * Note that it is almost always better to use the setters or {@link #translate(double, double)} then to set via properties, as this will ensure that objects don't move entirely off-screen
      * @see #setTranslationX(double)
      * @see #translate(double, double)
      * @return
@@ -413,7 +727,7 @@ public class TransformationContext {
     }
 
     /**
-     * Note that it is almost always better to use the setters or {@code #translate(int x, int y)} then to set via properties, as this will ensure that objects don't move entirely off-screen
+     * Note that it is almost always better to use the setters or {@link #translate(double, double)} then to set via properties, as this will ensure that objects don't move entirely off-screen
      * @see #setTranslationY(double)
      * @see #translate(double, double)
      * @return

@@ -59,17 +59,17 @@ public interface ILogger<T> {
      * Adds the state to the log.
      * May cause the thread to wait/block.
      * @param state
-     * @throws InterruptedException;
+     * @throws InterruptedException
      * @see #logAll(Collection)
      */
     void log(T state) throws InterruptedException;
 
     /**
-     * Adds all supplied states to the log, potentially synchronising more efficiently than multiple individual calls to {@link #log(T)}.
+     * Adds all supplied states to the log, potentially synchronising more efficiently than multiple individual calls to {@link #log(Object)}.
      * May cause the thread to wait/block.
      * @param states
      * @throws InterruptedException
-     * @see #log(T)
+     * @see #log(Object)
      */
     void logAll(Collection<T> states) throws InterruptedException;
 
