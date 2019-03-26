@@ -49,8 +49,10 @@ public class Display {
         System.out.printf("AutoTranslationX:          %s%n", context.getAutoTranslationX());
         System.out.printf("AutoTranslationY:          %s%n", context.getAutoTranslationY());
         System.out.printf("AutoScale:                 %s%n", context.getAutoScale());
-        System.out.printf("DecorationPaddingInLocalX: %s%n", context.getDecorationPaddingInLocal().getX());
-        System.out.printf("DecorationPaddingInLocalY: %s%n", context.getDecorationPaddingInLocal().getY());
+        System.out.printf("DecorationPaddingInLocalTop: %s%n", context.getDecorationPaddingInLocal().getTop());
+        System.out.printf("DecorationPaddingInLocalBottom: %s%n", context.getDecorationPaddingInLocal().getBottom());
+        System.out.printf("DecorationPaddingInLocalLeft: %s%n", context.getDecorationPaddingInLocal().getLeft());
+        System.out.printf("DecorationPaddingInLocalRight: %s%n", context.getDecorationPaddingInLocal().getRight());
         System.out.printf("LogicalBoundsX:            %s%n", context.getLogicalBounds().getMinX());
         System.out.printf("LogicalBoundsY:            %s%n", context.getLogicalBounds().getMinY());
         System.out.printf("LogicalBoundsWidth:        %s%n", context.getLogicalBounds().getWidth());

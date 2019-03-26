@@ -9,7 +9,10 @@ import org.marcos.uon.tspaidemo.canvas.layer.ListLayer;
 import org.marcos.uon.tspaidemo.canvas.layer.VertexLayer;
 import org.marcos.uon.tspaidemo.canvas.test.util.Display;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class DataDisplayExample extends Application {
 
@@ -19,7 +22,7 @@ public class DataDisplayExample extends Application {
         ListLayer<Edge> edgeLayer = new ListLayer<>(0);
         for(int i = 0; i < 6; ++i) {
             vertexLayer.add(
-                    new Vertex(Math.random()*100, Math.random()*100, Math.random()*5 + 8, Math.random()*4 + 2, "", CanvasTSPGraph.DEFAULT_DOT_FILL, CanvasTSPGraph.DEFAULT_DOT_STROKE, CanvasTSPGraph.DEFAULT_LABEL_COLOR)
+                    new Vertex(Math.random()*100, Math.random()*100, 8, 1, "", CanvasTSPGraph.DEFAULT_DOT_FILL, CanvasTSPGraph.DEFAULT_DOT_STROKE, CanvasTSPGraph.DEFAULT_LABEL_COLOR)
             );
         }
 

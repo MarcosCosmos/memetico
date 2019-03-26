@@ -4,6 +4,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 
 /**
@@ -138,7 +139,9 @@ public class TransformationContext {
      * @see #scale
      * @see #computeDecorationPaddingInLocal()
      */
-    private ReadOnlyObjectWrapper<Point2D> decorationPaddingInLocal;
+    private ReadOnlyObjectWrapper<Insets> decorationPaddingInLocal;
+
+    private ReadOnlyObjectWrapper<Insets> decorationPaddingInCanvas;
 
     /**
      * The scale to apply to content decorations (e.g. a circle drawn to identify a vertex, a line between vertices).
@@ -269,6 +272,13 @@ public class TransformationContext {
                 )
         );
 
+        decorationPaddingInCanvas.bind(
+                Bindings.createObjectBinding(
+                        () -> estimateDecorationPadding(getDecorationScale()),
+                        decorationPaddingInLocal, decorationScale
+                )
+        );
+
 
         boundsInCanvas.bind(
                 Bindings.createObjectBinding(
@@ -314,12 +324,16 @@ public class TransformationContext {
      * @return an updated value for {@link #decorationPaddingInLocal}
      * @see #decorationPaddingInLocal
      */
-    public Point2D computeDecorationPaddingInLocal() {
+    public Insets computeDecorationPaddingInLocal() {
         Bounds logicalBounds = getLogicalBounds();
         Bounds boundsInLocal = getBoundsInLocal();
-        return new Point2D((boundsInLocal.getWidth() - logicalBounds.getWidth())/2.0, (boundsInLocal.getHeight() - logicalBounds.getHeight())/2.0);
+        return new Insets(logicalBounds.getMinY() - boundsInLocal.getMinY(), boundsInLocal.getMaxX() - logicalBounds.getMaxX(), boundsInLocal.getMaxY() - logicalBounds.getMaxY(), logicalBounds.getMinX() - boundsInLocal.getMinX());
     }
 
+    public Insets estimateDecorationPadding(double decorationScale) {
+        Insets decorationPaddingInLocal = getDecorationPaddingInLocal();
+        return new Insets(decorationPaddingInLocal.getTop() * decorationScale, decorationPaddingInLocal.getRight() * decorationScale, decorationPaddingInLocal.getBottom() * decorationScale, decorationPaddingInLocal.getLeft() * decorationScale);
+    }
 
     /**
      * Computes an updated value for {@link #boundsInCanvas}
@@ -328,9 +342,9 @@ public class TransformationContext {
      */
     public Bounds computeBoundsInCanvas() {
         Bounds logicalBounds = getLogicalBounds();
-        Point2D decorationPaddingInCanvas = getDecorationPaddingInLocal().multiply(getDecorationScale());
-        Point2D minInCanvas = localToCanvas(logicalBounds.getMinX(), logicalBounds.getMinY()).subtract(decorationPaddingInCanvas);
-        Point2D sizeInCanvas = localToCanvas(logicalBounds.getMaxX(), logicalBounds.getMaxY()).add(decorationPaddingInCanvas).subtract(minInCanvas);
+        Insets decorationPaddingInCanvas = getDecorationPaddingInCanvas();
+        Point2D minInCanvas = localToCanvas(logicalBounds.getMinX(), logicalBounds.getMinY()).subtract(decorationPaddingInCanvas.getLeft(), decorationPaddingInCanvas.getTop());
+        Point2D sizeInCanvas = localToCanvas(logicalBounds.getMaxX(), logicalBounds.getMaxY()).add(decorationPaddingInCanvas.getRight(), decorationPaddingInCanvas.getBottom()).subtract(minInCanvas);
         return new BoundingBox(minInCanvas.getX(), minInCanvas.getY(), sizeInCanvas.getX(), sizeInCanvas.getY());
     }
 
@@ -349,8 +363,8 @@ public class TransformationContext {
             return naiveScale;
         } else {
             Bounds logicalBounds = getLogicalBounds();
-            Point2D totalDecorationPaddingInCanvas = getDecorationPaddingInLocal().multiply(2*decorationScale);
-            return Math.min((canvasBounds.getWidth()-totalDecorationPaddingInCanvas.getX())/logicalBounds.getWidth(), (canvasBounds.getHeight()-totalDecorationPaddingInCanvas.getY())/logicalBounds.getHeight());
+            Insets totalDecorationPaddingInCanvas = estimateDecorationPadding(decorationScale);
+            return Math.min((canvasBounds.getWidth()-totalDecorationPaddingInCanvas.getLeft()-totalDecorationPaddingInCanvas.getRight())/logicalBounds.getWidth(), (canvasBounds.getHeight()-totalDecorationPaddingInCanvas.getTop()-totalDecorationPaddingInCanvas.getBottom())/logicalBounds.getHeight());
         }
     }
 
@@ -366,10 +380,10 @@ public class TransformationContext {
         Bounds boundsInLocal = getBoundsInLocal();
         Bounds canvasBounds = getCanvasBounds();
 
-        Point2D totalDecorationPaddingInCanvas = getDecorationPaddingInLocal().multiply(2*decorationScale);
+        Insets decorationPaddingInCanvas = getDecorationPaddingInCanvas();
         Point2D sizeInCanvas = new Point2D(logicalBounds.getWidth(), logicalBounds.getHeight())
                 .multiply(scale)
-                .add(totalDecorationPaddingInCanvas);
+                .add(decorationPaddingInCanvas.getLeft()+decorationPaddingInCanvas.getRight(), decorationPaddingInCanvas.getTop()+decorationPaddingInCanvas.getBottom());
         Point2D canvasMin = new Point2D(canvasBounds.getMinX(), canvasBounds.getMinY());
         Point2D canvasSize = new Point2D(canvasBounds.getWidth(), canvasBounds.getHeight());
 
@@ -641,6 +655,7 @@ public class TransformationContext {
         boundsInCanvas = new ReadOnlyObjectWrapper<>();
 
         decorationPaddingInLocal = new ReadOnlyObjectWrapper<>();
+        decorationPaddingInCanvas = new ReadOnlyObjectWrapper<>();
         decorationScale = new ReadOnlyDoubleWrapper();
 
         this.transformAutomatically = new SimpleBooleanProperty(false);
@@ -915,12 +930,20 @@ public class TransformationContext {
         this.transformAutomatically.set(transformAutomatically);
     }
 
-    public Point2D getDecorationPaddingInLocal() {
+    public Insets getDecorationPaddingInLocal() {
         return decorationPaddingInLocal.get();
     }
 
-    public ReadOnlyObjectProperty<Point2D> decorationPaddingInLocalProperty() {
+    public ReadOnlyObjectProperty<Insets> decorationPaddingInLocalProperty() {
         return decorationPaddingInLocal.getReadOnlyProperty();
+    }
+
+    public Insets getDecorationPaddingInCanvas() {
+        return decorationPaddingInCanvas.get();
+    }
+
+    public ReadOnlyObjectProperty<Insets> decorationPaddingInCanvasProperty() {
+        return decorationPaddingInCanvas.getReadOnlyProperty();
     }
 
     public double getDecorationScale() {
