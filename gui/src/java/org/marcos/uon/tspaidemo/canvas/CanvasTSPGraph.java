@@ -8,8 +8,8 @@ import org.jorlib.io.tspLibReader.graph.NodeCoordinates;
 import org.marcos.uon.tspaidemo.canvas.drawable.Edge;
 import org.marcos.uon.tspaidemo.canvas.drawable.OutlineEdge;
 import org.marcos.uon.tspaidemo.canvas.drawable.Vertex;
-import org.marcos.uon.tspaidemo.canvas.layer.ListLayer;
-import org.marcos.uon.tspaidemo.canvas.layer.VertexLayer;
+import org.marcos.uon.tspaidemo.canvas.layer.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,6 +45,7 @@ public class CanvasTSPGraph {
         transformationContext.logicalBoundsProperty().bind(vertexLayer.logicalBoundsProperty());
         transformationContext.boundsInLocalProperty().bind(vertexLayer.boundsInLocalProperty());
         gestures = new ViewportGestures(transformationContext);
+//        internalGraphic.getLayers().addAll(new LogicalBounds(200), new BoundsInLocal(300), new BoundsInCanvas(400), new CanvasBounds(500));
     }
 
     /**
@@ -165,6 +166,11 @@ public class CanvasTSPGraph {
 
         setVertices(Arrays.stream(nodeData.listNodes()).mapToObj(i -> nodeData.get(i).getPosition()).collect(Collectors.toList()));
 
+//        //clip the logical bounds to remove excess min x/y
+//        Bounds logicalBounds = getLogicalBounds();
+//        for (Vertex each: vertexLayer) {
+//            each.setLocation(each.getLocation().subtract(logicalBounds.getMinX(), logicalBounds.getMinY()));
+//        }
         vertexLayer.requestRedraw();
 
         //add targets

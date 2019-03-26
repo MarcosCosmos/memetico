@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.canvas.test.layers;
+package org.marcos.uon.tspaidemo.canvas.layer;
 
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
@@ -7,10 +7,10 @@ import javafx.scene.paint.Color;
 import org.marcos.uon.tspaidemo.canvas.TransformationContext;
 import org.marcos.uon.tspaidemo.canvas.layer.LayerBase;
 
-public class LogicalBounds extends LayerBase {
+public class BoundsInCanvas extends LayerBase {
     ChangeListener<Bounds> changeListener;
 
-    public LogicalBounds(int priority) {
+    public BoundsInCanvas(int priority) {
         super(priority);
         changeListener = ((observable, oldValue, newValue) -> {
             if(!newValue.equals(oldValue)) {
@@ -23,23 +23,24 @@ public class LogicalBounds extends LayerBase {
     public void draw() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0,0, canvas.getWidth(), canvas.getHeight());
-
-        Bounds logicalBounds = transformationContext.getLogicalBounds();
+        
+        Bounds boundsInCanvas = transformationContext.getBoundsInCanvas();
+        
         gc.setLineWidth(1);
-        gc.setFill(Color.rgb(255, 0, 0, 0.25));
-        gc.fillRect(logicalBounds.getMinX(), logicalBounds.getMinY(), logicalBounds.getWidth(), logicalBounds.getHeight());
-        gc.setStroke(Color.rgb(255, 0, 0, 0.5));
-        gc.strokeRect(logicalBounds.getMinX(), logicalBounds.getMinY(), logicalBounds.getWidth(), logicalBounds.getHeight());
+        gc.setFill(Color.rgb(0, 0, 255, 0.25));
+        gc.fillRect(boundsInCanvas.getMinX(), boundsInCanvas.getMinY(), boundsInCanvas.getWidth(), boundsInCanvas.getHeight());
+        gc.setStroke(Color.rgb(0, 0, 255, 0.5));
+        gc.strokeRect(boundsInCanvas.getMinX(), boundsInCanvas.getMinY(), boundsInCanvas.getWidth(), boundsInCanvas.getHeight());
         requiresRedraw = false;
     }
 
     @Override
     public void setTransformationContext(TransformationContext context) {
         if(transformationContext != null) {
-            transformationContext.logicalBoundsProperty().removeListener(changeListener);
+            transformationContext.boundsInLocalProperty().removeListener(changeListener);
         }
         super.setTransformationContext(context);
-        context.logicalBoundsProperty().addListener(changeListener);
+        context.boundsInLocalProperty().addListener(changeListener);
         requestRedraw(); //trigger the first update
     }
 }

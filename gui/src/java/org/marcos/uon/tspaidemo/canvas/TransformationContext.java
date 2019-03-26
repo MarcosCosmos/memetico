@@ -387,12 +387,14 @@ public class TransformationContext {
         Point2D canvasMin = new Point2D(canvasBounds.getMinX(), canvasBounds.getMinY());
         Point2D canvasSize = new Point2D(canvasBounds.getWidth(), canvasBounds.getHeight());
 
-        return canvasMin.add(
-                canvasSize.subtract(sizeInCanvas)
-                        .multiply(0.5)
-        )
+        //start with the canvas min, then translate for the (canvas) decoration, then add the proportional position, then offset for logical min
+        return canvasMin.add(decorationPaddingInCanvas.getLeft(), decorationPaddingInCanvas.getTop())
+                .add(
+                        canvasSize.subtract(sizeInCanvas)
+                                .multiply(0.5)
+                )
                 .multiply(1/scale)
-                .subtract(boundsInLocal.getMinX(), boundsInLocal.getMinY());
+                .subtract(logicalBounds.getMinX(), logicalBounds.getMinY());
 
     }
 
@@ -569,19 +571,25 @@ public class TransformationContext {
         if (isTransformAutomatically()) {
             return;
         }
+        Bounds logicalBounds = getLogicalBounds();
         Bounds canvasBounds = getCanvasBounds();
         Bounds boundsInCanvas = getBoundsInCanvas();
+        Insets decorationPaddingInCanvas = getDecorationPaddingInCanvas();
         double newTranslationX = getTranslationX(), newTranslationY = getTranslationY();
         double scale = getScale();
         if(boundsInCanvas.getMaxX() < canvasBounds.getMaxX()) {
-            newTranslationX = ((canvasBounds.getMinX()+(canvasBounds.getWidth()-boundsInCanvas.getWidth()))/scale) - getBoundsInLocal().getMinX();
+            newTranslationX = (
+                    (
+                            canvasBounds.getMinX() + decorationPaddingInCanvas.getLeft() +
+                                    (canvasBounds.getWidth()-boundsInCanvas.getWidth())
+                    )/scale) - logicalBounds.getMinX();
         } else if (boundsInCanvas.getMinX() > canvasBounds.getMinX()) {
-            newTranslationX = (canvasBounds.getMinX()/scale) - getBoundsInLocal().getMinX();
+            newTranslationX = (canvasBounds.getMinX()+decorationPaddingInCanvas.getLeft())/scale - logicalBounds.getMinX();
         }
         if(boundsInCanvas.getMaxY() < canvasBounds.getMaxY()) {
-            newTranslationY = ((canvasBounds.getMinY()+(canvasBounds.getHeight()-boundsInCanvas.getHeight()))/scale) - getBoundsInLocal().getMinY();
+            newTranslationY = ((canvasBounds.getMinY()+decorationPaddingInCanvas.getTop()+(canvasBounds.getHeight()-boundsInCanvas.getHeight()))/scale) - logicalBounds.getMinY();
         } else if (boundsInCanvas.getMinY() > canvasBounds.getMinY()) {
-            newTranslationY = (canvasBounds.getMinY()/scale) - getBoundsInLocal().getMinY();
+            newTranslationY = (canvasBounds.getMinY()+decorationPaddingInCanvas.getTop())/scale - logicalBounds.getMinY();
         }
         setTranslation(newTranslationX, newTranslationY);
     }

@@ -9,10 +9,10 @@ import org.marcos.uon.tspaidemo.canvas.CanvasTSPGraph;
 import org.marcos.uon.tspaidemo.canvas.LayeredCanvas;
 import org.marcos.uon.tspaidemo.canvas.TransformationContext;
 import org.marcos.uon.tspaidemo.canvas.layer.Layer;
-import org.marcos.uon.tspaidemo.canvas.test.layers.BoundsInCanvas;
-import org.marcos.uon.tspaidemo.canvas.test.layers.BoundsInLocal;
-import org.marcos.uon.tspaidemo.canvas.test.layers.CanvasBounds;
-import org.marcos.uon.tspaidemo.canvas.test.layers.LogicalBounds;
+import org.marcos.uon.tspaidemo.canvas.layer.BoundsInCanvas;
+import org.marcos.uon.tspaidemo.canvas.layer.BoundsInLocal;
+import org.marcos.uon.tspaidemo.canvas.layer.CanvasBounds;
+import org.marcos.uon.tspaidemo.canvas.layer.LogicalBounds;
 
 import java.util.List;
 
@@ -53,6 +53,10 @@ public class Display {
         System.out.printf("DecorationPaddingInLocalBottom: %s%n", context.getDecorationPaddingInLocal().getBottom());
         System.out.printf("DecorationPaddingInLocalLeft: %s%n", context.getDecorationPaddingInLocal().getLeft());
         System.out.printf("DecorationPaddingInLocalRight: %s%n", context.getDecorationPaddingInLocal().getRight());
+        System.out.printf("DecorationPaddingInCanvasTop: %s%n", context.getDecorationPaddingInCanvas().getTop());
+        System.out.printf("DecorationPaddingInCanvasBottom: %s%n", context.getDecorationPaddingInCanvas().getBottom());
+        System.out.printf("DecorationPaddingInCanvasLeft: %s%n", context.getDecorationPaddingInCanvas().getLeft());
+        System.out.printf("DecorationPaddingInCanvasRight: %s%n", context.getDecorationPaddingInCanvas().getRight());
         System.out.printf("LogicalBoundsX:            %s%n", context.getLogicalBounds().getMinX());
         System.out.printf("LogicalBoundsY:            %s%n", context.getLogicalBounds().getMinY());
         System.out.printf("LogicalBoundsWidth:        %s%n", context.getLogicalBounds().getWidth());

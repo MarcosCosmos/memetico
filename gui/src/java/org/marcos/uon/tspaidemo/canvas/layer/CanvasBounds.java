@@ -1,4 +1,4 @@
-package org.marcos.uon.tspaidemo.canvas.test.layers;
+package org.marcos.uon.tspaidemo.canvas.layer;
 
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
@@ -7,10 +7,10 @@ import javafx.scene.paint.Color;
 import org.marcos.uon.tspaidemo.canvas.TransformationContext;
 import org.marcos.uon.tspaidemo.canvas.layer.LayerBase;
 
-public class BoundsInLocal extends LayerBase {
+public class CanvasBounds extends LayerBase {
     ChangeListener<Bounds> changeListener;
 
-    public BoundsInLocal(int priority) {
+    public CanvasBounds(int priority) {
         super(priority);
         changeListener = ((observable, oldValue, newValue) -> {
             if(!newValue.equals(oldValue)) {
@@ -23,13 +23,11 @@ public class BoundsInLocal extends LayerBase {
     public void draw() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0,0, canvas.getWidth(), canvas.getHeight());
-        Bounds boundsInLocal = transformationContext.getBoundsInLocal();
 
+        Bounds canvasBounds = transformationContext.getCanvasBounds();
         gc.setLineWidth(1);
-        gc.setFill(Color.rgb(0, 255, 0, 0.25));
-        gc.fillRect(boundsInLocal.getMinX(), boundsInLocal.getMinY(), boundsInLocal.getWidth(), boundsInLocal.getHeight());
-        gc.setStroke(Color.rgb(0, 255, 0, 0.5));
-        gc.strokeRect(boundsInLocal.getMinX(), boundsInLocal.getMinY(), boundsInLocal.getWidth(), boundsInLocal.getHeight());
+        gc.setStroke(Color.rgb(255, 255, 255, 0.5));
+        gc.strokeRect(canvasBounds.getMinX(), canvasBounds.getMinY(), canvasBounds.getWidth(), canvasBounds.getHeight());
         requiresRedraw = false;
     }
 
@@ -37,11 +35,9 @@ public class BoundsInLocal extends LayerBase {
     public void setTransformationContext(TransformationContext context) {
         if(transformationContext != null) {
             transformationContext.boundsInLocalProperty().removeListener(changeListener);
-            transformationContext.boundsInCanvasProperty().removeListener(changeListener);
         }
         super.setTransformationContext(context);
         context.boundsInLocalProperty().addListener(changeListener);
-        context.boundsInCanvasProperty().addListener(changeListener);
         requestRedraw(); //trigger the first update
     }
 }
