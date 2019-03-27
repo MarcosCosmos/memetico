@@ -1,8 +1,6 @@
 package graph;
 
 
-import com.sun.istack.internal.NotNull;
-
 /**
  * Destructible here refers to destruction of nodes, i.e. A graph for which nodes can be added on-the-fly. Ths may mean variable memory usage over the life of the graph.
  * @param <V>
@@ -16,5 +14,5 @@ public interface DestructibleGraph<V extends Graph.Vertex, D extends Number, E e
      * @param vertex
      * @return
      */
-    boolean remove(@NotNull V vertex);
+    boolean remove(V vertex);
 }

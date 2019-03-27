@@ -1,9 +1,6 @@
 package graph;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Can be matrix or adjacency-list based internally; (Note that matrix based graphs cannot, generally, be BuildableGraphs
@@ -64,7 +61,7 @@ public interface Graph<V extends Graph.Vertex, D extends Number, E extends Graph
      * @param to
      * @return the edge from {@code from} to {@code to} if it exists, otherwise null.
      */
-    Edge<V, D> getEdge(@NotNull V from, @NotNull V to);
+    Edge<V, D> getEdge(V from, V to);
 
     /**
      * Tests whether or not an edge connecting from {@code from} to {@code to}.
@@ -72,7 +69,7 @@ public interface Graph<V extends Graph.Vertex, D extends Number, E extends Graph
      * @param to
      * @return true if there is an edge from {@code from} to {@code to}, otherwise null.
      */
-    default boolean hasConnection(@NotNull V from, @NotNull V to) {
+    default boolean hasConnection(V from, V to) {
         return getEdge(from, to) != null;
     }
 
@@ -81,19 +78,19 @@ public interface Graph<V extends Graph.Vertex, D extends Number, E extends Graph
      * @param edge an edge to tests for
      * @return true if the graph contains some edge {@code other} for which {@code other.equals(edge)} returns true
      */
-    boolean contains( @NotNull E edge);
+    boolean contains( E edge);
 
     /**
      * @param edge
      * Sets the edge in this uniquely matching the supplied {@code edge} to the supplied {@code edge}
      * @return whether or not the graph was modified as a result of this action
      */
-    boolean set(@NotNull E edge);
+    boolean set(E edge);
 
     /**
      * Removes the edge that uniques matches the supplied {@code edge} from the graph, if any exist
      * @param edge
      * @return true if the graph was modified as a result of this action (i.e. true if the edge was present), otherwise false.
      */
-    boolean remove(@NotNull E edge);
+    boolean remove(E edge);
 }

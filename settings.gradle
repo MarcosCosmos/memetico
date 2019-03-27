@@ -1,0 +1,4 @@
+rootProject.name = 'tsp-demo'
+include 'util'
+include 'memetico'
+include 'gui'

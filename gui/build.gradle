@@ -1,0 +1,42 @@
+buildscript {
+    dependencies {
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+    }
+    
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'application'
+    id "org.openjfx.javafxplugin" version "0.0.7"
+}
+
+javafx {
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+sourceSets {
+  main {
+    resources {
+        srcDirs = ["resources"]
+    }
+  }
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compile 'com.sirolf2009:fxgraph:0.0.3'
+    compile project(':memetico')
+    implementation 'com.google.code.gson:gson:2.8.5'
+}
+
+mainClassName = 'org.marcos.uon.tspaidemo.gui.memetico.MemeticoVisualisationApp'

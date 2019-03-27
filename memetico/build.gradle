@@ -1,0 +1,11 @@
+//and standard one
+apply plugin: 'java'
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+    compile 'com.google.guava:guava:27.1-jre'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    compile 'org.moeaframework:moeaframework:2.12'
+    compile project(':util')
+}
