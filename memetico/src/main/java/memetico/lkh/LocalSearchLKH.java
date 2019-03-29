@@ -70,6 +70,11 @@ public class LocalSearchLKH extends DiCycleLocalSearchOperator {
             destination.saveInOptTour(initialTourFile);
             Runtime r = Runtime.getRuntime();
             Process p = r.exec(new String[]{"LKH", paramFile.getPath()});
+            OutputStream outlet = p.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outlet));
+            writer.write("\n");
+            writer.flush();
+            writer.close();
             p.waitFor();
             if(p.exitValue() != 0) {
                 System.err.println("Error: LKH Failed - printing stdout and stderr outputs..");

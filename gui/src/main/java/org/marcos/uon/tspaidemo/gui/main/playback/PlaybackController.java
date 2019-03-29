@@ -23,8 +23,8 @@ import java.util.ResourceBundle;
  */
 public class PlaybackController implements Initializable {
 
-    private static final String PAUSE_TEXT = "❚❚";
-    private static final String PLAY_TEXT = "▶";
+    private static final String PAUSE_TEXT = "||";
+    private static final String PLAY_TEXT = "\u25B6";
 
     @FXML
     private HBox playbackControlsRoot;
