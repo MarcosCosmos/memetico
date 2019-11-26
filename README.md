@@ -4,7 +4,7 @@ A modified version of Memetico, with a GUI tool for visualisation and configurat
 Modifications include:
 - Refactoring
 - The inclusion of a GUI which permits configuration, saving of performance and state logs which can be loaded for visualisation later, and displays candidate tours found by Memetico at intervals during runs.  
-- An optional (configurable) extension which makes use of an external heuristic solver called Lin-Kernighan-Helsgaun (http://akira.ruc.dk/~keld/research/LKH)[http://akira.ruc.dk/~keld/research/LKH]. If enabled LKH will run, at the end of each generation, on the 'current' solution of every agent to try and find an improvement.
+- An optional (configurable) extension which makes use of an external heuristic solver called Lin-Kernighan-Helsgaun [http://akira.ruc.dk/~keld/research/LKH](http://akira.ruc.dk/~keld/research/LKH). If enabled LKH will run, at the end of each generation, on the 'current' solution of every agent to try and find an improvement.
 - An optional (configurable) extension which randomises the root agent's solutions every n-th generation in an attempt to avoid being stuck on local optima.
 
 Note that although Memetico itself can be run without the GUI, the command line interface to Memetico is not up to date and does not correctly permit argument-based configured.
