@@ -75,8 +75,16 @@ public class ViewportGestures {
 
         @Override
         public void handle(ScrollEvent event) {
-            transformationContext.setMouseAnchor(event.getX(), event.getY());
-            transformationContext.zoom(event.getDeltaY() < 0 ? 1/getZoomSpeed() : getZoomSpeed());
+            if(event.getDeltaY() != 0) {
+                double zoom = 0;
+                if(event.getDeltaY() > 0) {
+                    zoom = getZoomSpeed();
+                } else if(event.getDeltaY() < 0){
+                    zoom = 1/getZoomSpeed();
+                }
+                transformationContext.setMouseAnchor(event.getX(), event.getY());
+                transformationContext.zoom(event.getDeltaY() < 0 ? 1 / getZoomSpeed() : getZoomSpeed());
+            }
             event.consume();
         }
 

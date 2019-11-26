@@ -19,7 +19,6 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.text.Text;
-import memetico.TSPInstance;
 import memetico.logging.IPCLogger;
 import memetico.logging.MemeticoSnapshot;
 import memetico.logging.NullPCLogger;
@@ -31,7 +30,7 @@ import org.marcos.uon.tspaidemo.gui.memetico.agent.AgentDisplay;
 import org.marcos.uon.tspaidemo.gui.memetico.options.DisplayOptionsController;
 import org.marcos.uon.tspaidemo.gui.memetico.options.RunConfigurationController;
 import org.marcos.uon.tspaidemo.util.tree.TreeNode;
-import org.marcos.uon.tspaidemo.util.tsplib.TSPLibInstance;
+import tsplib4j.TSPLibInstance;
 
 import java.io.IOException;
 import java.net.URL;

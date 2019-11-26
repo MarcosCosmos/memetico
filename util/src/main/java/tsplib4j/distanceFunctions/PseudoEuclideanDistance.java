@@ -18,51 +18,44 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.fieldTypesAndFormats;
+package tsplib4j.distanceFunctions;
 
 /**
- * Enumeration of the ways node coordinates can be specified.
+ * The psuedo-Euclidean distance function used by the {@code ATT} TSPLIB problem
+ * instances.
  * 
  * @author David Hadka
  */
-public enum NodeCoordType {
+public class PseudoEuclideanDistance extends DistanceFunction {
 	
 	/**
-	 * Nodes are specified by coordinates in 2-D.
+	 * Constructs a new pseudo-Euclidean distance function.
 	 */
-	TWOD_COORDS(2),
-	
-	/**
-	 * Nodes are specified by coordinates in 3-D.
-	 */
-	THREED_COORDS(3),
-	
-	/**
-	 * Nodes do not have associated coordinates.
-	 */
-	NO_COORDS(-1);
-	
-	/**
-	 * The length (dimension) of the coordinates.
-	 */
-	private final int length;
-	
-	/**
-	 * Constructs a new node coordinate enumeration.
-	 * 
-	 * @param length the length (dimension) of the coordinates
-	 */
-	private NodeCoordType(int length) {
-		this.length = length;
+	public PseudoEuclideanDistance() {
+		super();
 	}
 	
 	/**
-	 * Returns the length (dimension) of the coordinates.
+	 * {@inheritDoc}
 	 * 
-	 * @return the length (dimension) of the coordinates
+	 * @throws IllegalArgumentException if the nodes are not two dimensional
 	 */
-	public int getLength() {
-		return length;
+	@Override
+	public double distance(int length, double[] position1, double[] position2) {
+		if (length != 2) {
+			throw new IllegalArgumentException("nodes must be 2D");
+		}
+		
+		double xd = position1[0] - position2[0];
+		double yd = position1[1] - position2[1];
+		double r = Math.sqrt((Math.pow(xd, 2.0) + Math.pow(yd, 2.0)) / 10.0);
+		double t = Math.round(r);
+
+		if (t < r) {
+			return t + 1.0;
+		} else {
+			return t;
+		}
 	}
 
 }

@@ -18,43 +18,51 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.fieldTypesAndFormats;
+package tsplib4j.fieldTypesAndFormats;
 
 /**
- * Enumeration of the supported data types.
+ * Enumeration of the ways node coordinates can be specified.
  * 
  * @author David Hadka
  */
-public enum DataType {
+public enum NodeCoordType {
 	
 	/**
-	 * Data for a symmetric traveling salesman problem.
+	 * Nodes are specified by coordinates in 2-D.
 	 */
-	TSP,
+	TWOD_COORDS(2),
 	
 	/**
-	 * Data for an asymmetric traveling salesman problem.
+	 * Nodes are specified by coordinates in 3-D.
 	 */
-	ATSP,
+	THREED_COORDS(3),
 	
 	/**
-	 * Data for a sequential ordering problem.
+	 * Nodes do not have associated coordinates.
 	 */
-	SOP,
+	NO_COORDS(-1);
 	
 	/**
-	 * Hamiltonian cycle problem data.
+	 * The length (dimension) of the coordinates.
 	 */
-	HCP,
+	private final int length;
 	
 	/**
-	 * Capacitated vehicle routing problem data.
+	 * Constructs a new node coordinate enumeration.
+	 * 
+	 * @param length the length (dimension) of the coordinates
 	 */
-	CVRP,
+	private NodeCoordType(int length) {
+		this.length = length;
+	}
 	
 	/**
-	 * A collection of tours.
+	 * Returns the length (dimension) of the coordinates.
+	 * 
+	 * @return the length (dimension) of the coordinates
 	 */
-	TOUR
+	public int getLength() {
+		return length;
+	}
 
 }

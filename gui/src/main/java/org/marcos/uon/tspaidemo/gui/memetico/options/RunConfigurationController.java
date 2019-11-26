@@ -18,7 +18,7 @@ import memetico.lkh.LocalSearchLKH;
 import memetico.logging.IPCLogger;
 import memetico.logging.PCLogger;
 import memetico.util.*;
-import org.marcos.uon.tspaidemo.util.tsplib.TSPLibInstance;
+import tsplib4j.TSPLibInstance;
 import org.marcos.uon.tspaidemo.gui.memetico.MemeticoConfiguration;
 import org.marcos.uon.tspaidemo.util.log.ValidityFlag;
 

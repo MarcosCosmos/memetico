@@ -18,31 +18,64 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions;
+package tsplib4j.fieldTypesAndFormats;
 
 /**
- * The Manhattan distance function.
+ * Enumeration of the various formats in which edge weights (distances) can be
+ * specified.
  * 
  * @author David Hadka
  */
-public class ManhattanDistance extends DistanceFunction {
+public enum EdgeWeightFormat {
 	
 	/**
-	 * Constructs a new Manhattan distance function.
+	 * Weights are given by a function.
 	 */
-	public ManhattanDistance() {
-		super();
-	}
+	FUNCTION,
 	
-	@Override
-	public double distance(int length, double[] position1, double[] position2) {
-		double result = 0.0;
-		
-		for (int i = 0; i < length; i++) {
-			result += Math.abs(position1[i] - position2[i]);
-		}
-
-		return Math.round(result);
-	}
+	/**
+	 * Weights are given by a full matrix.
+	 */
+	FULL_MATRIX,
+	
+	/**
+	 * Row-wise upper triangular matrix (excluding diagonal).
+	 */
+	UPPER_ROW,
+	
+	/**
+	 * Row-wise lower triangular matrix (excluding diagonal).
+	 */
+	LOWER_ROW,
+	
+	/**
+	 * Row-wise upper triangular matrix.
+	 */
+	UPPER_DIAG_ROW,
+	
+	/**
+	 * Row-wise lower triangular matrix.
+	 */
+	LOWER_DIAG_ROW,
+	
+	/**
+	 * Column-wise upper triangular matrix (without diagonal).
+	 */
+	UPPER_COL,
+	
+	/**
+	 * Column-wise lower triangular matrix (without diagonal).
+	 */
+	LOWER_COL,
+	
+	/**
+	 * Column-wise upper triangular matrix.
+	 */
+	UPPER_DIAG_COL,
+	
+	/**
+	 * Column-wise lower triangular matrix.
+	 */
+	LOWER_DIAG_COL
 
 }

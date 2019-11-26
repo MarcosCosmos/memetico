@@ -12,7 +12,7 @@ buildscript {
 plugins {
     id 'java'
     id 'application'
-    id "org.openjfx.javafxplugin" version "0.0.7"
+    id "org.openjfx.javafxplugin" version "0.0.8"
 }
 
 javafx {
@@ -33,10 +33,17 @@ sourceSets {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    compile 'com.sirolf2009:fxgraph:0.0.3'
     compile project(':memetico')
     implementation 'com.google.code.gson:gson:2.8.5'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.marcos.uon.tspaidemo.gui.memetico.MemeticoVisualisationApp'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 mainClassName = 'org.marcos.uon.tspaidemo.gui.memetico.MemeticoVisualisationApp'

@@ -18,11 +18,11 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib;
+package tsplib4j;
 
-import org.marcos.uon.tspaidemo.util.tsplib.graph.DistanceTable;
-import org.marcos.uon.tspaidemo.util.tsplib.graph.Edge;
-import org.marcos.uon.tspaidemo.util.tsplib.graph.EdgeData;
+import tsplib4j.graph.DistanceTable;
+import tsplib4j.graph.Edge;
+import tsplib4j.graph.EdgeData;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -18,9 +18,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions;
+package tsplib4j.distanceFunctions;
 
-import org.marcos.uon.tspaidemo.util.tsplib.graph.Node;
+import tsplib4j.graph.Node;
 
 /**
  * Abstract superclass of all distance function implementations.  This class

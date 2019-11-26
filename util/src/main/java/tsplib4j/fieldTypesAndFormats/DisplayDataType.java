@@ -18,33 +18,28 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions;
+package tsplib4j.fieldTypesAndFormats;
 
 /**
- * The Euclidean distance function with distances rounded up to the nearest
- * integer.
+ * Enumeration of ways a graphical display can be generated from the data.
  * 
  * @author David Hadka
  */
-public class CeilingDistance extends DistanceFunction {
+public enum DisplayDataType {
 	
 	/**
-	 * Constructs a new Euclidean distance function with distances rounded up
-	 * to the nearest integer.
+	 * The display is generated from the node coordinates.
 	 */
-	public CeilingDistance() {
-		super();
-	}
+	COORD_DISPLAY,
 	
-	@Override
-	public double distance(int length, double[] position1, double[] position2) {
-		double result = 0.0;
-		
-		for (int i = 0; i < length; i++) {
-			result += Math.pow(position1[i] - position2[i], 2.0);
-		}
-		
-		return Math.ceil(Math.sqrt(result));
-	}
+	/**
+	 * Explicit coordinates in 2-D are given.
+	 */
+	TWOD_DISPLAY,
+	
+	/**
+	 * No graphical display is available.
+	 */
+	NO_DISPLAY
 
 }

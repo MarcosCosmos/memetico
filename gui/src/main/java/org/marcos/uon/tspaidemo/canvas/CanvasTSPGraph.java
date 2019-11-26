@@ -3,13 +3,12 @@ package org.marcos.uon.tspaidemo.canvas;
 import javafx.geometry.Bounds;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import org.marcos.uon.tspaidemo.util.tsplib.TSPLibInstance;
-import org.marcos.uon.tspaidemo.util.tsplib.graph.NodeCoordinates;
+import org.marcos.uon.tspaidemo.canvas.layer.*;
+import tsplib4j.TSPLibInstance;
+import tsplib4j.graph.NodeCoordinates;
 import org.marcos.uon.tspaidemo.canvas.drawable.Edge;
 import org.marcos.uon.tspaidemo.canvas.drawable.OutlineEdge;
 import org.marcos.uon.tspaidemo.canvas.drawable.Vertex;
-import org.marcos.uon.tspaidemo.canvas.layer.ListLayer;
-import org.marcos.uon.tspaidemo.canvas.layer.VertexLayer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +45,7 @@ public class CanvasTSPGraph {
         transformationContext.logicalBoundsProperty().bind(vertexLayer.logicalBoundsProperty());
         transformationContext.boundsInLocalProperty().bind(vertexLayer.boundsInLocalProperty());
         gestures = new ViewportGestures(transformationContext);
-//        internalGraphic.getLayers().addAll(new LogicalBounds(200), new BoundsInLocal(300), new BoundsInCanvas(400), new CanvasBounds(500));
+        internalGraphic.getLayers().addAll(new LogicalBounds(200), new BoundsInLocal(300), new BoundsInCanvas(400), new CanvasBounds(500));
     }
 
     /**

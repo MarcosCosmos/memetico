@@ -18,64 +18,31 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.fieldTypesAndFormats;
+package tsplib4j.distanceFunctions;
 
 /**
- * Enumeration of the various formats in which edge weights (distances) can be
- * specified.
+ * The Euclidean distance function.
  * 
  * @author David Hadka
  */
-public enum EdgeWeightFormat {
+public class EuclideanDistance extends DistanceFunction {
 	
 	/**
-	 * Weights are given by a function.
+	 * Constructs a new Euclidean distance function.
 	 */
-	FUNCTION,
+	public EuclideanDistance() {
+		super();
+	}
 	
-	/**
-	 * Weights are given by a full matrix.
-	 */
-	FULL_MATRIX,
-	
-	/**
-	 * Row-wise upper triangular matrix (excluding diagonal).
-	 */
-	UPPER_ROW,
-	
-	/**
-	 * Row-wise lower triangular matrix (excluding diagonal).
-	 */
-	LOWER_ROW,
-	
-	/**
-	 * Row-wise upper triangular matrix.
-	 */
-	UPPER_DIAG_ROW,
-	
-	/**
-	 * Row-wise lower triangular matrix.
-	 */
-	LOWER_DIAG_ROW,
-	
-	/**
-	 * Column-wise upper triangular matrix (without diagonal).
-	 */
-	UPPER_COL,
-	
-	/**
-	 * Column-wise lower triangular matrix (without diagonal).
-	 */
-	LOWER_COL,
-	
-	/**
-	 * Column-wise upper triangular matrix.
-	 */
-	UPPER_DIAG_COL,
-	
-	/**
-	 * Column-wise lower triangular matrix.
-	 */
-	LOWER_DIAG_COL
+	@Override
+	public double distance(int length, double[] position1, double[] position2) {
+		double result = 0.0;
+
+		for (int i = 0; i < length; i++) {
+			result += Math.pow(position1[i] - position2[i], 2.0);
+		}
+
+		return Math.round(Math.sqrt(result));
+	}
 
 }

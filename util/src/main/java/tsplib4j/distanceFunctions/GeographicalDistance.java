@@ -18,7 +18,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions;
+package tsplib4j.distanceFunctions;
 
 /**
  * The geographical distance function.  Node coordinates must be specified in

@@ -18,44 +18,31 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions;
+package tsplib4j.distanceFunctions;
 
 /**
- * The psuedo-Euclidean distance function used by the {@code ATT} TSPLIB problem
- * instances.
+ * The maximum distance function.
  * 
  * @author David Hadka
  */
-public class PseudoEuclideanDistance extends DistanceFunction {
+public class MaximumDistance extends DistanceFunction {
 	
 	/**
-	 * Constructs a new pseudo-Euclidean distance function.
+	 * Constructs a new maximum distance function.
 	 */
-	public PseudoEuclideanDistance() {
+	public MaximumDistance() {
 		super();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws IllegalArgumentException if the nodes are not two dimensional
-	 */
 	@Override
 	public double distance(int length, double[] position1, double[] position2) {
-		if (length != 2) {
-			throw new IllegalArgumentException("nodes must be 2D");
-		}
+		double result = 0.0;
 		
-		double xd = position1[0] - position2[0];
-		double yd = position1[1] - position2[1];
-		double r = Math.sqrt((Math.pow(xd, 2.0) + Math.pow(yd, 2.0)) / 10.0);
-		double t = Math.round(r);
-
-		if (t < r) {
-			return t + 1.0;
-		} else {
-			return t;
+		for (int i = 0; i < length; i++) {
+			result += Math.max(result, Math.abs(position1[i] - position2[i]));
 		}
+
+		return Math.round(result);
 	}
 
 }

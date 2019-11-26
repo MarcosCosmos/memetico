@@ -18,9 +18,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.fieldTypesAndFormats;
+package tsplib4j.fieldTypesAndFormats;
 
-import org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions.*;
+import tsplib4j.distanceFunctions.*;
 
 /**
  * Enumeration of the ways that explicit edge weights (distances) can be

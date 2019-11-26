@@ -3,15 +3,13 @@ package memetico.lkh;
 import com.google.common.io.ByteStreams;
 import memetico.*;
 import org.apache.commons.lang3.SystemUtils;
-import org.marcos.uon.tspaidemo.util.tsplib.TSPLibInstance;
-import org.marcos.uon.tspaidemo.util.tsplib.TSPLibTour;
+import tsplib4j.TSPLibInstance;
+import tsplib4j.TSPLibTour;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.Buffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Scanner;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;

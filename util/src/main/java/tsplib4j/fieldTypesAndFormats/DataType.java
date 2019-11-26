@@ -18,28 +18,43 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.fieldTypesAndFormats;
+package tsplib4j.fieldTypesAndFormats;
 
 /**
- * Enumeration of ways a graphical display can be generated from the data.
+ * Enumeration of the supported data types.
  * 
  * @author David Hadka
  */
-public enum DisplayDataType {
+public enum DataType {
 	
 	/**
-	 * The display is generated from the node coordinates.
+	 * Data for a symmetric traveling salesman problem.
 	 */
-	COORD_DISPLAY,
+	TSP,
 	
 	/**
-	 * Explicit coordinates in 2-D are given.
+	 * Data for an asymmetric traveling salesman problem.
 	 */
-	TWOD_DISPLAY,
+	ATSP,
 	
 	/**
-	 * No graphical display is available.
+	 * Data for a sequential ordering problem.
 	 */
-	NO_DISPLAY
+	SOP,
+	
+	/**
+	 * Hamiltonian cycle problem data.
+	 */
+	HCP,
+	
+	/**
+	 * Capacitated vehicle routing problem data.
+	 */
+	CVRP,
+	
+	/**
+	 * A collection of tours.
+	 */
+	TOUR
 
 }

@@ -18,19 +18,19 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions;
+package tsplib4j.distanceFunctions;
 
 /**
- * The maximum distance function.
+ * The Manhattan distance function.
  * 
  * @author David Hadka
  */
-public class MaximumDistance extends DistanceFunction {
+public class ManhattanDistance extends DistanceFunction {
 	
 	/**
-	 * Constructs a new maximum distance function.
+	 * Constructs a new Manhattan distance function.
 	 */
-	public MaximumDistance() {
+	public ManhattanDistance() {
 		super();
 	}
 	
@@ -39,7 +39,7 @@ public class MaximumDistance extends DistanceFunction {
 		double result = 0.0;
 		
 		for (int i = 0; i < length; i++) {
-			result += Math.max(result, Math.abs(position1[i] - position2[i]));
+			result += Math.abs(position1[i] - position2[i]);
 		}
 
 		return Math.round(result);

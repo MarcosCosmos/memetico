@@ -18,10 +18,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib;
+package tsplib4j;
 
-import org.marcos.uon.tspaidemo.util.tsplib.fieldTypesAndFormats.*;
-import org.marcos.uon.tspaidemo.util.tsplib.graph.*;
+import tsplib4j.fieldTypesAndFormats.*;
+import tsplib4j.graph.*;
 
 import java.io.*;
 import java.util.ArrayList;

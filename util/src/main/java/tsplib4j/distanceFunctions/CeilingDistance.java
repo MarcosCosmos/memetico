@@ -18,31 +18,33 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.distanceFunctions;
+package tsplib4j.distanceFunctions;
 
 /**
- * The Euclidean distance function.
+ * The Euclidean distance function with distances rounded up to the nearest
+ * integer.
  * 
  * @author David Hadka
  */
-public class EuclideanDistance extends DistanceFunction {
+public class CeilingDistance extends DistanceFunction {
 	
 	/**
-	 * Constructs a new Euclidean distance function.
+	 * Constructs a new Euclidean distance function with distances rounded up
+	 * to the nearest integer.
 	 */
-	public EuclideanDistance() {
+	public CeilingDistance() {
 		super();
 	}
 	
 	@Override
 	public double distance(int length, double[] position1, double[] position2) {
 		double result = 0.0;
-
+		
 		for (int i = 0; i < length; i++) {
 			result += Math.pow(position1[i] - position2[i], 2.0);
 		}
-
-		return Math.round(Math.sqrt(result));
+		
+		return Math.ceil(Math.sqrt(result));
 	}
 
 }

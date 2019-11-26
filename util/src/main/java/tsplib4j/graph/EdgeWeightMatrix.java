@@ -18,9 +18,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package org.marcos.uon.tspaidemo.util.tsplib.graph;
+package tsplib4j.graph;
 
-import org.marcos.uon.tspaidemo.util.tsplib.fieldTypesAndFormats.EdgeWeightFormat;
+import tsplib4j.fieldTypesAndFormats.EdgeWeightFormat;
 
 import java.io.BufferedReader;
 import java.io.EOFException;

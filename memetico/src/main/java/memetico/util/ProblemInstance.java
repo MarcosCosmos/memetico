@@ -2,9 +2,8 @@ package memetico.util;
 
 
 
-import org.marcos.uon.tspaidemo.util.tsplib.TSPLibInstance;
+import tsplib4j.TSPLibInstance;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public class ProblemInstance {
