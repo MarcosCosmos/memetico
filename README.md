@@ -10,7 +10,7 @@ Modifications include:
 Note that although Memetico itself can be run without the GUI, the command line interface to Memetico is not up to date and does not correctly permit argument-based configured.
 
 # About Memetico
-Memetico is a Memetic Algorithm which searches for good solutions to ATSP (Asymmetric Travelling Salesman Problem) problems. It was originally developed by Luciana Buriol, Paulo M. França, & Pablo Moscato and is discussed in greater detailed in their paper:
+Memetico is a Memetic Algorithm which searches for good solutions to ATSP (Asymmetric Travelling Salesman Problem) problems. It was originally developed by Luciana Buriol, Paulo M. França & Pablo Moscato and is discussed in greater detailed in their paper:
 
 A New Memetic Algorithm for the Asymmetric Traveling Salesman Problem
 Journal of Heuristics, 2004, Volume 10, Number 5, Page 483
