@@ -68,3 +68,5 @@ fabric.properties
 
 # Custom
 working/
+build/
+/.gradle/
