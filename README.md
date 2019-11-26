@@ -4,7 +4,7 @@ A modified version of Memetico, with a GUI tool for visualisation and configurat
 Modifications include:
 - Refactoring
 - The inclusion of a GUI which permits configuration, saving of performance and state logs which can be loaded for visualisation later, and displays candidate tours found by Memetico at intervals during runs.  
-- An optional (configurable) extension which makes use of an external heuristic solver called Lin-Kernighan-Helsgaun [http://akira.ruc.dk/~keld/research/LKH](http://akira.ruc.dk/~keld/research/LKH). If enabled LKH will run, at the end of each generation, on the 'current' solution of every agent to try and find an improvement.
+- An optional (configurable) extension which makes use of the [Lin-Kernighan-Helsgaun](http://akira.ruc.dk/~keld/research/LKH) solver. LKH is used, at the end of each generation, to try to find improvement upon the 'current' solution of each agent in the population.
 - An optional (configurable) extension which randomises the root agent's solutions every n-th generation in an attempt to avoid being stuck on local optima.
 
 Note that although Memetico itself can be run without the GUI, the command line interface to Memetico is not up to date and does not correctly permit argument-based configured.
@@ -16,7 +16,7 @@ A New Memetic Algorithm for the Asymmetric Traveling Salesman Problem
 Journal of Heuristics, 2004, Volume 10, Number 5, Page 483
 Luciana Buriol, Paulo M. França, Pablo Moscato
 
-[https://doi.org/10.1023/B:HEUR.0000045321.59202.52](https://doi.org/10.1023/B:HEUR.0000045321.59202.52)
+DIO: [10.1023/B:HEUR.0000045321.59202.52](https://doi.org/10.1023/B:HEUR.0000045321.59202.52)
 
 # Usage
 This project makes extension use of gradle. The main (useful) gradle tasks are those for GUI module. E.g. Assuming gradle is configured correctly etc, you the 'run' task should open the application. This can be done via the the command line by typing:  
